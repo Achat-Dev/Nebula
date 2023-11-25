@@ -1,0 +1,16 @@
+# Directories
+[Dd]ebug/
+[Rr]elease/
+[Bb]in/
+[Oo]bj/
+x64/
+x86/
+build/
+.vs/
+
+# Files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.nupkg

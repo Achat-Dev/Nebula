@@ -1,7 +1,4 @@
 ﻿using Silk.NET.Windowing;
-using Silk.NET.Maths;
-using Silk.NET.OpenGL;
-using System.Drawing;
 
 namespace Nebula;
 
@@ -9,7 +6,7 @@ internal class Window
 {
     private readonly IWindow m_window;
 
-    public Window(string title, Vector2D<int> size, bool vSync)
+    public Window(string title, Vector2i size, bool vSync)
     {
         Logger.EngineInfo("Creating window");
 

@@ -7,7 +7,7 @@ public class Game
 
     private static Game s_instance;
 
-    public Game(string title)
+    public Game(string title, Vector2i size, bool vSync)
     {
         Logger.EngineAssert(s_instance != null, "Cannot create multiple instances of Game");
         s_instance = this;
@@ -17,7 +17,7 @@ public class Game
 
         m_title = title;
 
-        m_window = new Window(title, new Silk.NET.Maths.Vector2D<int>(1280, 720), true);
+        m_window = new Window(title, size, vSync);
     }
 
     public void Start()
@@ -28,7 +28,7 @@ public class Game
 
     public static string GetPersistentPath()
     {
-        return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/BackfischEngine/" + s_instance.m_title;
+        return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/Nebula/" + s_instance.m_title;
     }
 
     public static string GetProcessPath()

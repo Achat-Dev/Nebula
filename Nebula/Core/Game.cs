@@ -3,6 +3,7 @@
 public class Game
 {
     private string m_title;
+    private Window m_window;
 
     private static Game s_instance;
 
@@ -15,15 +16,14 @@ public class Game
         Logger.EngineInfo("Creating game");
 
         m_title = title;
+
+        m_window = new Window(title, new Silk.NET.Maths.Vector2D<int>(1280, 720), true);
     }
 
     public void Start()
     {
         Logger.EngineInfo("Starting game");
-        while (true)
-        {
-
-        }
+        m_window.Open();
     }
 
     public static string GetPersistentPath()

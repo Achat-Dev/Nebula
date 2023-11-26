@@ -7,10 +7,11 @@ namespace Nebula;
 
 public enum LogLevel
 {
-    Info = 1,
-    Warn = 2,
-    Error = 3,
-    Fatal = 4,
+    Debug = 1,
+    Info = 2,
+    Warn = 3,
+    Error = 4,
+    Fatal = 5,
 }
 
 public static class Logger
@@ -54,18 +55,11 @@ public static class Logger
         Serilog.Log.CloseAndFlush();
     }
 
-    /* ----------------------------------------------------------------- */
-    /* ------------------------------ Dev ------------------------------ */
-    /* ----------------------------------------------------------------- */
+    internal static void EngineDebug(object o) { m_devLogger.Debug(o.ToString()); }
     internal static void EngineInfo(object o) { m_devLogger.Information(o.ToString()); }
     internal static void EngineWarn(object o) { m_devLogger.Warning(o.ToString() + Environment.NewLine + new StackTrace(1, true).ToString()); }
     internal static void EngineError(object o) { m_devLogger.Error(o.ToString() + Environment.NewLine + new StackTrace(1, true).ToString()); }
     internal static void EngineFatal(object o) { m_devLogger.Fatal(o.ToString() + Environment.NewLine + new StackTrace(1, true).ToString()); }
-
-    internal static void EngineInfo(string message) { m_devLogger.Information(message); }
-    internal static void EngineWarn(string message) { m_devLogger.Warning(message + Environment.NewLine + new StackTrace(1, true).ToString()); }
-    internal static void EngineError(string message) { m_devLogger.Error(message + Environment.NewLine + new StackTrace(1, true).ToString()); }
-    internal static void EngineFatal(string message) { m_devLogger.Fatal(message + Environment.NewLine + new StackTrace(1, true).ToString()); }
 
     [Conditional("DEBUG")]
     internal static void EngineAssert(bool condition, string message = "Assertion failed:")
@@ -78,18 +72,11 @@ public static class Logger
         }
     }
 
-    /* -------------------------------------------------------------------- */
-    /* ------------------------------ Client ------------------------------ */
-    /* -------------------------------------------------------------------- */
+    public static void Debug(object o) { m_appLogger.Debug(o.ToString()); }
     public static void Info(object o) { m_appLogger.Information(o.ToString()); }
     public static void Warn(object o) { m_appLogger.Warning(o.ToString()); }
     public static void Error(object o) { m_appLogger.Error(o.ToString()); }
     public static void Fatal(object o) { m_appLogger.Fatal(o.ToString()); }
-
-    public static void Info(string message) { m_appLogger.Information(message); }
-    public static void Warn(string message) { m_appLogger.Warning(message); }
-    public static void Error(string message) { m_appLogger.Error(message); }
-    public static void Fatal(string message) { m_appLogger.Fatal(message); }
 
     [Conditional("DEBUG")]
     public static void Assert(bool condition, string message = "Assertion failed:")

@@ -148,6 +148,6 @@ public struct Vector2i : IEquatable<Vector2i>
 
     public override string ToString()
     {
-        return "(" + X + " | " + Y + ")";
+        return $"({X} | {Y})";
     }
 }

@@ -161,6 +161,6 @@ public struct Vector3i : IEquatable<Vector3i>
 
     public override string ToString()
     {
-        return "(" + X + " | " + Y + " | " + Z + ")";
+        return $"({X} | {Y} | {Z})";
     }
 }

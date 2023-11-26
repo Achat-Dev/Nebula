@@ -47,6 +47,7 @@ internal sealed class Window : IDisposable
 
     private void OnUpdate(double deltaTime)
     {
+        Scene.GetActive().Update();
         Input.RefreshInputStates();
     }
 

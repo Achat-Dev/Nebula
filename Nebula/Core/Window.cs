@@ -31,7 +31,7 @@ internal sealed class Window : IDisposable
     public void Close()
     {
         Logger.EngineInfo("Closing window");
-        Dispose();
+        m_window.Close();
     }
 
     public void Dispose()

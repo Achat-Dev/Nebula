@@ -39,6 +39,9 @@ public class TestUpdateableComponent : UpdateableComponent
 
     public override void OnUpdate()
     {
-
+        if (Input.IsKeyPressed(Key.Escape))
+        {
+            Game.Close();
+        }
     }
 }

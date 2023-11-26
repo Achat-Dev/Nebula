@@ -1,6 +1,6 @@
 ﻿namespace Nebula;
 
-public class Game
+public sealed class Game
 {
     private string m_title;
     private Window m_window;
@@ -9,15 +9,20 @@ public class Game
 
     public Game(string title, Vector2i size, bool vSync)
     {
-        Logger.EngineAssert(s_instance != null, "Cannot create multiple instances of Game");
+        if (s_instance != null)
+        {
+            // Logger is already initialised here
+            Logger.EngineFatal("Cannot create multiple game instances");
+            Environment.Exit(1);
+        }
         s_instance = this;
 
         Logger.Init(LogLevel.Info);
         Logger.EngineInfo("Creating game");
 
         m_title = title;
-
         m_window = new Window(title, size, vSync);
+        Scene.Load();
     }
 
     public void Start()

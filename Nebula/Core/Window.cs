@@ -1,8 +1,9 @@
-﻿using Silk.NET.Windowing;
+﻿using Silk.NET.Input;
+using Silk.NET.Windowing;
 
 namespace Nebula;
 
-internal class Window
+internal sealed class Window : IDisposable
 {
     private readonly IWindow m_window;
 
@@ -29,21 +30,28 @@ internal class Window
 
     public void Close()
     {
+        Logger.EngineInfo("Closing window");
+        Dispose();
+    }
 
+    public void Dispose()
+    {
+        Logger.EngineInfo("Disposing window");
+        m_window.Dispose();
     }
 
     private void OnLoad()
     {
-
+        Input.Init(m_window.CreateInput());
     }
 
     private void OnUpdate(double deltaTime)
     {
-        Logger.EngineInfo($"Update: {deltaTime}");
+        Input.RefreshKeyboardState();
     }
 
     private void OnRender(double deltaTime)
     {
-        Logger.EngineInfo($"Render: {deltaTime}");
+
     }
 }

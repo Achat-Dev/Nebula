@@ -47,7 +47,7 @@ internal sealed class Window : IDisposable
 
     private void OnUpdate(double deltaTime)
     {
-        Input.RefreshKeyboardState();
+        Input.RefreshInputStates();
     }
 
     private void OnRender(double deltaTime)

@@ -172,6 +172,16 @@ public struct Vector2 : IEquatable<Vector2>
         return new Vector2(value.X, value.Y);
     }
 
+    public static implicit operator System.Numerics.Vector2(Vector2 value)
+    {
+        return new System.Numerics.Vector2(value.X, value.Y);
+    }
+
+    public static implicit operator Vector2(System.Numerics.Vector2 value)
+    {
+        return new Vector2(value.X, value.Y);
+    }
+
     public static explicit operator Vector2i(Vector2 value)
     {
         return new Vector2i((int)value.X, (int)value.Y);

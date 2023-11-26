@@ -200,6 +200,16 @@ public struct Vector3 : IEquatable<Vector3>
         return new Vector3(value.X, value.Y, value.Z);
     }
 
+    public static implicit operator System.Numerics.Vector3(Vector3 value)
+    {
+        return new System.Numerics.Vector3(value.X, value.Y, value.Z);
+    }
+
+    public static implicit operator Vector3(System.Numerics.Vector3 value)
+    {
+        return new Vector3(value.X, value.Y, value.Z);
+    }
+
     public static explicit operator Vector3i(Vector3 value)
     {
         return new Vector3i((int)value.X, (int)value.Y, (int)value.Z);

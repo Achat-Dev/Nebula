@@ -133,6 +133,11 @@ public struct Vector3i : IEquatable<Vector3i>
         return new Vector3(value.X, value.Y, value.Z);
     }
 
+    public static explicit operator Vector2i(Vector3i value)
+    {
+        return new Vector2i(value.X, value.Y);
+    }
+
     /* -------------------- Overrides -------------------- */
 
     public bool Equals(Vector3i other)

@@ -62,7 +62,7 @@ public struct Quaternion : IEquatable<Quaternion>
     {
         if (axis == Vector3.Zero)
         {
-            Logger.EngineWarn("Illegal operation: Trying to create quaternion via FromAxisAngle with Vector3.Zero as the axis");
+            Logger.EngineWarn("Illegal operation: Trying to create a quaternion via FromAxisAngle with Vector3.Zero as the axis");
             return Identity;
         }
 

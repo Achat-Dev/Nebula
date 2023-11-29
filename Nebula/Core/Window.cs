@@ -10,6 +10,8 @@ internal sealed class Window : IDisposable
     private readonly IWindow m_window;
 
     // Temporary
+    private TransformComponent m_transform = new TransformComponent();
+
     private BufferObject<float> m_vbo;
     private BufferObject<uint> m_ibo;
     private VertexArrayObject m_vao;
@@ -138,6 +140,7 @@ internal sealed class Window : IDisposable
         Nebula.Rendering.GL.Get().Clear((uint)ClearBufferMask.ColorBufferBit);
         m_vao.Bind();
         m_shader.Use();
+        m_shader.SetMat4("u_model", m_transform.GetWorldMatrix());
         Nebula.Rendering.GL.Get().DrawElements(PrimitiveType.Triangles, (uint)m_indices2.Length, DrawElementsType.UnsignedInt, null);
     }
 

@@ -154,6 +154,11 @@ public struct Quaternion : IEquatable<Quaternion>
         return new Quaternion(value.X, value.Y, value.Z, value.W);
     }
 
+    public static implicit operator System.Numerics.Quaternion(Quaternion value)
+    {
+        return new System.Numerics.Quaternion(value.X, value.Y, value.Z, value.W);
+    }
+
     /* -------------------- Overrides -------------------- */
 
     public bool Equals(Quaternion other)

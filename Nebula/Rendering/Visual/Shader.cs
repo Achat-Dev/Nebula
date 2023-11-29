@@ -1,4 +1,5 @@
 ﻿using Silk.NET.OpenGL;
+using System.Numerics;
 using System.Text;
 
 namespace Nebula.Rendering;
@@ -6,7 +7,7 @@ namespace Nebula.Rendering;
 public class Shader : IDisposable
 {
     private readonly uint r_handle;
-    private readonly Dictionary<string, int> m_uniformLocationCache = new Dictionary<string, int>();
+    private readonly Dictionary<string, int> r_uniformLocationCache = new Dictionary<string, int>();
 
     public Shader(string vertexSource, string fragmentSource)
     {
@@ -38,7 +39,7 @@ public class Shader : IDisposable
         {
             string name = GL.Get().GetActiveUniform(r_handle, i, out _, out _);
             int location = GL.Get().GetUniformLocation(r_handle, name);
-            m_uniformLocationCache.Add(name, location);
+            r_uniformLocationCache.Add(name, location);
         }
     }
 
@@ -92,6 +93,11 @@ public class Shader : IDisposable
         }
 
         return source;
+    }
+
+    public unsafe void SetMat4(string name, Matrix4x4 value)
+    {
+        GL.Get().UniformMatrix4(r_uniformLocationCache[name], 1, false, (float*) &value);
     }
 
     public void Use()

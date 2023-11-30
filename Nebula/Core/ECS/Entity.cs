@@ -3,6 +3,7 @@
 public sealed class Entity
 {
     private string m_name;
+    private TransformComponent m_transform;
 
     private readonly List<Component> r_components = new List<Component>();
     private readonly List<UpdateableComponent> r_updateableComponents = new List<UpdateableComponent>();
@@ -11,6 +12,7 @@ public sealed class Entity
     public Entity(string name = "New entity")
     {
         m_name = name;
+        m_transform = new TransformComponent();
         Scene scene = Scene.GetActive();
         if (scene == null)
         {
@@ -121,5 +123,10 @@ public sealed class Entity
     public void SetName(string name)
     {
         m_name = name;
+    }
+
+    public TransformComponent GetTransform()
+    {
+        return m_transform;
     }
 }

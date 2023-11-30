@@ -18,6 +18,33 @@ public class TransformComponent : Component
         m_localRotation *= rotation;
     }
 
+    public Vector3 GetWorldPosition()
+    {
+        // Rework once parenting is introduced
+        return m_localPosition;
+    }
+
+    public Quaternion GetWorldRotation()
+    {
+        // Rework once parenting is introduced
+        return m_localRotation;
+    }
+
+    public Vector3 GetRight()
+    {
+        return GetWorldRotation() * Vector3.Right;
+    }
+
+    public Vector3 GetUp()
+    {
+        return GetWorldRotation() * Vector3.Up;
+    }
+
+    public Vector3 GetForward()
+    {
+        return GetWorldRotation() * Vector3.Forward;
+    }
+
     public Matrix4x4 GetWorldMatrix()
     {
         return Matrix4x4.CreateFromQuaternion(m_localRotation) * Matrix4x4.CreateScale(m_localScale) * Matrix4x4.CreateTranslation(m_localPosition);

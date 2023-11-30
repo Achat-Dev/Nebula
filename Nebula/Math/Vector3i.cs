@@ -12,7 +12,7 @@ public struct Vector3i : IEquatable<Vector3i>
     public static readonly Vector3i One = new Vector3i(1, 1, 1);
     public static readonly Vector3i Right = new Vector3i(1, 0, 0);
     public static readonly Vector3i Up = new Vector3i(0, 1, 0);
-    public static readonly Vector3i Backward = new Vector3i(0, 0, 1);
+    public static readonly Vector3i Forward = new Vector3i(0, 0, 1);
 
     public Vector3i(int x, int y, int z)
     {

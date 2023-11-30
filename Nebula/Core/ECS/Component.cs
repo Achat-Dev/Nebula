@@ -2,7 +2,7 @@
 
 public abstract class Component
 {
-    private Entity m_entity;
+    protected Entity m_entity;
 
     internal void SetEntity(Entity entity)
     {

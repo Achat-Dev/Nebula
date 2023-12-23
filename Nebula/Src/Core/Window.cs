@@ -5,7 +5,7 @@ using Silk.NET.Windowing;
 
 namespace Nebula;
 
-internal sealed class Window : IDisposable
+internal class Window : IDisposable
 {
     private readonly IWindow m_window;
 
@@ -109,7 +109,6 @@ internal sealed class Window : IDisposable
         // Temporary
         m_vbo = new BufferObject<float>(m_vertices, BufferTargetARB.ArrayBuffer);
         m_ibo = new BufferObject<uint>(m_indices, BufferTargetARB.ElementArrayBuffer);
-
         BufferLayout bufferLayout = new BufferLayout(BufferElement.Float3);
         m_vao = new VertexArrayObject(m_vbo, m_ibo, bufferLayout);
 
@@ -125,7 +124,7 @@ internal sealed class Window : IDisposable
 
     private void OnUpdate(double deltaTime)
     {
-        Scene.GetActive().Update();
+        Scene.GetActive().Update((float)deltaTime);
         Input.RefreshInputStates();
 
         TransformComponent cameraTransform = m_camera.GetEntity().GetTransform();
@@ -146,7 +145,7 @@ internal sealed class Window : IDisposable
     private unsafe void OnRender(double deltaTime)
     {
         // Temporary
-        Nebula.Rendering.GL.Get().Clear((uint)ClearBufferMask.ColorBufferBit);
+        Nebula.Rendering.GL.Get().Clear(ClearBufferMask.ColorBufferBit);
         m_vao.Bind();
         m_shader.Use();
         m_shader.SetMat4("u_model", m_transform.GetWorldMatrix());

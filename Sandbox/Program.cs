@@ -37,7 +37,7 @@ public class TestUpdateableComponent : UpdateableComponent
         Logger.Info("Creating test updateble component");
     }
 
-    public override void OnUpdate()
+    public override void OnUpdate(float deltaTime)
     {
         if (Input.IsKeyPressed(Key.Escape))
         {

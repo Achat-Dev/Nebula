@@ -1,6 +1,6 @@
 ﻿namespace Nebula;
 
-public sealed class Entity
+public class Entity
 {
     private string m_name;
     private TransformComponent m_transform;
@@ -24,11 +24,11 @@ public sealed class Entity
         }
     }
 
-    internal void Update()
+    internal void Update(float deltaTime)
     {
         for (int i = r_updateableComponents.Count - 1; i >= 0; i--)
         {
-            r_updateableComponents[i].OnUpdate();
+            r_updateableComponents[i].OnUpdate(deltaTime);
         }
 
         int removalCount = r_componentRemovalStack.Count;

@@ -1,6 +1,6 @@
 ﻿namespace Nebula;
 
-public sealed class Scene
+public class Scene
 {
     private readonly List<Entity> r_entities = new List<Entity>();
     private readonly Stack<Entity> r_entityRemovalStack = new Stack<Entity>();
@@ -9,11 +9,11 @@ public sealed class Scene
 
     private Scene() { }
 
-    internal void Update()
+    internal void Update(float deltaTime)
     {
         for (int i = r_entities.Count - 1; i >= 0; i--)
         {
-            r_entities[i].Update();
+            r_entities[i].Update(deltaTime);
         }
 
         int removalCount = r_entityRemovalStack.Count;

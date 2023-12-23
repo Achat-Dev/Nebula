@@ -1,8 +1,6 @@
-﻿using Nebula.Rendering;
+﻿namespace Nebula;
 
-namespace Nebula;
-
-public sealed class Game
+public class Game
 {
     private bool m_isRunning = false;
     private string m_title;
@@ -18,6 +16,7 @@ public sealed class Game
         {
             // Logger is already initialised here
             Logger.EngineFatal("Cannot create multiple game instances");
+            s_instance.Terminate();
             Environment.Exit(1);
         }
         s_instance = this;
@@ -38,6 +37,11 @@ public sealed class Game
         m_window.Open();
 
         // Since m_window.Open is a blocking call, this code is only called after the window has been closed
+        Terminate();
+    }
+
+    private void Terminate()
+    {
         Close();
         m_window.Dispose();
         Logger.Flush();

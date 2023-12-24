@@ -18,10 +18,21 @@ public class TransformComponent : Component
         m_localRotation *= rotation;
     }
 
+    public void SetLocalScale(Vector3 scale)
+    {
+        m_localScale = scale;
+    }
+
     public Vector3 GetWorldPosition()
     {
         // Rework once parenting is introduced
         return m_localPosition;
+    }
+
+    public void SetWorldPosition(Vector3 position)
+    {
+        // Rework once parenting is introduced
+        m_localPosition = position;
     }
 
     public Quaternion GetWorldRotation()

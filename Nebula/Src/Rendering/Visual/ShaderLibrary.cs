@@ -5,6 +5,9 @@ public enum DefaultShader
     // None is the same as the fallback shader
     None = 0,
     Fallback = 0,
+    Colour,
+    Gouraud,
+    Phong,
 }
 
 public static class ShaderLibrary
@@ -30,6 +33,15 @@ public static class ShaderLibrary
 
         switch (shaderType)
         {
+            case DefaultShader.Colour:
+                shader = new Shader(EngineResources.LoadAsFileContent("Shader/Colour.vert"), EngineResources.LoadAsFileContent("Shader/Colour.frag"));
+                break;
+            case DefaultShader.Gouraud:
+                shader = new Shader(EngineResources.LoadAsFileContent("Shader/Gouraud.vert"), EngineResources.LoadAsFileContent("Shader/Gouraud.frag"));
+                break;
+            case DefaultShader.Phong:
+                shader = new Shader(EngineResources.LoadAsFileContent("Shader/Phong.vert"), EngineResources.LoadAsFileContent("Shader/Phong.frag"));
+                break;
             default:
                 shader = new Shader(EngineResources.LoadAsFileContent("Shader/Fallback.vert"), EngineResources.LoadAsFileContent("Shader/Fallback.frag"));
                 break;

@@ -30,4 +30,15 @@
     <EmbeddedResource Include="Assets/**/*.*" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Assets\Shader\Colour.frag" />
+    <None Remove="Assets\Shader\Colour.vert" />
+    <None Remove="Assets\Shader\Gouraud.frag" />
+    <None Remove="Assets\Shader\Gouraud.vert" />
+    <None Remove="Assets\Shader\LightData.glsl" />
+    <None Remove="Assets\Shader\LightMethods.glsl" />
+    <None Remove="Assets\Shader\Phong.frag" />
+    <None Remove="Assets\Shader\Phong.vert" />
+  </ItemGroup>
+
 </Project>

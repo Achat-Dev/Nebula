@@ -89,10 +89,26 @@ public class Shader : IDisposable
                     break;
                 }
             }
+
             return stringBuilder.ToString();
         }
 
         return source;
+    }
+
+    public void SetInt(string name, int value)
+    {
+        GL.Get().Uniform1(r_uniformLocationCache[name], value);
+    }
+
+    public void SetFloat(string name, float value)
+    {
+        GL.Get().Uniform1(r_uniformLocationCache[name], value);
+    }
+
+    public void SetVec3(string name, System.Numerics.Vector3 value)
+    {
+        GL.Get().Uniform3(r_uniformLocationCache[name], ref value);
     }
 
     public unsafe void SetMat4(string name, Matrix4x4 value)

@@ -2,7 +2,9 @@
 
 out vec4 o_colour;
 
+in vec4 io_colour;
+
 void main()
 {
-	o_colour = vec4(1.0, 0.0, 1.0, 1.0);
+	o_colour = io_colour;
 }

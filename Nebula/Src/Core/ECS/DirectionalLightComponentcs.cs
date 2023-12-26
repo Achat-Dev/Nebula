@@ -1,6 +1,8 @@
-﻿namespace Nebula;
+﻿using Nebula.Rendering;
 
-public class DirectionalLightComponent : Component
+namespace Nebula;
+
+public class DirectionalLightComponent : StartableComponent
 {
     // TODO: Replace this with the transform rotation as euler angles
     private Vector3 m_direction = new Vector3(-0.2f, -1f, -0.3f);
@@ -10,11 +12,9 @@ public class DirectionalLightComponent : Component
     private float m_diffuseStrength = 0.5f;
     private float m_specularStrength = 1f;
 
-    private static DirectionalLightComponent s_instance;
-
-    public DirectionalLightComponent()
+    public override void OnCreate()
     {
-        s_instance = this;
+        Lighting.SetDirectionalLight(this);
     }
 
     public Vector3 GetDirection()
@@ -40,10 +40,5 @@ public class DirectionalLightComponent : Component
     public void SetColour(Colour colour)
     {
         m_colour = colour;
-    }
-
-    internal static DirectionalLightComponent GetInstance()
-    {
-        return s_instance;
     }
 }

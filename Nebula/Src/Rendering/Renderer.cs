@@ -23,8 +23,8 @@ public static class Renderer
     internal static void StartFrame(CameraComponent camera)
     {
         s_camera = camera;
-        s_directionalLight = DirectionalLightComponent.GetInstance();
-        s_pointLights = PointLightComponent.GetPointLights();
+        s_directionalLight = Lighting.GetDirectionalLight();
+        s_pointLights = Lighting.GetPointLights();
     }
 
     internal static unsafe void DrawLitMesh(VertexArrayObject vao, Shader shader, System.Numerics.Matrix4x4 modelMatrix, Material material)
@@ -60,8 +60,9 @@ public static class Renderer
         shader.SetVec3("u_directionalLight.specular", s_directionalLight.GetSpecular());
 
         // Point Lights
-        shader.SetInt("u_pointLightCount", PointLightComponent.GetPointLightCount());
-        for (int i = 0; i < PointLightComponent.GetPointLightCount(); i++)
+        int pointLightCount = Lighting.GetPointLightCount();
+        shader.SetInt("u_pointLightCount", pointLightCount);
+        for (int i = 0; i < pointLightCount; i++)
         {
             shader.SetVec3($"u_pointLights[{i}].position", s_pointLights[i].GetEntity().GetTransform().GetWorldPosition());
             shader.SetVec3($"u_pointLights[{i}].ambient", s_pointLights[i].GetAmbient());

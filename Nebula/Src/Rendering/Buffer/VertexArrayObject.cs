@@ -5,10 +5,12 @@ namespace Nebula.Rendering;
 internal class VertexArrayObject : IDisposable
 {
     private readonly uint r_handle;
+    private readonly uint r_indexCount;
 
     public VertexArrayObject(BufferObject<float> vertexBuffer, BufferObject<uint> indexBuffer, BufferLayout bufferLayout)
     {
         r_handle = GL.Get().GenVertexArray();
+        r_indexCount = indexBuffer.GetElementCount();
 
         Bind();
         vertexBuffer.Bind();
@@ -35,5 +37,10 @@ internal class VertexArrayObject : IDisposable
     public void Dispose()
     {
         GL.Get().DeleteVertexArray(r_handle);
+    }
+
+    public uint GetIndexCount()
+    {
+        return r_indexCount;
     }
 }

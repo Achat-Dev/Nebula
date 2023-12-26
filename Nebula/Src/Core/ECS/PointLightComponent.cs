@@ -11,9 +11,11 @@ public class PointLightComponent : StartableComponent
     private float m_quadraticFalloff = 0.1f;
 
     private static int s_pointLightCount = 0;
+    private static List<PointLightComponent> s_pointLights = new List<PointLightComponent>();
 
     public override void OnCreate()
     {
+        s_pointLights.Add(this);
         s_pointLightCount++;
     }
 
@@ -21,6 +23,7 @@ public class PointLightComponent : StartableComponent
     {
         base.OnDestroy();
         s_pointLightCount = Math.Max(0, s_pointLightCount - 1);
+        s_pointLights.Remove(this);
     }
 
     public Vector3 GetAmbient()
@@ -58,8 +61,13 @@ public class PointLightComponent : StartableComponent
         m_colour = colour;
     }
 
-    public static int GetPointLightCount()
+    internal static int GetPointLightCount()
     {
         return s_pointLightCount;
+    }
+
+    internal static List<PointLightComponent> GetPointLights()
+    {
+        return s_pointLights;
     }
 }

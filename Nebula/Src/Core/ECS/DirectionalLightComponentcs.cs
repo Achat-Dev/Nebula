@@ -10,6 +10,13 @@ public class DirectionalLightComponent : Component
     private float m_diffuseStrength = 0.5f;
     private float m_specularStrength = 1f;
 
+    private static DirectionalLightComponent s_instance;
+
+    public DirectionalLightComponent()
+    {
+        s_instance = this;
+    }
+
     public Vector3 GetDirection()
     {
         return m_direction;
@@ -33,5 +40,10 @@ public class DirectionalLightComponent : Component
     public void SetColour(Colour colour)
     {
         m_colour = colour;
+    }
+
+    internal static DirectionalLightComponent GetInstance()
+    {
+        return s_instance;
     }
 }

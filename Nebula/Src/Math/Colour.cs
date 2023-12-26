@@ -7,9 +7,11 @@ public struct Colour : IEquatable<Colour>
     public float B = 0f;
     public float A = 1f;
 
-    public static readonly Colour Red = new Colour(1, 0, 0);
-    public static readonly Colour Green = new Colour(0, 1, 0);
-    public static readonly Colour Blue = new Colour(0, 0, 1);
+    public static readonly Colour White = new Colour(1f, 1f, 1f);
+    public static readonly Colour Black = new Colour(0f, 0f, 0f);
+    public static readonly Colour Red = new Colour(1f, 0f, 0f);
+    public static readonly Colour Green = new Colour(0f, 1f, 0f);
+    public static readonly Colour Blue = new Colour(0f, 0f, 1f);
 
     public Colour(float r, float g, float b)
     {
@@ -39,6 +41,11 @@ public struct Colour : IEquatable<Colour>
     }
 
     /* -------------------- Conversions -------------------- */
+
+    public static explicit operator Vector3(Colour colour)
+    {
+        return new Vector3(colour.R, colour.G, colour.B);
+    }
 
     public static implicit operator System.Numerics.Vector4(Colour colour)
     {

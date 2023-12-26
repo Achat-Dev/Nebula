@@ -11,8 +11,8 @@ internal class Window : IDisposable
 
     // Temporary
     private TransformComponent m_transform = new TransformComponent();
-    private TransformComponent[] m_lightTransforms = { new TransformComponent(), new TransformComponent(), new TransformComponent()};
-    private Vector3[] m_lightColours = { Vector3.Right, Vector3.Up, Vector3.Forward };
+    private Entity[] m_pointLightEntites = new Entity[3];
+    private PointLightComponent[] m_pointLights = new PointLightComponent[3];
     private CameraComponent m_camera;
 
     private BufferObject<float> m_vbo;
@@ -70,6 +70,8 @@ internal class Window : IDisposable
     private Nebula.Rendering.Shader m_shader;
     private Nebula.Rendering.Shader m_lightSourceShader;
 
+    private DirectionalLightComponent m_directionalLight = new DirectionalLightComponent();
+
     public Window(string title, Vector2i size, bool vSync)
     {
         Logger.EngineInfo("Creating window");
@@ -125,10 +127,15 @@ internal class Window : IDisposable
         m_camera = entity.AddComponent<CameraComponent>();
         TransformComponent transform = entity.GetTransform();
         transform.Translate(new Vector3(0, 0, -5));
-        for (int i = 0; i < m_lightTransforms.Length; i++)
+        for (int i = 0; i < 3; i++)
         {
-            m_lightTransforms[i].SetLocalScale(Vector3.One * 0.2f);
+            m_pointLightEntites[i] = new Entity();
+            m_pointLights[i] = m_pointLightEntites[i].AddComponent<PointLightComponent>();
+            m_pointLights[i].GetEntity().GetTransform().SetLocalScale(Vector3.One * 0.2f);
         }
+        m_pointLights[0].SetColour(Colour.Red);
+        m_pointLights[1].SetColour(Colour.Green);
+        m_pointLights[2].SetColour(Colour.Blue);
     }
 
     private void OnUpdate(double deltaTime)
@@ -151,9 +158,9 @@ internal class Window : IDisposable
         if (Input.IsKeyDown(Key.U)) cameraTransform.Rotate(Quaternion.FromAxisAngle(Vector3.Forward, 40 * (float)deltaTime));
 
         float piThird = (MathF.PI * 2f) / 3f;
-        for (int i = 0; i < m_lightTransforms.Length; i++)
+        for (int i = 0; i < m_pointLightEntites.Length; i++)
         {
-            m_lightTransforms[i].SetWorldPosition(new Vector3(MathF.Sin((float)m_window.Time + piThird * i) * 2, 0, MathF.Cos((float)m_window.Time + piThird * i) * 2));
+            m_pointLightEntites[i].GetTransform().SetWorldPosition(new Vector3(MathF.Sin((float)m_window.Time + piThird * i) * 2, 0, MathF.Cos((float)m_window.Time + piThird * i) * 2));
         }
     }
 
@@ -189,21 +196,21 @@ internal class Window : IDisposable
         m_shader.SetFloat("u_material.shininess", 32);
 
         // Directional Light
-        m_shader.SetVec3("u_directionalLight.direction", new Vector3(-0.2f, -1f, -0.3f));
-        m_shader.SetVec3("u_directionalLight.ambient", Vector3.Zero * 0.2f);
-        m_shader.SetVec3("u_directionalLight.diffuse", Vector3.Zero * 0.4f);
-        m_shader.SetVec3("u_directionalLight.specular", Vector3.Zero * 0.5f);
+        m_shader.SetVec3("u_directionalLight.direction", m_directionalLight.GetDirection());
+        m_shader.SetVec3("u_directionalLight.ambient", m_directionalLight.GetAmbient());
+        m_shader.SetVec3("u_directionalLight.diffuse", m_directionalLight.GetDiffuse());
+        m_shader.SetVec3("u_directionalLight.specular", m_directionalLight.GetSpecular());
 
         // Point Lights
-        m_shader.SetInt("u_pointLightCount", m_lightTransforms.Length);
-        for (int i = 0; i < m_lightTransforms.Length; i++)
+        m_shader.SetInt("u_pointLightCount", PointLightComponent.GetPointLightCount());
+        for (int i = 0; i < PointLightComponent.GetPointLightCount(); i++)
         {
-            m_shader.SetVec3($"u_pointLights[{i}].position", m_lightTransforms[i].GetWorldPosition());
-            m_shader.SetVec3($"u_pointLights[{i}].ambient", m_lightColours[i] * 0.2f);
-            m_shader.SetVec3($"u_pointLights[{i}].diffuse", m_lightColours[i] * 0.5f);
-            m_shader.SetVec3($"u_pointLights[{i}].specular", m_lightColours[i] * 1.0f);
-            m_shader.SetFloat($"u_pointLights[{i}].linearFalloff", 0.01f);
-            m_shader.SetFloat($"u_pointLights[{i}].quadraticFalloff", 0.1f);
+            m_shader.SetVec3($"u_pointLights[{i}].position", m_pointLights[i].GetEntity().GetTransform().GetWorldPosition());
+            m_shader.SetVec3($"u_pointLights[{i}].ambient", m_pointLights[i].GetAmbient());
+            m_shader.SetVec3($"u_pointLights[{i}].diffuse", m_pointLights[i].GetDiffuse());
+            m_shader.SetVec3($"u_pointLights[{i}].specular", m_pointLights[i].GetSpecular());
+            m_shader.SetFloat($"u_pointLights[{i}].linearFalloff", m_pointLights[i].GetLinearFalloff());
+            m_shader.SetFloat($"u_pointLights[{i}].quadraticFalloff", m_pointLights[i].GetQuadraticFalloff());
         }
 
         Nebula.Rendering.GL.Get().DrawElements(PrimitiveType.Triangles, (uint)m_indices.Length, DrawElementsType.UnsignedInt, null);
@@ -211,10 +218,10 @@ internal class Window : IDisposable
         // Light source
         m_lightSourceShader.Use();
         m_lightSourceShader.SetMat4("u_viewProjection", m_camera.GetViewProjectionMatrix());
-        for (int i = 0; i < m_lightTransforms.Length; i++)
+        for (int i = 0; i < m_pointLightEntites.Length; i++)
         {
-            m_lightSourceShader.SetMat4("u_model", m_lightTransforms[i].GetWorldMatrix());
-            m_lightSourceShader.SetVec3("u_colour", m_lightColours[i]);
+            m_lightSourceShader.SetMat4("u_model", m_pointLightEntites[i].GetTransform().GetWorldMatrix());
+            m_lightSourceShader.SetVec3("u_colour", (Vector3)m_pointLights[i].GetColour());
             Nebula.Rendering.GL.Get().DrawElements(PrimitiveType.Triangles, (uint)m_indices.Length, DrawElementsType.UnsignedInt, null);
         }
     }

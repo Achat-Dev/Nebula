@@ -12,6 +12,7 @@ public struct Colour : IEquatable<Colour>
     public static readonly Colour Red = new Colour(1f, 0f, 0f);
     public static readonly Colour Green = new Colour(0f, 1f, 0f);
     public static readonly Colour Blue = new Colour(0f, 0f, 1f);
+    public static readonly Colour Transparent = new Colour(1f, 1f, 1f, 0f);
 
     public Colour(float r, float g, float b)
     {

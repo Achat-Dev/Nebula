@@ -122,7 +122,6 @@ internal class Window : IDisposable
 
         Entity entity = new Entity("Camera");
         m_camera = entity.AddComponent<CameraComponent>();
-        entity.AddComponent<DirectionalLightComponent>();
         TransformComponent transform = entity.GetTransform();
         transform.Translate(new Vector3(0, 0, -5));
         for (int i = 0; i < 3; i++)

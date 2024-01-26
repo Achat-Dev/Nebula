@@ -5,7 +5,7 @@ namespace Nebula.Rendering;
 public static class Renderer
 {
     private static CameraComponent s_camera;
-    private static DirectionalLightComponent s_directionalLight;
+    private static DirectionalLight s_directionalLight;
     private static List<PointLightComponent> s_pointLights;
 
     internal static void Init()

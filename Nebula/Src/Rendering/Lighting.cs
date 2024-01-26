@@ -2,23 +2,11 @@
 
 internal static class Lighting
 {
-    private static DirectionalLightComponent s_directionalLight;
+    private static DirectionalLight s_directionalLight = new DirectionalLight();
     private static readonly List<PointLightComponent> s_pointLights = new List<PointLightComponent>();
     private static int s_pointLightCount = 0;
 
-    public static void SetDirectionalLight(DirectionalLightComponent directionalLight)
-    {
-        if (s_directionalLight == null)
-        {
-            s_directionalLight = directionalLight;
-        }
-        else
-        {
-            Logger.EngineWarn("Multiple directional lights in the scene. Only the first registered light is used for rendering");
-        }
-    }
-
-    public static DirectionalLightComponent GetDirectionalLight()
+    public static DirectionalLight GetDirectionalLight()
     {
         return s_directionalLight;
     }

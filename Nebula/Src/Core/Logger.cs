@@ -21,7 +21,7 @@ public static class Logger
 
     internal static void Init(LogLevel logLevel)
     {
-        string filePath = Game.GetPersistentPath() + "/log.txt";
+        string filePath = Game.GetPersistentPath() + "log.txt";
         string engineOutputTemplate = "[{Timestamp:HH:mm:ss} {Level}] ENGINE: {Message}{NewLine}{Exception}";
         string clientOutputTemplate = "[{Timestamp:HH:mm:ss} {Level}] APP: {Message}{NewLine}{Exception}";
 

@@ -60,11 +60,11 @@ public class Game
 
     public static string GetPersistentPath()
     {
-        return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/Nebula/" + s_instance.m_title;
+        return Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/Nebula/" + s_instance.m_title + '/';
     }
 
     public static string GetProcessPath()
     {
-        return Environment.ProcessPath;
+        return Environment.ProcessPath + '/';
     }
 }

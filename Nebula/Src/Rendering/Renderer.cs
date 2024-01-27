@@ -27,7 +27,7 @@ public static class Renderer
         s_pointLights = Lighting.GetPointLights();
     }
 
-    internal static unsafe void DrawLitMesh(VertexArrayObject vao, Shader shader, System.Numerics.Matrix4x4 modelMatrix, Material material)
+    internal static unsafe void DrawLitMesh(VertexArrayObject vao, System.Numerics.Matrix4x4 modelMatrix, Shader shader, Material material)
     {
         vao.Bind();
         shader.Use();

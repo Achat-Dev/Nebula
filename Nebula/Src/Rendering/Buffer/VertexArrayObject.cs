@@ -1,21 +1,18 @@
-﻿using Silk.NET.OpenGL;
-
-namespace Nebula.Rendering;
+﻿namespace Nebula.Rendering;
 
 internal class VertexArrayObject : IDisposable
 {
+    private readonly BufferObject<Vertex> r_vbo;
+    private readonly BufferObject<uint> r_ibo;
     private readonly uint r_handle;
-    private readonly uint r_indexCount;
 
-    public VertexArrayObject(BufferObject<float> vertexBuffer, BufferObject<uint> indexBuffer, BufferLayout bufferLayout)
+    public VertexArrayObject(BufferObject<Vertex> vertexBuffer, BufferObject<uint> indexBuffer, BufferLayout bufferLayout)
     {
+        r_vbo = vertexBuffer;
+        r_ibo = indexBuffer;
         r_handle = GL.Get().GenVertexArray();
-        r_indexCount = indexBuffer.GetElementCount();
 
         Bind();
-        vertexBuffer.Bind();
-        indexBuffer.Bind();
-
         SetVertexBufferLayout(bufferLayout);
     }
 
@@ -32,15 +29,19 @@ internal class VertexArrayObject : IDisposable
     public void Bind()
     {
         GL.Get().BindVertexArray(r_handle);
+        r_vbo.Bind();
+        r_ibo.Bind();
     }
 
     public void Dispose()
     {
+        r_vbo.Dispose();
+        r_ibo.Dispose();
         GL.Get().DeleteVertexArray(r_handle);
     }
 
     public uint GetIndexCount()
     {
-        return r_indexCount;
+        return r_ibo.GetElementCount();
     }
 }

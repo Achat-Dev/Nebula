@@ -1,4 +1,5 @@
 ﻿using Silk.NET.Assimp;
+using System.Numerics;
 using AssimpMesh = Silk.NET.Assimp.Mesh;
 using AssimpNode = Silk.NET.Assimp.Node;
 using AssimpScene = Silk.NET.Assimp.Scene;
@@ -50,11 +51,11 @@ public class Model : IDisposable
         r_meshes.Add(mesh);
     }
 
-    internal void Draw(System.Numerics.Matrix4x4 modelMatrix, Shader shader, Material material)
+    internal void Draw(Matrix4x4 modelMatrix, Material material)
     {
         for (int i = 0; i < r_meshes.Count; i++)
         {
-            r_meshes[i].Draw(modelMatrix, shader, material);
+            r_meshes[i].Draw(modelMatrix, material);
         }
     }
 

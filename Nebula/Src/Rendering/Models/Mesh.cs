@@ -1,4 +1,5 @@
 ﻿using Silk.NET.OpenGL;
+using System.Numerics;
 using AssimpFace = Silk.NET.Assimp.Face;
 using AssimpMesh = Silk.NET.Assimp.Mesh;
 
@@ -51,9 +52,9 @@ internal class Mesh : IDisposable
         return new Mesh(vertices.ToArray(), indices.ToArray());
     }
 
-    public void Draw(System.Numerics.Matrix4x4 modelMatrix, Shader shader, Material material)
+    public void Draw(Matrix4x4 modelMatrix, Material material)
     {
-        Renderer.DrawLitMesh(r_vao, modelMatrix, shader, material);
+        Renderer.DrawLitMesh(r_vao, modelMatrix, material);
     }
 
     public void Dispose()

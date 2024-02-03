@@ -18,9 +18,7 @@ internal class Window : IDisposable
     private Model m_cubeModel;
     private Model m_testModel;
 
-    private Material m_material = new Material();
-    private Nebula.Rendering.Shader m_shader;
-    private Nebula.Rendering.Shader m_lightSourceShader;
+    private Material m_material;
 
     public Window(string title, Vector2i size, bool vSync)
     {
@@ -68,8 +66,7 @@ internal class Window : IDisposable
         m_cubeModel = Model.Load("Art/Models/Cube.obj");
         m_testModel = Model.Load("Art/Models/Test.obj");
 
-        m_shader = ShaderLibrary.Get(DefaultShader.Phong);
-        m_lightSourceShader = ShaderLibrary.Get(DefaultShader.Colour);
+        m_material = Material.Create(ShaderLibrary.Get(DefaultShader.Phong));
 
         Entity entity = new Entity("Camera");
         m_camera = entity.AddComponent<CameraComponent>();
@@ -117,14 +114,14 @@ internal class Window : IDisposable
         Renderer.Clear();
         Renderer.StartFrame(m_camera);
 
-        m_monkeyModel.Draw(System.Numerics.Matrix4x4.CreateTranslation(new System.Numerics.Vector3(-3f, 0f, 0f)), m_shader, m_material);
-        m_cubeModel.Draw(System.Numerics.Matrix4x4.CreateTranslation(new System.Numerics.Vector3(0f, 0f, 0f)), m_shader, m_material);
-        m_testModel.Draw(System.Numerics.Matrix4x4.CreateTranslation(new System.Numerics.Vector3(3f, 0f, 0f)), m_shader, m_material);
+        m_monkeyModel.Draw(System.Numerics.Matrix4x4.CreateTranslation(new System.Numerics.Vector3(-3f, 0f, 0f)), m_material);
+        m_cubeModel.Draw(System.Numerics.Matrix4x4.CreateTranslation(new System.Numerics.Vector3(0f, 0f, 0f)), m_material);
+        m_testModel.Draw(System.Numerics.Matrix4x4.CreateTranslation(new System.Numerics.Vector3(3f, 0f, 0f)), m_material);
 
         // Light sources
         for (int i = 0; i < m_pointLightEntites.Length; i++)
         {
-            m_cubeModel.Draw(m_pointLightEntites[i].GetTransform().GetWorldMatrix(), m_shader, m_material);
+            m_cubeModel.Draw(m_pointLightEntites[i].GetTransform().GetWorldMatrix(), m_material);
             //Renderer.DrawUnlitMesh(m_vao, m_lightSourceShader, m_pointLightEntites[i].GetTransform().GetWorldMatrix(), m_pointLights[i].GetColour());
         }
     }

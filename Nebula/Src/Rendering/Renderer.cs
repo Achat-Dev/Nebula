@@ -1,4 +1,5 @@
 ﻿using Silk.NET.OpenGL;
+using System.Numerics;
 
 namespace Nebula.Rendering;
 
@@ -27,9 +28,10 @@ public static class Renderer
         s_pointLights = Lighting.GetPointLights();
     }
 
-    internal static unsafe void DrawLitMesh(VertexArrayObject vao, System.Numerics.Matrix4x4 modelMatrix, Shader shader, Material material)
+    internal static unsafe void DrawLitMesh(VertexArrayObject vao, Matrix4x4 modelMatrix, Material material)
     {
         vao.Bind();
+        Shader shader = material.GetShader();
         shader.Use();
         shader.SetMat4("u_viewProjection", s_camera.GetViewProjectionMatrix());
         shader.SetVec3("u_cameraPosition", s_camera.GetEntity().GetTransform().GetWorldPosition());
@@ -37,13 +39,13 @@ public static class Renderer
         shader.SetMat4("u_model", modelMatrix);
         if (modelMatrix.GetDeterminant() != 0f)
         {
-            System.Numerics.Matrix4x4.Invert(modelMatrix, out modelMatrix);
-            modelMatrix = System.Numerics.Matrix4x4.Transpose(modelMatrix);
+            Matrix4x4.Invert(modelMatrix, out modelMatrix);
+            modelMatrix = Matrix4x4.Transpose(modelMatrix);
             shader.SetMat4("u_modelNormalMatrix", modelMatrix);
         }
         else
         {
-            shader.SetMat4("u_modelNormalMatrix", System.Numerics.Matrix4x4.Identity);
+            shader.SetMat4("u_modelNormalMatrix", Matrix4x4.Identity);
         }
 
         // Material
@@ -75,7 +77,7 @@ public static class Renderer
         GL.Get().DrawElements(PrimitiveType.Triangles, vao.GetIndexCount(), DrawElementsType.UnsignedInt, null);
     }
 
-    internal static unsafe void DrawUnlitMesh(VertexArrayObject vao, Shader shader, System.Numerics.Matrix4x4 modelMatrix, Colour colour)
+    internal static unsafe void DrawUnlitMesh(VertexArrayObject vao, Shader shader, Matrix4x4 modelMatrix, Colour colour)
     {
         vao.Bind();
         shader.Use();

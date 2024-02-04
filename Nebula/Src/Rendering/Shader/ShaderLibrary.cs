@@ -34,16 +34,16 @@ public static class ShaderLibrary
         switch (shaderType)
         {
             case DefaultShader.Colour:
-                shader = new Shader(EngineResources.LoadAsFileContent("Shader/Colour.vert"), EngineResources.LoadAsFileContent("Shader/Colour.frag"));
+                shader = new Shader(AssetLoader.LoadAsFileContent("Shader/Colour.vert"), AssetLoader.LoadAsFileContent("Shader/Colour.frag"));
                 break;
             case DefaultShader.Gouraud:
-                shader = new Shader(EngineResources.LoadAsFileContent("Shader/Gouraud.vert"), EngineResources.LoadAsFileContent("Shader/Gouraud.frag"));
+                shader = new Shader(AssetLoader.LoadAsFileContent("Shader/Gouraud.vert"), AssetLoader.LoadAsFileContent("Shader/Gouraud.frag"));
                 break;
             case DefaultShader.Phong:
-                shader = new Shader(EngineResources.LoadAsFileContent("Shader/Phong.vert"), EngineResources.LoadAsFileContent("Shader/Phong.frag"));
+                shader = new Shader(AssetLoader.LoadAsFileContent("Shader/Phong.vert"), AssetLoader.LoadAsFileContent("Shader/Phong.frag"));
                 break;
             default:
-                shader = new Shader(EngineResources.LoadAsFileContent("Shader/Fallback.vert"), EngineResources.LoadAsFileContent("Shader/Fallback.frag"));
+                shader = new Shader(AssetLoader.LoadAsFileContent("Shader/Fallback.vert"), AssetLoader.LoadAsFileContent("Shader/Fallback.frag"));
                 break;
         }
 

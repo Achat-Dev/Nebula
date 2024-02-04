@@ -74,7 +74,7 @@ public class Shader : IDisposable
                 if (lines[i].StartsWith(include))
                 {
                     string path = lines[i].Substring(include.Length + 1).TrimEnd();
-                    string includeSource = EngineResources.LoadAsFileContent(path);
+                    string includeSource = AssetLoader.LoadAsFileContent(path);
                     stringBuilder.Replace(lines[i], includeSource);
                 }
                 else if (lines[i].StartsWith(skip))

@@ -24,7 +24,7 @@ public class Game
 
         Logger.Init(LogLevel.Info);
         Logger.EngineInfo("Creating game");
-        EngineResources.Init();
+        AssetLoader.Init();
 
         m_window = new Window(title, size, vSync);
         Scene.Load();

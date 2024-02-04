@@ -2,14 +2,14 @@
 
 namespace Nebula;
 
-internal static class EngineResources
+internal static class AssetLoader
 {
     private static Assembly s_assembly;
 
     public static void Init()
     {
         Logger.EngineInfo("Initialising engine resources");
-        s_assembly = typeof(EngineResources).Assembly;
+        s_assembly = typeof(AssetLoader).Assembly;
     }
 
     public static string LoadAsFileContent(string path)

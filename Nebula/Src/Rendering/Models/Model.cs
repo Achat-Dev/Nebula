@@ -16,7 +16,7 @@ public class Model : IDisposable
 
     public static unsafe Model Load(string path)
     {
-        AssimpScene* assimpScene = Assimp.Get().ImportFileFromMemory(EngineResources.LoadAsByteArray(path, out int dataSize), (uint)dataSize, c_postProcessSteps, "");
+        AssimpScene* assimpScene = Assimp.Get().ImportFileFromMemory(AssetLoader.LoadAsByteArray(path, out int dataSize), (uint)dataSize, c_postProcessSteps, "");
 
         if (assimpScene == null || assimpScene->MFlags == Silk.NET.Assimp.Assimp.SceneFlagsIncomplete || assimpScene->MRootNode == null)
         {

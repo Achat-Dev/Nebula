@@ -10,7 +10,7 @@ public class Model : IDisposable
 {
     private readonly List<Mesh> r_meshes = new List<Mesh>();
 
-    private const uint c_postProcessSteps = (uint)(PostProcessSteps.Triangulate | PostProcessSteps.GenerateNormals | PostProcessSteps.JoinIdenticalVertices);
+    private const uint c_postProcessSteps = (uint)(PostProcessSteps.Triangulate | PostProcessSteps.GenerateNormals | PostProcessSteps.GenerateUVCoords | PostProcessSteps.JoinIdenticalVertices);
 
     private Model() { }
 

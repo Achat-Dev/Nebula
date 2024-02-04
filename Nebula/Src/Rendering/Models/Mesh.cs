@@ -18,7 +18,7 @@ internal class Mesh : IDisposable
 
         BufferObject<Vertex> vbo = new BufferObject<Vertex>(vertices, BufferTargetARB.ArrayBuffer);
         BufferObject<uint> ibo = new BufferObject<uint>(indices, BufferTargetARB.ElementArrayBuffer);
-        r_vao = new VertexArrayObject(vbo, ibo, new BufferLayout(BufferElement.Float3, BufferElement.Float3));
+        r_vao = new VertexArrayObject(vbo, ibo, new BufferLayout(BufferElement.Float3, BufferElement.Float3, BufferElement.Float2));
     }
 
     public static unsafe Mesh CreateFromAssimpMesh(AssimpMesh* assimpMesh)
@@ -33,6 +33,12 @@ internal class Mesh : IDisposable
             if (assimpMesh->MNormals != null)
             {
                 vertex.Normal = assimpMesh->MNormals[i];
+            }
+
+            if (assimpMesh->MTextureCoords[0] != null)
+            {
+                Vector3 uv = assimpMesh->MTextureCoords[0][i];
+                vertex.UV = (Vector2)uv;
             }
 
             vertices.Add(vertex);

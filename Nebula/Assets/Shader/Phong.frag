@@ -4,8 +4,8 @@
 
 out vec4 o_colour;
 
-in vec3 io_normal;
 in vec3 io_vertexPosition;
+in vec3 io_normal;
 
 uniform int u_pointLightCount;
 uniform vec3 u_cameraPosition;

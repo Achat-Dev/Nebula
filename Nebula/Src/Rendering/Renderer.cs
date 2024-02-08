@@ -49,29 +49,34 @@ public static class Renderer
         }
 
         // Material
-        Vector3 materialColour = (Vector3)material.GetColour();
-        shader.SetVec3("u_material.ambient", materialColour);
-        shader.SetVec3("u_material.diffuse", materialColour);
-        shader.SetVec3("u_material.specular", materialColour);
-        shader.SetFloat("u_material.shininess", material.GetShininess());
+        //Vector3 materialColour = (Vector3)material.GetColour();
+        //shader.SetVec3("u_material.ambient", materialColour);
+        //shader.SetVec3("u_material.diffuse", materialColour);
+        //shader.SetVec3("u_material.specular", materialColour);
+        //shader.SetFloat("u_material.shininess", material.GetShininess());
+        shader.SetVec3("u_albedo", (Vector3)material.GetColour());
+        shader.SetFloat("u_metallic", material.GetMetallic());
+        shader.SetFloat("u_roughness", material.GetRoughness());
 
         // Directional Light
-        shader.SetVec3("u_directionalLight.direction", s_directionalLight.GetDirection());
-        shader.SetVec3("u_directionalLight.ambient", s_directionalLight.GetAmbient());
-        shader.SetVec3("u_directionalLight.diffuse", s_directionalLight.GetDiffuse());
-        shader.SetVec3("u_directionalLight.specular", s_directionalLight.GetSpecular());
+        //shader.SetVec3("u_directionalLight.direction", s_directionalLight.GetDirection());
+        //shader.SetVec3("u_directionalLight.ambient", s_directionalLight.GetAmbient());
+        //shader.SetVec3("u_directionalLight.diffuse", s_directionalLight.GetDiffuse());
+        //shader.SetVec3("u_directionalLight.specular", s_directionalLight.GetSpecular());
 
         // Point Lights
         int pointLightCount = Lighting.GetPointLightCount();
         shader.SetInt("u_pointLightCount", pointLightCount);
         for (int i = 0; i < pointLightCount; i++)
         {
+            //shader.SetVec3($"u_pointLights[{i}].position", s_pointLights[i].GetEntity().GetTransform().GetWorldPosition());
+            //shader.SetVec3($"u_pointLights[{i}].ambient", s_pointLights[i].GetAmbient());
+            //shader.SetVec3($"u_pointLights[{i}].diffuse", s_pointLights[i].GetDiffuse());
+            //shader.SetVec3($"u_pointLights[{i}].specular", s_pointLights[i].GetSpecular());
+            //shader.SetFloat($"u_pointLights[{i}].linearFalloff", s_pointLights[i].GetLinearFalloff());
+            //shader.SetFloat($"u_pointLights[{i}].quadraticFalloff", s_pointLights[i].GetQuadraticFalloff());
             shader.SetVec3($"u_pointLights[{i}].position", s_pointLights[i].GetEntity().GetTransform().GetWorldPosition());
-            shader.SetVec3($"u_pointLights[{i}].ambient", s_pointLights[i].GetAmbient());
-            shader.SetVec3($"u_pointLights[{i}].diffuse", s_pointLights[i].GetDiffuse());
-            shader.SetVec3($"u_pointLights[{i}].specular", s_pointLights[i].GetSpecular());
-            shader.SetFloat($"u_pointLights[{i}].linearFalloff", s_pointLights[i].GetLinearFalloff());
-            shader.SetFloat($"u_pointLights[{i}].quadraticFalloff", s_pointLights[i].GetQuadraticFalloff());
+            shader.SetVec3($"u_pointLights[{i}].colour", (Vector3)s_pointLights[i].GetColour());
         }
 
         GL.Get().DrawElements(PrimitiveType.Triangles, vao.GetIndexCount(), DrawElementsType.UnsignedInt, null);

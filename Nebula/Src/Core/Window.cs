@@ -66,7 +66,7 @@ internal class Window : IDisposable
         m_cubeModel = Model.Load("Art/Models/Cube.obj");
         m_testModel = Model.Load("Art/Models/Test.obj");
 
-        m_material = Material.Create(ShaderLibrary.Get(DefaultShader.Phong));
+        m_material = Material.Create(new Shader(AssetLoader.LoadAsFileContent("Shader/PBR.vert"), AssetLoader.LoadAsFileContent("Shader/PBR.frag")));
 
         Entity entity = new Entity("Camera");
         m_camera = entity.AddComponent<CameraComponent>();
@@ -88,19 +88,28 @@ internal class Window : IDisposable
         Scene.GetActive().Update((float)deltaTime);
         Input.RefreshInputStates();
 
+        float dt = (float)deltaTime;
+
         TransformComponent cameraTransform = m_camera.GetEntity().GetTransform();
-        if (Input.IsKeyDown(Key.W)) cameraTransform.Translate(cameraTransform.GetForward() * (float)deltaTime);
-        if (Input.IsKeyDown(Key.A)) cameraTransform.Translate(-cameraTransform.GetRight() * (float)deltaTime);
-        if (Input.IsKeyDown(Key.S)) cameraTransform.Translate(-cameraTransform.GetForward() * (float)deltaTime);
-        if (Input.IsKeyDown(Key.D)) cameraTransform.Translate(cameraTransform.GetRight() * (float)deltaTime);
-        if (Input.IsKeyDown(Key.Space)) cameraTransform.Translate(cameraTransform.GetUp() * (float)deltaTime);
-        if (Input.IsKeyDown(Key.ControlLeft)) cameraTransform.Translate(-cameraTransform.GetUp() * (float)deltaTime);
-        if (Input.IsKeyDown(Key.Q)) cameraTransform.Rotate(Quaternion.FromAxisAngle(Vector3.Up, -40 * (float)deltaTime));
-        if (Input.IsKeyDown(Key.E)) cameraTransform.Rotate(Quaternion.FromAxisAngle(Vector3.Up, 40 * (float)deltaTime));
-        if (Input.IsKeyDown(Key.R)) cameraTransform.Rotate(Quaternion.FromAxisAngle(Vector3.Right, -40 * (float)deltaTime));
-        if (Input.IsKeyDown(Key.T)) cameraTransform.Rotate(Quaternion.FromAxisAngle(Vector3.Right, 40 * (float)deltaTime));
-        if (Input.IsKeyDown(Key.Z)) cameraTransform.Rotate(Quaternion.FromAxisAngle(Vector3.Forward, -40 * (float)deltaTime));
-        if (Input.IsKeyDown(Key.U)) cameraTransform.Rotate(Quaternion.FromAxisAngle(Vector3.Forward, 40 * (float)deltaTime));
+        if (Input.IsKeyDown(Key.W)) cameraTransform.Translate(cameraTransform.GetForward() * dt);
+        if (Input.IsKeyDown(Key.A)) cameraTransform.Translate(-cameraTransform.GetRight() * dt);
+        if (Input.IsKeyDown(Key.S)) cameraTransform.Translate(-cameraTransform.GetForward() * dt);
+        if (Input.IsKeyDown(Key.D)) cameraTransform.Translate(cameraTransform.GetRight() * dt);
+        if (Input.IsKeyDown(Key.Space)) cameraTransform.Translate(cameraTransform.GetUp() * dt);
+        if (Input.IsKeyDown(Key.ControlLeft)) cameraTransform.Translate(-cameraTransform.GetUp() * dt);
+        if (Input.IsKeyDown(Key.Q)) cameraTransform.Rotate(Quaternion.FromAxisAngle(Vector3.Up, -40 * dt));
+        if (Input.IsKeyDown(Key.E)) cameraTransform.Rotate(Quaternion.FromAxisAngle(Vector3.Up, 40 * dt));
+        if (Input.IsKeyDown(Key.R)) cameraTransform.Rotate(Quaternion.FromAxisAngle(Vector3.Right, -40 * dt));
+        if (Input.IsKeyDown(Key.T)) cameraTransform.Rotate(Quaternion.FromAxisAngle(Vector3.Right, 40 * dt));
+        if (Input.IsKeyDown(Key.Z)) cameraTransform.Rotate(Quaternion.FromAxisAngle(Vector3.Forward, -40 * dt));
+        if (Input.IsKeyDown(Key.U)) cameraTransform.Rotate(Quaternion.FromAxisAngle(Vector3.Forward, 40 * dt));
+
+        if (Input.IsKeyDown(Key.Y)) m_material.SetMetallic(m_material.GetMetallic() - dt);
+        if (Input.IsKeyDown(Key.X)) m_material.SetMetallic(m_material.GetMetallic() + dt);
+        if (Input.IsKeyDown(Key.C)) m_material.SetRoughness(m_material.GetRoughness() - dt);
+        if (Input.IsKeyDown(Key.V)) m_material.SetRoughness(m_material.GetRoughness() + dt);
+
+        Logger.EngineInfo($"Metallic: {m_material.GetMetallic()} | Roughness: {m_material.GetRoughness()}");
 
         float piThird = (MathF.PI * 2f) / 3f;
         for (int i = 0; i < m_pointLightEntites.Length; i++)
@@ -114,14 +123,14 @@ internal class Window : IDisposable
         Renderer.Clear();
         Renderer.StartFrame(m_camera);
 
-        m_monkeyModel.Draw(System.Numerics.Matrix4x4.CreateTranslation(new System.Numerics.Vector3(-3f, 0f, 0f)), m_material);
-        m_cubeModel.Draw(System.Numerics.Matrix4x4.CreateTranslation(new System.Numerics.Vector3(0f, 0f, 0f)), m_material);
-        m_testModel.Draw(System.Numerics.Matrix4x4.CreateTranslation(new System.Numerics.Vector3(3f, 0f, 0f)), m_material);
+        m_monkeyModel.Draw(System.Numerics.Matrix4x4.CreateTranslation(new System.Numerics.Vector3(0f, 0f, 0f)), m_material);
+        //m_cubeModel.Draw(System.Numerics.Matrix4x4.CreateTranslation(new System.Numerics.Vector3(0f, 0f, 0f)), m_material);
+        //m_testModel.Draw(System.Numerics.Matrix4x4.CreateTranslation(new System.Numerics.Vector3(3f, 0f, 0f)), m_material);
 
         // Light sources
         for (int i = 0; i < m_pointLightEntites.Length; i++)
         {
-            m_cubeModel.Draw(m_pointLightEntites[i].GetTransform().GetWorldMatrix(), m_material);
+            //m_cubeModel.Draw(m_pointLightEntites[i].GetTransform().GetWorldMatrix(), m_material);
             //Renderer.DrawUnlitMesh(m_vao, m_lightSourceShader, m_pointLightEntites[i].GetTransform().GetWorldMatrix(), m_pointLights[i].GetColour());
         }
     }

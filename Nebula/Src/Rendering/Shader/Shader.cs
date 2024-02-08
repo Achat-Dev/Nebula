@@ -9,11 +9,13 @@ public class Shader : IDisposable
     private readonly uint r_handle;
     private readonly Dictionary<string, int> r_uniformLocationCache = new Dictionary<string, int>();
 
-    public Shader(string vertexSource, string fragmentSource)
+    private readonly static Dictionary<(string, string), Shader> s_cache = new Dictionary<(string, string), Shader>();
+
+    private Shader(string vertexPath, string fragmentPath)
     {
         // Create shaders
-        uint vertexShaderHandle = CreateShader(ShaderType.VertexShader, GetSourceWithIncludes(vertexSource));
-        uint fragmentShaderHandle = CreateShader(ShaderType.FragmentShader, GetSourceWithIncludes(fragmentSource));
+        uint vertexShaderHandle = CreateGLShader(ShaderType.VertexShader, GetSourceWithIncludes(AssetLoader.LoadAsFileContent(vertexPath)));
+        uint fragmentShaderHandle = CreateGLShader(ShaderType.FragmentShader, GetSourceWithIncludes(AssetLoader.LoadAsFileContent(fragmentPath)));
 
         // Link shaders
         r_handle = GL.Get().CreateProgram();
@@ -43,7 +45,20 @@ public class Shader : IDisposable
         }
     }
 
-    private uint CreateShader(ShaderType type, string source)
+    public static Shader Create(string vertexPath, string fragmentPath)
+    {
+        if (s_cache.TryGetValue((vertexPath, fragmentPath), out Shader shader))
+        {
+            return shader;
+        }
+
+        Logger.EngineDebug($"Creating new shader with sources {vertexPath} and {fragmentPath}");
+        shader = new Shader(vertexPath, fragmentPath);
+        s_cache.Add((vertexPath, fragmentPath), shader);
+        return shader;
+    }
+
+    private uint CreateGLShader(ShaderType type, string source)
     {
         uint handle = GL.Get().CreateShader(type);
         GL.Get().ShaderSource(handle, source);
@@ -116,7 +131,7 @@ public class Shader : IDisposable
         GL.Get().UniformMatrix4(r_uniformLocationCache[name], 1, false, (float*) &value);
     }
 
-    public void Use()
+    internal void Use()
     {
         GL.Get().UseProgram(r_handle);
     }
@@ -124,5 +139,15 @@ public class Shader : IDisposable
     public void Dispose()
     {
         GL.Get().DeleteProgram(r_handle);
+    }
+
+    internal static void DisposeCache()
+    {
+        Logger.EngineInfo("Disposing shader cache");
+        foreach (var item in s_cache)
+        {
+            item.Value.Dispose();
+        }
+        s_cache.Clear();
     }
 }

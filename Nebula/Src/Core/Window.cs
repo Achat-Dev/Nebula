@@ -66,7 +66,9 @@ internal class Window : IDisposable
         m_cubeModel = Model.Load("Art/Models/Cube.obj");
         m_testModel = Model.Load("Art/Models/Test.obj");
 
-        m_material = Material.Create(new Shader(AssetLoader.LoadAsFileContent("Shader/PBR.vert"), AssetLoader.LoadAsFileContent("Shader/PBR.frag")));
+        m_material = Material.Create(Shader.Create("Shader/PBR.vert", "Shader/PBR.frag"));
+
+        Shader shader = Shader.Create("Shader/PBR.vert", "Shader/PBR.frag");
 
         Entity entity = new Entity("Camera");
         m_camera = entity.AddComponent<CameraComponent>();
@@ -137,7 +139,7 @@ internal class Window : IDisposable
 
     private void OnClose()
     {
-        ShaderLibrary.Dispose();
+        Shader.DisposeCache();
         // Temporary
         m_monkeyModel.Dispose();
         m_cubeModel.Dispose();

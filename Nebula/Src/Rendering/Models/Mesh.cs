@@ -58,9 +58,9 @@ internal class Mesh : IDisposable
         return new Mesh(vertices.ToArray(), indices.ToArray());
     }
 
-    public void Draw(Matrix4x4 modelMatrix, Material material)
+    public void Draw(Matrix4x4 modelMatrix, ShaderInstance shaderInstance)
     {
-        Renderer.DrawLitMesh(r_vao, modelMatrix, material);
+        Renderer.DrawLitMesh(r_vao, modelMatrix, shaderInstance);
     }
 
     public void Dispose()

@@ -28,10 +28,10 @@ public static class Renderer
         s_pointLights = Lighting.GetPointLights();
     }
 
-    internal static unsafe void DrawLitMesh(VertexArrayObject vao, Matrix4x4 modelMatrix, Material material)
+    internal static unsafe void DrawLitMesh(VertexArrayObject vao, Matrix4x4 modelMatrix, ShaderInstance shaderInstance)
     {
         vao.Bind();
-        Shader shader = material.GetShader();
+        Shader shader = shaderInstance.GetShader();
         shader.Use();
         shader.SetMat4("u_viewProjection", s_camera.GetViewProjectionMatrix());
         shader.SetVec3("u_cameraPosition", s_camera.GetEntity().GetTransform().GetWorldPosition());
@@ -54,9 +54,9 @@ public static class Renderer
         //shader.SetVec3("u_material.diffuse", materialColour);
         //shader.SetVec3("u_material.specular", materialColour);
         //shader.SetFloat("u_material.shininess", material.GetShininess());
-        shader.SetVec3("u_albedo", (Vector3)material.GetColour());
-        shader.SetFloat("u_metallic", material.GetMetallic());
-        shader.SetFloat("u_roughness", material.GetRoughness());
+        shader.SetVec3("u_albedo", (Vector3)shaderInstance.GetColour());
+        shader.SetFloat("u_metallic", shaderInstance.GetMetallic());
+        shader.SetFloat("u_roughness", shaderInstance.GetRoughness());
 
         // Directional Light
         //shader.SetVec3("u_directionalLight.direction", s_directionalLight.GetDirection());

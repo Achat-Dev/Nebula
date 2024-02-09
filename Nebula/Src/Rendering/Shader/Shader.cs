@@ -12,6 +12,21 @@ public class Shader : IDisposable
         PBRFlat,
     }
 
+    internal enum DataType
+    {
+        Float,
+        Float2,
+        Float3,
+        Float4,
+        Int,
+        Int2,
+        Int3,
+        Int4,
+        Mat3,
+        Mat4,
+        Bool,
+    }
+
     private readonly uint r_handle;
     private readonly Dictionary<string, int> r_uniformLocationCache = new Dictionary<string, int>();
 

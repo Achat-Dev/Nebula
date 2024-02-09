@@ -18,7 +18,7 @@ internal class Window : IDisposable
     private Model m_cubeModel;
     private Model m_testModel;
 
-    private Material m_material;
+    private ShaderInstance m_shaderInstance;
 
     public Window(string title, Vector2i size, bool vSync)
     {
@@ -67,7 +67,7 @@ internal class Window : IDisposable
         m_testModel = Model.Load("Art/Models/Test.obj");
 
         Shader shader = Shader.GetDefault(Shader.DefaultType.PBRFlat);
-        m_material = Material.Create(shader);
+        m_shaderInstance = new ShaderInstance(shader);
 
         Entity entity = new Entity("Camera");
         m_camera = entity.AddComponent<CameraComponent>();
@@ -105,12 +105,12 @@ internal class Window : IDisposable
         if (Input.IsKeyDown(Key.Z)) cameraTransform.Rotate(Quaternion.FromAxisAngle(Vector3.Forward, -40 * dt));
         if (Input.IsKeyDown(Key.U)) cameraTransform.Rotate(Quaternion.FromAxisAngle(Vector3.Forward, 40 * dt));
 
-        if (Input.IsKeyDown(Key.Y)) m_material.SetMetallic(m_material.GetMetallic() - dt);
-        if (Input.IsKeyDown(Key.X)) m_material.SetMetallic(m_material.GetMetallic() + dt);
-        if (Input.IsKeyDown(Key.C)) m_material.SetRoughness(m_material.GetRoughness() - dt);
-        if (Input.IsKeyDown(Key.V)) m_material.SetRoughness(m_material.GetRoughness() + dt);
+        if (Input.IsKeyDown(Key.Y)) m_shaderInstance.SetMetallic(m_shaderInstance.GetMetallic() - dt);
+        if (Input.IsKeyDown(Key.X)) m_shaderInstance.SetMetallic(m_shaderInstance.GetMetallic() + dt);
+        if (Input.IsKeyDown(Key.C)) m_shaderInstance.SetRoughness(m_shaderInstance.GetRoughness() - dt);
+        if (Input.IsKeyDown(Key.V)) m_shaderInstance.SetRoughness(m_shaderInstance.GetRoughness() + dt);
 
-        Logger.EngineInfo($"Metallic: {m_material.GetMetallic()} | Roughness: {m_material.GetRoughness()}");
+        Logger.EngineInfo($"Metallic: {m_shaderInstance.GetMetallic()} | Roughness: {m_shaderInstance.GetRoughness()}");
 
         float piThird = (MathF.PI * 2f) / 3f;
         for (int i = 0; i < m_pointLightEntites.Length; i++)
@@ -124,7 +124,7 @@ internal class Window : IDisposable
         Renderer.Clear();
         Renderer.StartFrame(m_camera);
 
-        m_monkeyModel.Draw(System.Numerics.Matrix4x4.CreateTranslation(new System.Numerics.Vector3(0f, 0f, 0f)), m_material);
+        m_monkeyModel.Draw(System.Numerics.Matrix4x4.CreateTranslation(new System.Numerics.Vector3(0f, 0f, 0f)), m_shaderInstance);
         //m_cubeModel.Draw(System.Numerics.Matrix4x4.CreateTranslation(new System.Numerics.Vector3(0f, 0f, 0f)), m_material);
         //m_testModel.Draw(System.Numerics.Matrix4x4.CreateTranslation(new System.Numerics.Vector3(3f, 0f, 0f)), m_material);
 

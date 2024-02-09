@@ -1,6 +1,6 @@
 ﻿namespace Nebula.Rendering;
 
-public class Material
+public class ShaderInstance
 {
     private Colour m_colour = Colour.White;
     private float m_shininess = 32;
@@ -9,14 +9,9 @@ public class Material
 
     private readonly Shader r_shader;
 
-    private Material(Shader shader)
+    public ShaderInstance(Shader shader)
     {
         r_shader = shader;
-    }
-
-    public static Material Create(Shader shader)
-    {
-        return new Material(shader);
     }
 
     public Colour GetColour()

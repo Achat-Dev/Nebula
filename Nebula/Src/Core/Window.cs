@@ -66,7 +66,8 @@ internal class Window : IDisposable
         m_cubeModel = Model.Load("Art/Models/Cube.obj");
         m_testModel = Model.Load("Art/Models/Test.obj");
 
-        m_material = Material.Create(Shader.Create("Shader/PBR_Flat.vert", "Shader/PBR_Flat.frag"));
+        Shader shader = Shader.GetDefault(Shader.DefaultType.PBRFlat);
+        m_material = Material.Create(shader);
 
         Entity entity = new Entity("Camera");
         m_camera = entity.AddComponent<CameraComponent>();

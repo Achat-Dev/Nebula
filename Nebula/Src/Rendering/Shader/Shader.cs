@@ -6,6 +6,12 @@ namespace Nebula.Rendering;
 
 public class Shader : IDisposable
 {
+    public enum DefaultType
+    {
+        Colour,
+        PBRFlat,
+    }
+
     private readonly uint r_handle;
     private readonly Dictionary<string, int> r_uniformLocationCache = new Dictionary<string, int>();
 
@@ -58,6 +64,19 @@ public class Shader : IDisposable
         return shader;
     }
 
+    public static Shader GetDefault(DefaultType defaultType)
+    {
+        switch (defaultType)
+        {
+            case DefaultType.Colour:
+                return Create("Shader/Colour.vert", "Shader/Colour.frag");
+            case DefaultType.PBRFlat:
+                return Create("Shader/PBR_Flat.vert", "Shader/PBR_Flat.frag");
+            default:
+                return Create("Shader/Fallback.vert", "Shader/Fallback.frag");
+        }
+    }
+
     private uint CreateGLShader(ShaderType type, string source)
     {
         uint handle = GL.Get().CreateShader(type);
@@ -89,7 +108,7 @@ public class Shader : IDisposable
                 if (lines[i].StartsWith(include))
                 {
                     string path = lines[i].Substring(include.Length + 1).TrimEnd();
-                    string includeSource = AssetLoader.LoadAsFileContent(path);
+                    string includeSource = GetSourceWithIncludes(AssetLoader.LoadAsFileContent(path));
                     stringBuilder.Replace(lines[i], includeSource);
                 }
                 else if (lines[i].StartsWith(skip))

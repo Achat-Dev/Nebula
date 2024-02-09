@@ -52,7 +52,7 @@ public class Shader : IDisposable
             return shader;
         }
 
-        Logger.EngineDebug($"Creating new shader with sources {vertexPath} and {fragmentPath}");
+        Logger.EngineDebug($"Creating new shader from sources: {vertexPath} and {fragmentPath}");
         shader = new Shader(vertexPath, fragmentPath);
         s_cache.Add((vertexPath, fragmentPath), shader);
         return shader;

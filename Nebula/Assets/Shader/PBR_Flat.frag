@@ -25,10 +25,9 @@ uniform PointLight u_pointLights[MAX_POINT_LIGHTS];
 
 const float PI = 3.14159265359;
 
-float distributionGGX(vec3 n, vec3 h, float roughness)
+float distributionGGX(float nDotH, float roughness)
 {
 	float roughness4 = pow(roughness, 4.0);
-	float nDotH = max(dot(n, h), 0.0);
 	float nDotH2 = nDotH * nDotH;
 
 	float denom = (nDotH2 * (roughness4 - 1.0) + 1.0);
@@ -46,19 +45,17 @@ float geometrySchlickGGX(float nDotV, float roughness)
 	return nDotV / denom;
 }
 
-float geometrySmith(vec3 n, vec3 l, vec3 v, float roughness)
+float geometrySmith(float nDotL, float nDotV, float roughness)
 {
-	float nDotL = max(dot(n, l), 0.0);
-	float nDotV = max(dot(n, v), 0.0);
 	float ggx1 = geometrySchlickGGX(nDotL, roughness);
 	float ggx2 = geometrySchlickGGX(nDotV, roughness);
 
 	return ggx1 * ggx2;
 }
 
-vec3 fresnelSchlick(float cosTheta, vec3 f0)
+vec3 fresnel(float hDotV, vec3 f0)
 {
-	return f0 + (1.0 - f0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+	return f0 + (1.0 - f0) * pow(clamp(1.0 - hDotV, 0.0, 1.0), 5.0);
 }
 
 void main()
@@ -79,20 +76,23 @@ void main()
 		vec3 radiance = u_pointLights[i].colour * attenuation;
 
 		// Cook-Torrance BRDF
-		float ndf = distributionGGX(io_normal, h, u_roughness);
-		float g = geometrySmith(io_normal, l, v, u_roughness);
-		vec3 f = fresnelSchlick(clamp(dot(h, v), 0.0, 1.0), f0);
+		float nDotH = max(dot(io_normal, h), 0.0);
+		float nDotL = max(dot(io_normal, l), 0.0);
+		float nDotV = max(dot(io_normal, v), 0.0);
+		float hDotV = clamp(dot(h, v), 0.0, 1.0);
+
+		float ndf = distributionGGX(nDotH, u_roughness);
+		float g = geometrySmith(nDotL, nDotV, u_roughness);
+		vec3 f = fresnel(hDotV, f0);
 
 		vec3 nom = ndf * g * f;
 		// plus at the end to prevent dividing by 0
-		float denom = 4.0 * max(dot(io_normal, v), 0.0) * max(dot(io_normal, l), 0.0) + 0.0001;
+		float denom = 4.0 * nDotV * nDotL + 0.0001;
 		vec3 specular = nom / denom;
 
 		vec3 ks = f;
 		vec3 kd = vec3(1.0) - ks;
 		kd *= 1.0 - u_metallic;
-		
-		float nDotL = max(dot(io_normal, l), 0.0);
 
 		colour += (kd * u_albedo / PI + specular) * radiance * nDotL;
 	}

@@ -48,12 +48,7 @@ public static class Renderer
             shader.SetMat4("u_modelNormalMatrix", Matrix4x4.Identity);
         }
 
-        // Material
-        //Vector3 materialColour = (Vector3)material.GetColour();
-        //shader.SetVec3("u_material.ambient", materialColour);
-        //shader.SetVec3("u_material.diffuse", materialColour);
-        //shader.SetVec3("u_material.specular", materialColour);
-        //shader.SetFloat("u_material.shininess", material.GetShininess());
+        // Shader instance
         shader.SetVec3("u_albedo", (Vector3)shaderInstance.GetColour());
         shader.SetFloat("u_metallic", shaderInstance.GetMetallic());
         shader.SetFloat("u_roughness", shaderInstance.GetRoughness());
@@ -69,14 +64,9 @@ public static class Renderer
         shader.SetInt("u_pointLightCount", pointLightCount);
         for (int i = 0; i < pointLightCount; i++)
         {
-            //shader.SetVec3($"u_pointLights[{i}].position", s_pointLights[i].GetEntity().GetTransform().GetWorldPosition());
-            //shader.SetVec3($"u_pointLights[{i}].ambient", s_pointLights[i].GetAmbient());
-            //shader.SetVec3($"u_pointLights[{i}].diffuse", s_pointLights[i].GetDiffuse());
-            //shader.SetVec3($"u_pointLights[{i}].specular", s_pointLights[i].GetSpecular());
-            //shader.SetFloat($"u_pointLights[{i}].linearFalloff", s_pointLights[i].GetLinearFalloff());
-            //shader.SetFloat($"u_pointLights[{i}].quadraticFalloff", s_pointLights[i].GetQuadraticFalloff());
             shader.SetVec3($"u_pointLights[{i}].position", s_pointLights[i].GetEntity().GetTransform().GetWorldPosition());
-            shader.SetVec3($"u_pointLights[{i}].colour", (Vector3)s_pointLights[i].GetColour());
+            shader.SetVec3($"u_pointLights[{i}].colour", (Vector3)s_pointLights[i].GetColour() * s_pointLights[i].GetIntensity());
+            shader.SetFloat($"u_pointLights[{i}].range", s_pointLights[i].GetRange());
         }
 
         GL.Get().DrawElements(PrimitiveType.Triangles, vao.GetIndexCount(), DrawElementsType.UnsignedInt, null);

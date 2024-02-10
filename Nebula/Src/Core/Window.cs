@@ -19,6 +19,8 @@ internal class Window : IDisposable
     private Model m_testModel;
 
     private ShaderInstance m_shaderInstance;
+    private float m_lightRange = 1f;
+    private float m_lightIntensity = 1f;
 
     public Window(string title, Vector2i size, bool vSync)
     {
@@ -109,13 +111,19 @@ internal class Window : IDisposable
         if (Input.IsKeyDown(Key.X)) m_shaderInstance.SetMetallic(m_shaderInstance.GetMetallic() + dt);
         if (Input.IsKeyDown(Key.C)) m_shaderInstance.SetRoughness(m_shaderInstance.GetRoughness() - dt);
         if (Input.IsKeyDown(Key.V)) m_shaderInstance.SetRoughness(m_shaderInstance.GetRoughness() + dt);
+        if (Input.IsKeyDown(Key.B)) m_lightRange -= dt;
+        if (Input.IsKeyDown(Key.N)) m_lightRange += dt;
+        if (Input.IsKeyDown(Key.M)) m_lightIntensity -= dt;
+        if (Input.IsKeyDown(Key.Comma)) m_lightIntensity += dt;
 
-        Logger.EngineInfo($"Metallic: {m_shaderInstance.GetMetallic()} | Roughness: {m_shaderInstance.GetRoughness()}");
+        Logger.EngineInfo($"Metallic: {m_shaderInstance.GetMetallic()} | Roughness: {m_shaderInstance.GetRoughness()} | Range: {m_lightRange} | Intensity: {m_lightIntensity}");
 
         float piThird = (MathF.PI * 2f) / 3f;
         for (int i = 0; i < m_pointLightEntites.Length; i++)
         {
             m_pointLightEntites[i].GetTransform().SetWorldPosition(new Vector3(MathF.Sin((float)m_window.Time + piThird * i) * 4, 0, MathF.Cos((float)m_window.Time + piThird * i) * 4));
+            m_pointLights[i].SetRange(m_lightRange);
+            m_pointLights[i].SetIntensity(m_lightIntensity);
         }
     }
 

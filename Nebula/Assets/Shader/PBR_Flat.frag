@@ -6,6 +6,7 @@ struct PointLight
 {
 	vec3 position;
 	vec3 colour;
+	float range;
 };
 
 out vec4 o_colour;
@@ -71,7 +72,7 @@ void main()
 		// Calculate per-light radiance
 		vec3 l = normalize(u_pointLights[i].position - io_vertexPosition);
 		vec3 h = normalize(v + l);
-		float distance = length(u_pointLights[i].position - io_vertexPosition);
+		float distance = length(u_pointLights[i].position - io_vertexPosition) / u_pointLights[i].range;
 		float attenuation = 1.0 / (distance * distance);
 		vec3 radiance = u_pointLights[i].colour * attenuation;
 

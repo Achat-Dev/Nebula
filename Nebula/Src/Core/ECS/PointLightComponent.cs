@@ -4,13 +4,9 @@ namespace Nebula;
 
 public class PointLightComponent : StartableComponent
 {
+    private float m_range = 1f;
+    private float m_intensity = 1f;
     private Colour m_colour = Colour.White;
-    private float m_ambientStrength = 0.2f;
-    private float m_diffuseStrength = 0.5f;
-    private float m_specularStrength = 1f;
-
-    private float m_linearFalloff = 0.01f;
-    private float m_quadraticFalloff = 0.1f;
 
     public override void OnCreate()
     {
@@ -23,29 +19,24 @@ public class PointLightComponent : StartableComponent
         Lighting.RemovePointLight(this);
     }
 
-    public Vector3 GetAmbient()
+    public float GetRange()
     {
-        return (Vector3)m_colour * m_ambientStrength;
+        return m_range;
     }
 
-    public Vector3 GetDiffuse()
+    public void SetRange(float range)
     {
-        return (Vector3)m_colour * m_diffuseStrength;
+        m_range = range;
     }
 
-    public Vector3 GetSpecular()
+    public float GetIntensity()
     {
-        return (Vector3)m_colour * m_specularStrength;
+        return m_intensity;
     }
 
-    public float GetLinearFalloff()
+    public void SetIntensity(float intensity)
     {
-        return m_linearFalloff;
-    }
-
-    public float GetQuadraticFalloff()
-    {
-        return m_quadraticFalloff;
+        m_intensity = intensity;
     }
 
     public Colour GetColour()

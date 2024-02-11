@@ -2,6 +2,12 @@
 
 #define MAX_POINT_LIGHTS 128
 
+struct DirectionalLight
+{
+	vec3 direction;
+	vec3 colour;
+};
+
 struct PointLight
 {
 	vec3 position;
@@ -22,13 +28,14 @@ uniform float u_roughness;
 uniform float u_ambientOcclusion;
 
 uniform int u_pointLightCount;
+uniform DirectionalLight u_directionalLight;
 uniform PointLight u_pointLights[MAX_POINT_LIGHTS];
 
 const float PI = 3.14159265359;
 
-float distributionGGX(float nDotH, float roughness)
+float distributionGGX(float nDotH)
 {
-	float roughness4 = pow(roughness, 4.0);
+	float roughness4 = pow(u_roughness, 4.0);
 	float nDotH2 = nDotH * nDotH;
 
 	float denom = (nDotH2 * (roughness4 - 1.0) + 1.0);
@@ -37,66 +44,86 @@ float distributionGGX(float nDotH, float roughness)
 	return roughness4 / denom;
 }
 
-float geometrySchlickGGX(float nDotV, float roughness)
+float geometrySchlickGGX(float nDotV)
 {
-	float r = roughness + 1.0;
+	float r = u_roughness + 1.0;
 	float k = (r * r) / 8.0;
 	float denom = nDotV * (1.0 - k) + k;
 
 	return nDotV / denom;
 }
 
-float geometrySmith(float nDotL, float nDotV, float roughness)
-{
-	float ggx1 = geometrySchlickGGX(nDotL, roughness);
-	float ggx2 = geometrySchlickGGX(nDotV, roughness);
-
-	return ggx1 * ggx2;
-}
-
-vec3 fresnel(float hDotV, vec3 f0)
+vec3 fresnelSchlick(float hDotV, vec3 f0)
 {
 	return f0 + (1.0 - f0) * pow(clamp(1.0 - hDotV, 0.0, 1.0), 5.0);
 }
 
-void main()
+vec3 calculateDirectionalLight(vec3 viewDirection, vec3 f0)
 {
-	vec3 v = normalize(u_cameraPosition - io_vertexPosition);
+	// Calculate Cook-Torrance BRDF
+	vec3 lightDirection = -u_directionalLight.direction;
+	vec3 halfVector = normalize(viewDirection + lightDirection);
 
-	vec3 f0 = vec3(0.04);
-	f0 = mix(f0, u_albedo, u_metallic);
+	float nDotH = max(dot(io_normal, halfVector), 0.0);
+	float nDotL = max(dot(io_normal, lightDirection), 0.0);
+	float nDotV = max(dot(io_normal, viewDirection), 0.0);
+	float hDotV = clamp(dot(halfVector, viewDirection), 0.0, 1.0);
 
+	// Calculate kd
+	vec3 fresnel = fresnelSchlick(hDotV, f0);
+	vec3 kd = vec3(1.0) - fresnel;
+	kd *= 1.0 - u_metallic;
+
+	// Calculate specular
+	vec3 specular = distributionGGX(nDotH) * geometrySchlickGGX(nDotL) * geometrySchlickGGX(nDotV) * fresnel;
+	float specularDenom = 4.0 * nDotV * nDotL + 0.0001; // plus at the end to prevent dividing by 0
+	specular /= specularDenom;
+
+	return (kd * u_albedo / PI + specular) * u_directionalLight.colour * nDotL;
+}
+
+vec3 calculatePointLights(vec3 viewDirection, vec3 f0)
+{
 	vec3 colour = vec3(0.0);
 	for (int i = 0; i < u_pointLightCount; i++)
 	{
-		// Calculate per-light radiance
-		vec3 l = normalize(u_pointLights[i].position - io_vertexPosition);
-		vec3 h = normalize(v + l);
-		float distance = length(u_pointLights[i].position - io_vertexPosition) / u_pointLights[i].range;
+		// Calculate radiance
+		vec3 lightDirection = u_pointLights[i].position - io_vertexPosition;
+		float distance = length(lightDirection) / u_pointLights[i].range;
 		float attenuation = 1.0 / (distance * distance);
 		vec3 radiance = u_pointLights[i].colour * attenuation;
 
-		// Cook-Torrance BRDF
-		float nDotH = max(dot(io_normal, h), 0.0);
-		float nDotL = max(dot(io_normal, l), 0.0);
-		float nDotV = max(dot(io_normal, v), 0.0);
-		float hDotV = clamp(dot(h, v), 0.0, 1.0);
+		// Calculate Cook-Torrance BRDF
+		lightDirection = normalize(lightDirection);
+		vec3 halfVector = normalize(viewDirection + lightDirection);
 
-		float ndf = distributionGGX(nDotH, u_roughness);
-		float g = geometrySmith(nDotL, nDotV, u_roughness);
-		vec3 f = fresnel(hDotV, f0);
+		float nDotH = max(dot(io_normal, halfVector), 0.0);
+		float nDotL = max(dot(io_normal, lightDirection), 0.0);
+		float nDotV = max(dot(io_normal, viewDirection), 0.0);
+		float hDotV = clamp(dot(halfVector, viewDirection), 0.0, 1.0);
 
-		vec3 nom = ndf * g * f;
-		// plus at the end to prevent dividing by 0
-		float denom = 4.0 * nDotV * nDotL + 0.0001;
-		vec3 specular = nom / denom;
-
-		vec3 ks = f;
-		vec3 kd = vec3(1.0) - ks;
+		// Calculate kd
+		vec3 fresnel = fresnelSchlick(hDotV, f0);
+		vec3 kd = vec3(1.0) - fresnel;
 		kd *= 1.0 - u_metallic;
+
+		// Calculate specular
+		vec3 specular = distributionGGX(nDotH) * geometrySchlickGGX(nDotL) * geometrySchlickGGX(nDotV) * fresnel;
+		float specularDenom = 4.0 * nDotV * nDotL + 0.0001; // plus at the end to prevent dividing by 0
+		specular /= specularDenom;
 
 		colour += (kd * u_albedo / PI + specular) * radiance * nDotL;
 	}
+	return colour;
+}
+
+void main()
+{
+	vec3 viewDirection = normalize(u_cameraPosition - io_vertexPosition);
+	vec3 f0 = mix(vec3(0.04), u_albedo, u_metallic);
+
+	vec3 colour = calculateDirectionalLight(viewDirection, f0);
+	colour += calculatePointLights(viewDirection, f0);
 
 	vec3 ambient = vec3(0.03) * u_albedo * u_ambientOcclusion;
 	colour += ambient;

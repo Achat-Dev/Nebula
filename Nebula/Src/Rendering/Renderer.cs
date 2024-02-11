@@ -53,13 +53,11 @@ public static class Renderer
         shader.SetFloat("u_metallic", shaderInstance.GetMetallic());
         shader.SetFloat("u_roughness", shaderInstance.GetRoughness());
 
-        // Directional Light
-        //shader.SetVec3("u_directionalLight.direction", s_directionalLight.GetDirection());
-        //shader.SetVec3("u_directionalLight.ambient", s_directionalLight.GetAmbient());
-        //shader.SetVec3("u_directionalLight.diffuse", s_directionalLight.GetDiffuse());
-        //shader.SetVec3("u_directionalLight.specular", s_directionalLight.GetSpecular());
+        // Directional light
+        shader.SetVec3("u_directionalLight.direction", s_directionalLight.GetDirection());
+        shader.SetVec3("u_directionalLight.colour", (Vector3)s_directionalLight.GetColour() * s_directionalLight.GetIntensity());
 
-        // Point Lights
+        // Point lights
         int pointLightCount = Lighting.GetPointLightCount();
         shader.SetInt("u_pointLightCount", pointLightCount);
         for (int i = 0; i < pointLightCount; i++)

@@ -2,36 +2,28 @@
 
 public class DirectionalLight
 {
-    private Vector3 m_direction = new Vector3(-0.2f, -1f, -0.3f);
-
+    private Vector3 m_direction;
     private Colour m_colour = Colour.White;
-    private float m_ambientStrength = 0.2f;
-    private float m_diffuseStrength = 0.5f;
-    private float m_specularStrength = 1f;
+    private float m_intensity = 1f;
+
+    public DirectionalLight()
+    {
+        SetDirection(new Vector3(-0.5f, -0.663f, 0.557f));
+    }
 
     public Vector3 GetDirection()
     {
         return m_direction;
     }
 
-    public Vector3 GetAmbient()
-    {
-        return (Vector3)m_colour * m_ambientStrength;
-    }
-
-    public Vector3 GetDiffuse()
-    {
-        return (Vector3)m_colour * m_diffuseStrength;
-    }
-
-    public Vector3 GetSpecular()
-    {
-        return (Vector3)m_colour * m_specularStrength;
-    }
-
     public void SetDirection(Vector3 direction)
     {
-        m_direction = direction;
+        m_direction = direction.Normalised();
+    }
+
+    public Colour GetColour()
+    {
+        return m_colour;
     }
 
     public void SetColour(Colour colour)
@@ -39,18 +31,13 @@ public class DirectionalLight
         m_colour = colour;
     }
 
-    public void SetAmbientStrength(float strength)
+    public float GetIntensity()
     {
-        m_ambientStrength = strength;
+        return m_intensity;
     }
 
-    public void SetDiffuseStrength(float strength)
+    public void SetIntensity(float intensity)
     {
-        m_diffuseStrength = strength;
-    }
-
-    public void SetSpecularStrength(float strength)
-    {
-        m_specularStrength = strength;
+        m_intensity = intensity;
     }
 }

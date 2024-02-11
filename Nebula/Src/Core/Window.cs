@@ -84,6 +84,8 @@ internal class Window : IDisposable
         m_pointLights[0].SetColour(Colour.Red);
         m_pointLights[1].SetColour(Colour.Green);
         m_pointLights[2].SetColour(Colour.Blue);
+
+        Lighting.GetDirectionalLight().SetIntensity(0f);
     }
 
     private void OnUpdate(double deltaTime)

@@ -10,6 +10,7 @@ public class Shader : IDisposable
     {
         Colour,
         PBRFlat,
+        PBRTextured,
     }
 
     internal enum DataType
@@ -87,6 +88,8 @@ public class Shader : IDisposable
                 return Create("Shader/Colour.vert", "Shader/Colour.frag");
             case DefaultType.PBRFlat:
                 return Create("Shader/PBR_Flat.vert", "Shader/PBR_Flat.frag");
+            case DefaultType.PBRTextured:
+                return Create("Shader/PBR_Textured.vert", "Shader/PBR_Textured.frag");
             default:
                 return Create("Shader/Fallback.vert", "Shader/Fallback.frag");
         }
@@ -158,6 +161,11 @@ public class Shader : IDisposable
     public void SetVec3(string name, System.Numerics.Vector3 value)
     {
         GL.Get().Uniform3(r_uniformLocationCache[name], ref value);
+    }
+
+    public unsafe void SetMat3(string name, Silk.NET.Maths.Matrix3X3<float> value)
+    {
+        GL.Get().UniformMatrix3(r_uniformLocationCache[name], 1, false, (float*)&value);
     }
 
     public unsafe void SetMat4(string name, Matrix4x4 value)

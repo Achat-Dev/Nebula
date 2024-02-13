@@ -18,7 +18,7 @@ internal class Mesh : IDisposable
 
         BufferObject<Vertex> vbo = new BufferObject<Vertex>(vertices, BufferTargetARB.ArrayBuffer);
         BufferObject<uint> ibo = new BufferObject<uint>(indices, BufferTargetARB.ElementArrayBuffer);
-        r_vao = new VertexArrayObject(vbo, ibo, new BufferLayout(BufferElement.Float3, BufferElement.Float3, BufferElement.Float2));
+        r_vao = new VertexArrayObject(vbo, ibo, new BufferLayout(BufferElement.Float3, BufferElement.Float3, BufferElement.Float3, BufferElement.Float2));
     }
 
     public static unsafe Mesh CreateFromAssimpMesh(AssimpMesh* assimpMesh)
@@ -33,6 +33,11 @@ internal class Mesh : IDisposable
             if (assimpMesh->MNormals != null)
             {
                 vertex.Normal = assimpMesh->MNormals[i];
+            }
+
+            if (assimpMesh->MTangents != null)
+            {
+                vertex.Tangent = assimpMesh->MTangents[i];
             }
 
             if (assimpMesh->MTextureCoords[0] != null)
@@ -61,6 +66,11 @@ internal class Mesh : IDisposable
     public void Draw(Matrix4x4 modelMatrix, ShaderInstance shaderInstance)
     {
         Renderer.DrawLitMesh(r_vao, modelMatrix, shaderInstance);
+    }
+
+    public void DrawTextured(Matrix4x4 modelMatrix, ShaderInstance shaderInstance, Texture albedoMap, Texture normalMap, Texture metallicMap, Texture roughnessMap, Texture ambientOcclusionMap)
+    {
+        Renderer.DrawLitMeshTextured(r_vao, modelMatrix, shaderInstance, albedoMap, normalMap, metallicMap, roughnessMap, ambientOcclusionMap);
     }
 
     public void Dispose()

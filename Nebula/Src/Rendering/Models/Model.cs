@@ -10,7 +10,7 @@ public class Model : IDisposable
 {
     private readonly List<Mesh> r_meshes = new List<Mesh>();
 
-    private const uint c_postProcessSteps = (uint)(PostProcessSteps.Triangulate | PostProcessSteps.GenerateNormals | PostProcessSteps.GenerateUVCoords | PostProcessSteps.JoinIdenticalVertices);
+    private const uint c_postProcessSteps = (uint)(PostProcessSteps.Triangulate | PostProcessSteps.GenerateNormals | PostProcessSteps.GenerateUVCoords | PostProcessSteps.CalculateTangentSpace | PostProcessSteps.JoinIdenticalVertices);
 
     private Model() { }
 
@@ -56,6 +56,14 @@ public class Model : IDisposable
         for (int i = 0; i < r_meshes.Count; i++)
         {
             r_meshes[i].Draw(modelMatrix, shaderInstance);
+        }
+    }
+
+    internal void DrawTextured(Matrix4x4 modelMatrix, ShaderInstance shaderInstance, Texture albedoMap, Texture normalMap, Texture metallicMap, Texture roughnessMap, Texture ambientOcclusionMap)
+    {
+        for (int i = 0; i < r_meshes.Count; i++)
+        {
+            r_meshes[i].DrawTextured(modelMatrix, shaderInstance, albedoMap, normalMap, metallicMap, roughnessMap, ambientOcclusionMap);
         }
     }
 

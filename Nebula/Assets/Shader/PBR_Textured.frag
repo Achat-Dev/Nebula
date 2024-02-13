@@ -19,12 +19,15 @@ out vec4 o_colour;
 
 in vec3 io_vertexPosition;
 in vec3 io_normal;
+in vec3 io_tangent;
+in vec2 io_uv;
 
 uniform vec3 u_cameraPosition;
 
-uniform vec3 u_albedo;
-uniform float u_metallic;
-uniform float u_roughness;
+uniform sampler2D u_albedoMap;
+uniform sampler2D u_normalMap;
+uniform sampler2D u_metallicMap;
+uniform sampler2D u_roughnessMap;
 
 uniform int u_pointLightCount;
 uniform DirectionalLight u_directionalLight;
@@ -32,9 +35,24 @@ uniform PointLight u_pointLights[MAX_POINT_LIGHTS];
 
 const float PI = 3.14159265359;
 
-float distributionGGX(float nDotH)
+// Possible optimisation:
+// | Calculate tbn matrix in vertex shader
+// | Yields slighty different results (only visible if you really try to see them), but should be faster
+vec3 getNormalFromMap()
 {
-	float roughness4 = pow(u_roughness, 4.0);
+    vec3 tangentNormal = texture(u_normalMap, io_uv).xyz * 2.0 - 1.0;
+
+	vec3 normal = normalize(io_normal);
+	vec3 tangent = normalize(io_tangent);
+	vec3 bitangent = -normalize(cross(normal, tangent));
+	mat3 tbn = mat3(tangent, bitangent, normal);
+
+	return normalize(tbn * tangentNormal);
+}
+
+float distributionGGX(float nDotH, float roughness)
+{
+	float roughness4 = pow(roughness, 4.0);
 	float nDotH2 = nDotH * nDotH;
 
 	float denom = (nDotH2 * (roughness4 - 1.0) + 1.0);
@@ -43,9 +61,9 @@ float distributionGGX(float nDotH)
 	return roughness4 / denom;
 }
 
-float geometrySchlickGGX(float nDotV)
+float geometrySchlickGGX(float nDotV, float roughness)
 {
-	float r = u_roughness + 1.0;
+	float r = roughness + 1.0;
 	float k = (r * r) / 8.0;
 	float denom = nDotV * (1.0 - k) + k;
 
@@ -57,7 +75,7 @@ vec3 fresnelSchlick(float hDotV, vec3 f0)
 	return f0 + (1.0 - f0) * pow(clamp(1.0 - hDotV, 0.0, 1.0), 5.0);
 }
 
-vec3 calculateDirectionalLight(vec3 viewDirection, vec3 f0, vec3 normal)
+vec3 calculateDirectionalLight(vec3 viewDirection, vec3 f0, vec3 albedo, vec3 normal, float metallic, float roughness)
 {
 	// Calculate Cook-Torrance BRDF
 	vec3 lightDirection = -u_directionalLight.direction;
@@ -71,17 +89,17 @@ vec3 calculateDirectionalLight(vec3 viewDirection, vec3 f0, vec3 normal)
 	// Calculate kd
 	vec3 fresnel = fresnelSchlick(hDotV, f0);
 	vec3 kd = vec3(1.0) - fresnel;
-	kd *= 1.0 - u_metallic;
+	kd *= 1.0 - metallic;
 
 	// Calculate specular
-	vec3 specular = distributionGGX(nDotH) * geometrySchlickGGX(nDotL) * geometrySchlickGGX(nDotV) * fresnel;
+	vec3 specular = distributionGGX(nDotH, roughness) * geometrySchlickGGX(nDotL, roughness) * geometrySchlickGGX(nDotV, roughness) * fresnel;
 	float specularDenom = 4.0 * nDotV * nDotL + 0.0001; // plus at the end to prevent dividing by 0
 	specular /= specularDenom;
 
-	return (kd * u_albedo / PI + specular) * u_directionalLight.colour * nDotL;
+	return (kd * albedo / PI + specular) * u_directionalLight.colour * nDotL;
 }
 
-vec3 calculatePointLights(vec3 viewDirection, vec3 f0, vec3 normal)
+vec3 calculatePointLights(vec3 viewDirection, vec3 f0, vec3 albedo, vec3 normal, float metallic, float roughness)
 {
 	vec3 colour = vec3(0.0);
 	for (int i = 0; i < u_pointLightCount; i++)
@@ -104,26 +122,30 @@ vec3 calculatePointLights(vec3 viewDirection, vec3 f0, vec3 normal)
 		// Calculate kd
 		vec3 fresnel = fresnelSchlick(hDotV, f0);
 		vec3 kd = vec3(1.0) - fresnel;
-		kd *= 1.0 - u_metallic;
+		kd *= 1.0 - metallic;
 
 		// Calculate specular
-		vec3 specular = distributionGGX(nDotH) * geometrySchlickGGX(nDotL) * geometrySchlickGGX(nDotV) * fresnel;
+		vec3 specular = distributionGGX(nDotH, roughness) * geometrySchlickGGX(nDotL, roughness) * geometrySchlickGGX(nDotV, roughness) * fresnel;
 		float specularDenom = 4.0 * nDotV * nDotL + 0.0001; // plus at the end to prevent dividing by 0
 		specular /= specularDenom;
 
-		colour += (kd * u_albedo / PI + specular) * radiance * nDotL;
+		colour += (kd * albedo / PI + specular) * radiance * nDotL;
 	}
 	return colour;
 }
 
 void main()
 {
-	vec3 viewDirection = normalize(u_cameraPosition - io_vertexPosition);
-	vec3 f0 = mix(vec3(0.04), u_albedo, u_metallic);
-	vec3 normal = normalize(io_normal);
+	vec3 albedo = pow(texture(u_albedoMap, io_uv).rgb, vec3(2.2));
+	vec3 normal = getNormalFromMap();
+	float metallic = texture(u_metallicMap, io_uv).r;
+	float roughness = texture(u_roughnessMap, io_uv).r;
 
-	vec3 colour = calculateDirectionalLight(viewDirection, f0, normal);
-	colour += calculatePointLights(viewDirection, f0, normal);
+	vec3 viewDirection = normalize(u_cameraPosition - io_vertexPosition);
+	vec3 f0 = mix(vec3(0.04), albedo, metallic);
+
+	vec3 colour = calculateDirectionalLight(viewDirection, f0, albedo, normal, metallic, roughness);
+	colour += calculatePointLights(viewDirection, f0, albedo, normal, metallic, roughness);
 
 	// HDR tonemapping
 	colour = colour / (colour + vec3(1.0));

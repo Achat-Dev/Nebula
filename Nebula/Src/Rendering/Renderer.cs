@@ -41,17 +41,84 @@ public static class Renderer
         {
             Matrix4x4.Invert(modelMatrix, out modelMatrix);
             modelMatrix = Matrix4x4.Transpose(modelMatrix);
-            shader.SetMat4("u_modelNormalMatrix", modelMatrix);
+            Silk.NET.Maths.Matrix3X3<float> modelNormalMatrix = new Silk.NET.Maths.Matrix3X3<float>();
+            modelNormalMatrix.M11 = modelMatrix.M11;
+            modelNormalMatrix.M12 = modelMatrix.M12;
+            modelNormalMatrix.M13 = modelMatrix.M13;
+            modelNormalMatrix.M21 = modelMatrix.M21;
+            modelNormalMatrix.M22 = modelMatrix.M22;
+            modelNormalMatrix.M23 = modelMatrix.M23;
+            modelNormalMatrix.M31 = modelMatrix.M31;
+            modelNormalMatrix.M32 = modelMatrix.M32;
+            modelNormalMatrix.M33 = modelMatrix.M33;
+            shader.SetMat3("u_modelNormalMatrix", modelNormalMatrix);
         }
         else
         {
-            shader.SetMat4("u_modelNormalMatrix", Matrix4x4.Identity);
+            shader.SetMat3("u_modelNormalMatrix", Silk.NET.Maths.Matrix3X3<float>.Identity);
         }
 
         // Shader instance
         shader.SetVec3("u_albedo", (Vector3)shaderInstance.GetColour());
         shader.SetFloat("u_metallic", shaderInstance.GetMetallic());
         shader.SetFloat("u_roughness", shaderInstance.GetRoughness());
+
+        // Directional light
+        shader.SetVec3("u_directionalLight.direction", s_directionalLight.GetDirection());
+        shader.SetVec3("u_directionalLight.colour", (Vector3)s_directionalLight.GetColour() * s_directionalLight.GetIntensity());
+
+        // Point lights
+        int pointLightCount = Lighting.GetPointLightCount();
+        shader.SetInt("u_pointLightCount", pointLightCount);
+        for (int i = 0; i < pointLightCount; i++)
+        {
+            shader.SetVec3($"u_pointLights[{i}].position", s_pointLights[i].GetEntity().GetTransform().GetWorldPosition());
+            shader.SetVec3($"u_pointLights[{i}].colour", (Vector3)s_pointLights[i].GetColour() * s_pointLights[i].GetIntensity());
+            shader.SetFloat($"u_pointLights[{i}].range", s_pointLights[i].GetRange());
+        }
+
+        GL.Get().DrawElements(PrimitiveType.Triangles, vao.GetIndexCount(), DrawElementsType.UnsignedInt, null);
+    }
+
+    internal static unsafe void DrawLitMeshTextured(VertexArrayObject vao, Matrix4x4 modelMatrix, ShaderInstance shaderInstance, Texture albedoMap, Texture normalMap, Texture metallicMap, Texture roughnessMap, Texture ambientOcclusionMap)
+    {
+        vao.Bind();
+        Shader shader = shaderInstance.GetShader();
+        shader.Use();
+        shader.SetMat4("u_viewProjection", s_camera.GetViewProjectionMatrix());
+        shader.SetVec3("u_cameraPosition", s_camera.GetEntity().GetTransform().GetWorldPosition());
+
+        shader.SetMat4("u_model", modelMatrix);
+        if (modelMatrix.GetDeterminant() != 0f)
+        {
+            Matrix4x4.Invert(modelMatrix, out modelMatrix);
+            modelMatrix = Matrix4x4.Transpose(modelMatrix);
+            Silk.NET.Maths.Matrix3X3<float> modelNormalMatrix = new Silk.NET.Maths.Matrix3X3<float>();
+            modelNormalMatrix.M11 = modelMatrix.M11;
+            modelNormalMatrix.M12 = modelMatrix.M12;
+            modelNormalMatrix.M13 = modelMatrix.M13;
+            modelNormalMatrix.M21 = modelMatrix.M21;
+            modelNormalMatrix.M22 = modelMatrix.M22;
+            modelNormalMatrix.M23 = modelMatrix.M23;
+            modelNormalMatrix.M31 = modelMatrix.M31;
+            modelNormalMatrix.M32 = modelMatrix.M32;
+            modelNormalMatrix.M33 = modelMatrix.M33;
+            shader.SetMat3("u_modelNormalMatrix", modelNormalMatrix);
+        }
+        else
+        {
+            shader.SetMat3("u_modelNormalMatrix", Silk.NET.Maths.Matrix3X3<float>.Identity);
+        }
+
+        // Shader instance
+        albedoMap.Bind(TextureUnit.Texture0);
+        normalMap.Bind(TextureUnit.Texture1);
+        //metallicMap.Bind(TextureUnit.Texture2);
+        roughnessMap.Bind(TextureUnit.Texture3);
+        shader.SetInt("u_albedoMap", 0);
+        shader.SetInt("u_normalMap", 1);
+        shader.SetInt("u_metallicMap", 2);
+        shader.SetInt("u_roughnessMap", 3);
 
         // Directional light
         shader.SetVec3("u_directionalLight.direction", s_directionalLight.GetDirection());

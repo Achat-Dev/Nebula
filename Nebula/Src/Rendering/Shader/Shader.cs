@@ -116,8 +116,6 @@ public class Shader : IDisposable
 
         if (source.Contains(include))
         {
-            string skip = "#skip";
-            string stopInclude = "#stop include";
             StringBuilder stringBuilder = new StringBuilder(source);
             string[] lines = source.Split(Environment.NewLine);
 
@@ -128,17 +126,6 @@ public class Shader : IDisposable
                     string path = lines[i].Substring(include.Length + 1).TrimEnd();
                     string includeSource = GetSourceWithIncludes(AssetLoader.LoadAsFileContent(path));
                     stringBuilder.Replace(lines[i], includeSource);
-                }
-                else if (lines[i].StartsWith(skip))
-                {
-                    int value = int.Parse(lines[i].Substring(skip.Length + 1).TrimEnd());
-                    stringBuilder.Replace(lines[i], string.Empty);
-                    i += value;
-                }
-                else if (lines[i].StartsWith(stopInclude))
-                {
-                    stringBuilder.Replace(lines[i], string.Empty);
-                    break;
                 }
             }
 

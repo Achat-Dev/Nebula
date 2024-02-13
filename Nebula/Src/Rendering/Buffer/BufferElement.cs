@@ -19,9 +19,9 @@ internal struct BufferElement
     public static readonly BufferElement Mat4 = new BufferElement(Shader.DataType.Mat4);
     public static readonly BufferElement Bool = new BufferElement(Shader.DataType.Bool);
 
-    private BufferElement(Shader.DataType dataType)
+    private BufferElement(Shader.DataType shaderDataType)
     {
-        r_shaderDataType = dataType;
+        r_shaderDataType = shaderDataType;
     }
 
     public uint GetByteSize()

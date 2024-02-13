@@ -26,6 +26,9 @@ public static class Renderer
         s_camera = camera;
         s_directionalLight = Lighting.GetDirectionalLight();
         s_pointLights = Lighting.GetPointLights();
+
+        UniformBuffer matrixBuffer = UniformBuffer.GetDefault(UniformBuffer.DefaultType.Matrices);
+        matrixBuffer.BufferData(0, new Matrix4x4[] { s_camera.GetViewProjectionMatrix() });
     }
 
     internal static unsafe void DrawLitMesh(VertexArrayObject vao, Matrix4x4 modelMatrix, ShaderInstance shaderInstance)
@@ -33,7 +36,6 @@ public static class Renderer
         vao.Bind();
         Shader shader = shaderInstance.GetShader();
         shader.Use();
-        shader.SetMat4("u_viewProjection", s_camera.GetViewProjectionMatrix());
         shader.SetVec3("u_cameraPosition", s_camera.GetEntity().GetTransform().GetWorldPosition());
 
         shader.SetMat4("u_model", modelMatrix);
@@ -85,7 +87,6 @@ public static class Renderer
         vao.Bind();
         Shader shader = shaderInstance.GetShader();
         shader.Use();
-        shader.SetMat4("u_viewProjection", s_camera.GetViewProjectionMatrix());
         shader.SetVec3("u_cameraPosition", s_camera.GetEntity().GetTransform().GetWorldPosition());
 
         shader.SetMat4("u_model", modelMatrix);

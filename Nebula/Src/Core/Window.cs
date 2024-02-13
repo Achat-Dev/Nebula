@@ -69,6 +69,7 @@ internal class Window : IDisposable
         Input.Init(m_window.CreateInput());
         Nebula.Rendering.GL.Init(Silk.NET.OpenGL.GL.GetApi(m_window));
         Nebula.Rendering.Assimp.Init();
+        Nebula.Rendering.UniformBuffer.CreateDefaults();
         Renderer.Init();
 
         // Temporary
@@ -77,10 +78,10 @@ internal class Window : IDisposable
         m_testModel = Model.Load("Art/Models/Test.obj");
         m_sphereModel = Model.Load("Art/Models/Sphere.obj");
 
-        Shader shader = Shader.GetDefault(Shader.DefaultType.PBRFlat);
+        Shader shader = Shader.Create(Shader.DefaultType.PBRFlat);
         m_shaderInstance = new ShaderInstance(shader);
 
-        shader = Shader.GetDefault(Shader.DefaultType.PBRTextured);
+        shader = Shader.Create(Shader.DefaultType.PBRTextured);
         m_textureShaderInstance = new ShaderInstance(shader);
 
         m_albedoMap = new Texture("Art/Textures/Bricks_Albedo.jpg", Texture.WrapMode.Repeat, Texture.FilterMode.Linear);
@@ -169,6 +170,7 @@ internal class Window : IDisposable
     private void OnClose()
     {
         Shader.DisposeCache();
+        UniformBuffer.DisposeCache();
         // Temporary
         m_monkeyModel.Dispose();
         m_cubeModel.Dispose();

@@ -80,7 +80,7 @@ public class Shader : IDisposable
         return shader;
     }
 
-    public static Shader GetDefault(DefaultType defaultType)
+    public static Shader Create(DefaultType defaultType)
     {
         switch (defaultType)
         {
@@ -172,7 +172,7 @@ public class Shader : IDisposable
 
     internal static void DisposeCache()
     {
-        Logger.EngineInfo("Disposing shader cache");
+        Logger.EngineInfo("Disposing cached shaders");
         foreach (var item in s_cache)
         {
             item.Value.Dispose();

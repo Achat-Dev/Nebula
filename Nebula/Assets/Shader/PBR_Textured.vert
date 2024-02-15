@@ -7,7 +7,7 @@ layout (location = 1) in vec3 i_normal;
 layout (location = 2) in vec3 i_tangent;
 layout (location = 3) in vec2 i_uv;
 
-layout (std140, binding = 0) uniform u_matrices
+layout (std140, binding = 0) uniform ub_matrices
 {
 	mat4 u_viewProjection;
 };

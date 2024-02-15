@@ -52,7 +52,7 @@ internal class UniformBuffer : IDisposable
         Create((int)DefaultType.Lights,
             new UniformBufferLayout(UniformBufferElement.Int),
             new UniformBufferLayout(UniformBufferElement.Float3, UniformBufferElement.Float3),
-            new UniformBufferLayout(128, UniformBufferElement.Float3, UniformBufferElement.Float3, UniformBufferElement.Float));
+            new UniformBufferLayout(128, UniformBufferElement.Float, UniformBufferElement.Float3, UniformBufferElement.Float3));
     }
 
     internal static UniformBuffer GetDefault(DefaultType defaultType)
@@ -70,14 +70,32 @@ internal class UniformBuffer : IDisposable
         GL.Get().BindBuffer(BufferTargetARB.UniformBuffer, 0);
     }
 
-    public unsafe void BufferData<T>(int offset, T[] data)
+    public unsafe void BufferData<T>(int offset, params T[] data)
     {
         Bind();
         fixed (T* d = data)
         {
-            GL.Get().BufferSubData(BufferTargetARB.UniformBuffer, offset, (nuint)sizeof(T), d);
+            GL.Get().BufferSubData(BufferTargetARB.UniformBuffer, offset, (nuint)(sizeof(T) * data.Length), d);
         }
         Unbind();
+    }
+
+    public unsafe string ReadData<T>(int offset, int length)
+    {
+        Bind();
+
+        System.Text.StringBuilder stringBuilder = new System.Text.StringBuilder();
+        T[] data = new T[length];
+        fixed (void* d = &data[0])
+        {
+            GL.Get().GetBufferSubData(BufferTargetARB.UniformBuffer, offset, (nuint)length, d);
+            for (int i = 0; i < data.Length; i++)
+            {
+                stringBuilder.AppendLine(data[i].ToString());
+            }
+        }
+
+        return stringBuilder.ToString();
     }
 
     public void Dispose()

@@ -3,7 +3,7 @@
 layout (location = 0) in vec3 i_position;
 layout (location = 1) in vec3 i_normal;
 
-layout (std140, binding = 0) uniform u_matrices
+layout (std140, binding = 0) uniform ub_matrices
 {
 	mat4 u_viewProjection;
 };

@@ -10,9 +10,16 @@ struct DirectionalLight
 
 struct PointLight
 {
+	float range;
 	vec3 position;
 	vec3 colour;
-	float range;
+};
+
+layout (std140, binding = 2) uniform ub_lights
+{
+	uniform int u_pointLightCount;
+	uniform DirectionalLight u_directionalLight;
+	uniform PointLight u_pointLights[MAX_POINT_LIGHTS];
 };
 
 out vec4 o_colour;
@@ -25,10 +32,6 @@ uniform vec3 u_cameraPosition;
 uniform vec3 u_albedo;
 uniform float u_metallic;
 uniform float u_roughness;
-
-uniform int u_pointLightCount;
-uniform DirectionalLight u_directionalLight;
-uniform PointLight u_pointLights[MAX_POINT_LIGHTS];
 
 const float PI = 3.14159265359;
 

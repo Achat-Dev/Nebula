@@ -208,6 +208,11 @@ public struct Vector3 : IEquatable<Vector3>
         return new Vector3(value.X, value.Y, value.Z);
     }
 
+    public static explicit operator Vector4(Vector3 value)
+    {
+        return new Vector4(value.X, value.Y, value.Z, 0f);
+    }
+
     public static explicit operator Vector3i(Vector3 value)
     {
         return new Vector3i((int)value.X, (int)value.Y, (int)value.Z);

@@ -21,8 +21,8 @@ internal class Window : IDisposable
 
     private ShaderInstance m_shaderInstance;
     private ShaderInstance m_textureShaderInstance;
-    private float m_lightRange = 0f;
-    private float m_lightIntensity = 0f;
+    private float m_lightRange = 1f;
+    private float m_lightIntensity = 1f;
 
     private Texture m_albedoMap;
     private Texture m_normalMap;
@@ -104,7 +104,7 @@ internal class Window : IDisposable
         m_pointLights[1].SetColour(Colour.Green);
         m_pointLights[2].SetColour(Colour.Blue);
 
-        Lighting.GetDirectionalLight().SetIntensity(5f);
+        Lighting.GetDirectionalLight().SetIntensity(1f);
     }
 
     private void OnUpdate(double deltaTime)

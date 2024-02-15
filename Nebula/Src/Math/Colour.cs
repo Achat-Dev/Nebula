@@ -43,11 +43,6 @@ public struct Colour : IEquatable<Colour>
 
     /* -------------------- Conversions -------------------- */
 
-    public static explicit operator Vector3(Colour colour)
-    {
-        return new Vector3(colour.R, colour.G, colour.B);
-    }
-
     public static implicit operator System.Numerics.Vector4(Colour colour)
     {
         return new System.Numerics.Vector4(colour.R, colour.G, colour.B, colour.A);
@@ -56,6 +51,16 @@ public struct Colour : IEquatable<Colour>
     public static implicit operator Colour(System.Numerics.Vector4 colour)
     {
         return new Colour(colour.X, colour.Y, colour.Z, colour.W);
+    }
+
+    public static explicit operator Vector3(Colour colour)
+    {
+        return new Vector3(colour.R, colour.G, colour.B);
+    }
+
+    public static explicit operator Vector4(Colour colour)
+    {
+        return new Vector4(colour.R, colour.G, colour.B, colour.A);
     }
 
     /* -------------------- Overrides -------------------- */

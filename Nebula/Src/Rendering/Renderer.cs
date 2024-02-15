@@ -6,8 +6,6 @@ namespace Nebula.Rendering;
 public static class Renderer
 {
     private static CameraComponent s_camera;
-    private static DirectionalLight s_directionalLight;
-    private static List<PointLightComponent> s_pointLights;
 
     internal static void Init()
     {
@@ -24,8 +22,14 @@ public static class Renderer
     internal static void StartFrame(CameraComponent camera)
     {
         s_camera = camera;
-        s_directionalLight = Lighting.GetDirectionalLight();
-        s_pointLights = Lighting.GetPointLights();
+
+        UniformBuffer lightBuffer = UniformBuffer.GetDefault(UniformBuffer.DefaultType.Lights);
+        DirectionalLight directionalLight = Lighting.GetDirectionalLight();
+        Vector4 directionalLightColour = ((Vector4)directionalLight.GetColour()) * directionalLight.GetIntensity();
+        
+        lightBuffer.BufferData(0, Lighting.GetPointLightCount());
+        lightBuffer.BufferData(16, (Vector4)directionalLight.GetDirection(), directionalLightColour);
+        lightBuffer.BufferData(48, Lighting.GetPointLightData());
 
         UniformBuffer matrixBuffer = UniformBuffer.GetDefault(UniformBuffer.DefaultType.Matrices);
         matrixBuffer.BufferData(0, new Matrix4x4[] { s_camera.GetViewProjectionMatrix() });
@@ -64,20 +68,6 @@ public static class Renderer
         shader.SetVec3("u_albedo", (Vector3)shaderInstance.GetColour());
         shader.SetFloat("u_metallic", shaderInstance.GetMetallic());
         shader.SetFloat("u_roughness", shaderInstance.GetRoughness());
-
-        // Directional light
-        shader.SetVec3("u_directionalLight.direction", s_directionalLight.GetDirection());
-        shader.SetVec3("u_directionalLight.colour", (Vector3)s_directionalLight.GetColour() * s_directionalLight.GetIntensity());
-
-        // Point lights
-        int pointLightCount = Lighting.GetPointLightCount();
-        shader.SetInt("u_pointLightCount", pointLightCount);
-        for (int i = 0; i < pointLightCount; i++)
-        {
-            shader.SetVec3($"u_pointLights[{i}].position", s_pointLights[i].GetEntity().GetTransform().GetWorldPosition());
-            shader.SetVec3($"u_pointLights[{i}].colour", (Vector3)s_pointLights[i].GetColour() * s_pointLights[i].GetIntensity());
-            shader.SetFloat($"u_pointLights[{i}].range", s_pointLights[i].GetRange());
-        }
 
         GL.Get().DrawElements(PrimitiveType.Triangles, vao.GetIndexCount(), DrawElementsType.UnsignedInt, null);
     }
@@ -120,20 +110,6 @@ public static class Renderer
         shader.SetInt("u_normalMap", 1);
         shader.SetInt("u_metallicMap", 2);
         shader.SetInt("u_roughnessMap", 3);
-
-        // Directional light
-        shader.SetVec3("u_directionalLight.direction", s_directionalLight.GetDirection());
-        shader.SetVec3("u_directionalLight.colour", (Vector3)s_directionalLight.GetColour() * s_directionalLight.GetIntensity());
-
-        // Point lights
-        int pointLightCount = Lighting.GetPointLightCount();
-        shader.SetInt("u_pointLightCount", pointLightCount);
-        for (int i = 0; i < pointLightCount; i++)
-        {
-            shader.SetVec3($"u_pointLights[{i}].position", s_pointLights[i].GetEntity().GetTransform().GetWorldPosition());
-            shader.SetVec3($"u_pointLights[{i}].colour", (Vector3)s_pointLights[i].GetColour() * s_pointLights[i].GetIntensity());
-            shader.SetFloat($"u_pointLights[{i}].range", s_pointLights[i].GetRange());
-        }
 
         GL.Get().DrawElements(PrimitiveType.Triangles, vao.GetIndexCount(), DrawElementsType.UnsignedInt, null);
     }

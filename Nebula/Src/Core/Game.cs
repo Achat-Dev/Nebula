@@ -2,7 +2,6 @@
 
 public class Game
 {
-    private bool m_isRunning = false;
     private string m_title;
     private Window m_window;
 
@@ -16,7 +15,7 @@ public class Game
         {
             // Logger is already initialised here
             Logger.EngineFatal("Cannot create multiple game instances");
-            s_instance.Terminate();
+            s_instance.Dispose();
             Environment.Exit(1);
         }
         s_instance = this;
@@ -33,29 +32,23 @@ public class Game
     public void Start()
     {
         Logger.EngineInfo("Starting game");
-        m_isRunning = true;
         m_window.Open();
 
         // Since m_window.Open is a blocking call, this code is only called after the window has been closed
-        Terminate();
+        Dispose();
     }
 
-    private void Terminate()
+    private void Dispose()
     {
-        Close();
+        Logger.EngineInfo("Closing game");
+        m_window.Close();
         m_window.Dispose();
         Logger.Flush();
     }
 
     public static void Close()
     {
-        if (s_instance.m_isRunning)
-        {
-            Logger.EngineInfo("Closing game");
-            s_instance.m_isRunning = false;
-            Closing?.Invoke();
-            s_instance.m_window.Close();
-        }
+        s_instance.m_window.Close();
     }
 
     public static string GetPersistentPath()

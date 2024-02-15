@@ -6,6 +6,7 @@ namespace Nebula;
 
 internal class Window : IDisposable
 {
+    private bool m_isOpen = true;
     private readonly IWindow m_window;
 
     // Temporary
@@ -54,8 +55,10 @@ internal class Window : IDisposable
 
     public void Close()
     {
-        Logger.EngineInfo("Closing window");
-        m_window.Close();
+        if (m_isOpen)
+        {
+            m_window.Close();
+        }
     }
 
     public void Dispose()
@@ -169,6 +172,10 @@ internal class Window : IDisposable
 
     private void OnClose()
     {
+        Logger.EngineInfo("Closing window");
+        m_isOpen = false;
+        Game.Closing?.Invoke();
+
         Shader.DisposeCache();
         UniformBuffer.DisposeCache();
         // Temporary

@@ -1,31 +1,8 @@
 ﻿#version 460 core
 
-#define MAX_POINT_LIGHTS 128
-
-struct DirectionalLight
-{
-	vec3 direction;
-	vec3 colour;
-};
-
-struct PointLight
-{
-	float range;
-	vec3 position;
-	vec3 colour;
-};
-
-layout (std140, binding = 1) uniform ub_camera
-{
-	uniform vec3 u_cameraPosition;
-};
-
-layout (std140, binding = 2) uniform ub_lights
-{
-	uniform int u_pointLightCount;
-	uniform DirectionalLight u_directionalLight;
-	uniform PointLight u_pointLights[MAX_POINT_LIGHTS];
-};
+#include Shader/Include/UB_Lights.glsl
+#include Shader/Include/UB_Camera.glsl
+#include Shader/Include/Pi.glsl
 
 out vec4 o_colour;
 
@@ -38,8 +15,6 @@ uniform sampler2D u_albedoMap;
 uniform sampler2D u_normalMap;
 uniform sampler2D u_metallicMap;
 uniform sampler2D u_roughnessMap;
-
-const float PI = 3.14159265359;
 
 // Possible optimisation:
 // | Calculate tbn matrix in vertex shader

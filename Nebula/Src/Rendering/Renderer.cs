@@ -22,10 +22,10 @@ public static class Renderer
         UniformBuffer cameraBuffer = UniformBuffer.GetDefault(UniformBuffer.DefaultType.Camera);
         cameraBuffer.BufferData(0, camera.GetEntity().GetTransform().GetWorldPosition());
 
-        UniformBuffer lightBuffer = UniformBuffer.GetDefault(UniformBuffer.DefaultType.Lights);
         DirectionalLight directionalLight = Lighting.GetDirectionalLight();
         Vector4 directionalLightColour = ((Vector4)directionalLight.GetColour()) * directionalLight.GetIntensity();
-        
+
+        UniformBuffer lightBuffer = UniformBuffer.GetDefault(UniformBuffer.DefaultType.Lights);
         lightBuffer.BufferData(0, Lighting.GetPointLightCount());
         lightBuffer.BufferData(16, (Vector4)directionalLight.GetDirection(), directionalLightColour);
         lightBuffer.BufferData(48, Lighting.GetPointLightData());

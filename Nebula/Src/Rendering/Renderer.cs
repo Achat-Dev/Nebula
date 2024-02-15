@@ -5,8 +5,6 @@ namespace Nebula.Rendering;
 
 public static class Renderer
 {
-    private static CameraComponent s_camera;
-
     internal static void Init()
     {
         Logger.EngineInfo("Initialising Renderer");
@@ -21,7 +19,8 @@ public static class Renderer
 
     internal static void StartFrame(CameraComponent camera)
     {
-        s_camera = camera;
+        UniformBuffer cameraBuffer = UniformBuffer.GetDefault(UniformBuffer.DefaultType.Camera);
+        cameraBuffer.BufferData(0, camera.GetEntity().GetTransform().GetWorldPosition());
 
         UniformBuffer lightBuffer = UniformBuffer.GetDefault(UniformBuffer.DefaultType.Lights);
         DirectionalLight directionalLight = Lighting.GetDirectionalLight();
@@ -32,7 +31,7 @@ public static class Renderer
         lightBuffer.BufferData(48, Lighting.GetPointLightData());
 
         UniformBuffer matrixBuffer = UniformBuffer.GetDefault(UniformBuffer.DefaultType.Matrices);
-        matrixBuffer.BufferData(0, new Matrix4x4[] { s_camera.GetViewProjectionMatrix() });
+        matrixBuffer.BufferData(0, camera.GetViewProjectionMatrix());
     }
 
     internal static unsafe void DrawLitMesh(VertexArrayObject vao, Matrix4x4 modelMatrix, ShaderInstance shaderInstance)
@@ -40,7 +39,6 @@ public static class Renderer
         vao.Bind();
         Shader shader = shaderInstance.GetShader();
         shader.Use();
-        shader.SetVec3("u_cameraPosition", s_camera.GetEntity().GetTransform().GetWorldPosition());
 
         shader.SetMat4("u_model", modelMatrix);
         if (modelMatrix.GetDeterminant() != 0f)
@@ -77,7 +75,6 @@ public static class Renderer
         vao.Bind();
         Shader shader = shaderInstance.GetShader();
         shader.Use();
-        shader.SetVec3("u_cameraPosition", s_camera.GetEntity().GetTransform().GetWorldPosition());
 
         shader.SetMat4("u_model", modelMatrix);
         if (modelMatrix.GetDeterminant() != 0f)
@@ -118,7 +115,6 @@ public static class Renderer
     {
         vao.Bind();
         shader.Use();
-        shader.SetMat4("u_viewProjection", s_camera.GetViewProjectionMatrix());
         shader.SetMat4("u_model", modelMatrix);
         shader.SetVec3("u_colour", (Vector3)colour);
         GL.Get().DrawElements(PrimitiveType.Triangles, vao.GetIndexCount(), DrawElementsType.UnsignedInt, null);

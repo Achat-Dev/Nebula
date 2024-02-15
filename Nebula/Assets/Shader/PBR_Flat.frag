@@ -15,6 +15,11 @@ struct PointLight
 	vec3 colour;
 };
 
+layout (std140, binding = 1) uniform ub_camera
+{
+	uniform vec3 u_cameraPosition;
+};
+
 layout (std140, binding = 2) uniform ub_lights
 {
 	uniform int u_pointLightCount;
@@ -26,8 +31,6 @@ out vec4 o_colour;
 
 in vec3 io_vertexPosition;
 in vec3 io_normal;
-
-uniform vec3 u_cameraPosition;
 
 uniform vec3 u_albedo;
 uniform float u_metallic;

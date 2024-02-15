@@ -18,7 +18,7 @@ internal class Mesh : IDisposable
 
         BufferObject<Vertex> vbo = new BufferObject<Vertex>(vertices, BufferTargetARB.ArrayBuffer);
         BufferObject<uint> ibo = new BufferObject<uint>(indices, BufferTargetARB.ElementArrayBuffer);
-        r_vao = new VertexArrayObject(vbo, ibo, new BufferLayout(BufferElement.Float3, BufferElement.Float3, BufferElement.Float3, BufferElement.Float2));
+        r_vao = new VertexArrayObject(vbo, ibo, new BufferLayout(BufferElement.Vec3, BufferElement.Vec3, BufferElement.Vec3, BufferElement.Vec2));
     }
 
     public static unsafe Mesh CreateFromAssimpMesh(AssimpMesh* assimpMesh)

@@ -160,6 +160,15 @@ public struct Vector3 : IEquatable<Vector3>
         return value;
     }
 
+    public static Vector3 operator *(Matrix3x3 transformation, Vector3 value)
+    {
+        Vector3 result;
+        result.X = transformation.M11 * value.X + transformation.M12 * value.Y + transformation.M13 * value.Z;
+        result.Y = transformation.M21 * value.X + transformation.M22 * value.Y + transformation.M23 * value.Z;
+        result.Z = transformation.M31 * value.X + transformation.M32 * value.Y + transformation.M33 * value.Z;
+        return result;
+    }
+
     public static Vector3 operator /(Vector3 vector, float scale)
     {
         vector.X /= scale;

@@ -144,6 +144,16 @@ public struct Vector4 : IEquatable<Vector4>
         return value;
     }
 
+    public static Vector4 operator *(Matrix4x4 transformation, Vector4 value)
+    {
+        Vector4 result;
+        result.X = transformation.M11 * value.X + transformation.M12 * value.Y + transformation.M13 * value.Z + transformation.M14 * value.W;
+        result.Y = transformation.M21 * value.X + transformation.M22 * value.Y + transformation.M23 * value.Z + transformation.M24 * value.W;
+        result.Z = transformation.M31 * value.X + transformation.M32 * value.Y + transformation.M33 * value.Z + transformation.M34 * value.W;
+        result.W = transformation.M41 * value.X + transformation.M42 * value.Y + transformation.M43 * value.Z + transformation.M44 * value.W;
+        return result;
+    }
+
     public static Vector4 operator /(Vector4 vector, float scale)
     {
         vector.X /= scale;

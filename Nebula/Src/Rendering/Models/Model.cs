@@ -1,5 +1,4 @@
 ﻿using Silk.NET.Assimp;
-using System.Numerics;
 using AssimpMesh = Silk.NET.Assimp.Mesh;
 using AssimpNode = Silk.NET.Assimp.Node;
 using AssimpScene = Silk.NET.Assimp.Scene;

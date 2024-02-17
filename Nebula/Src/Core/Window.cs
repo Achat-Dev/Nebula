@@ -113,23 +113,29 @@ internal class Window : IDisposable
     private void OnUpdate(double deltaTime)
     {
         Scene.GetActive().Update((float)deltaTime);
-        Input.RefreshInputStates();
 
         float dt = (float)deltaTime;
 
         TransformComponent cameraTransform = m_camera.GetEntity().GetTransform();
-        if (Input.IsKeyDown(Key.W)) cameraTransform.Translate(cameraTransform.GetForward() * dt);
-        if (Input.IsKeyDown(Key.A)) cameraTransform.Translate(-cameraTransform.GetRight() * dt);
-        if (Input.IsKeyDown(Key.S)) cameraTransform.Translate(-cameraTransform.GetForward() * dt);
-        if (Input.IsKeyDown(Key.D)) cameraTransform.Translate(cameraTransform.GetRight() * dt);
-        if (Input.IsKeyDown(Key.Space)) cameraTransform.Translate(cameraTransform.GetUp() * dt);
-        if (Input.IsKeyDown(Key.ControlLeft)) cameraTransform.Translate(-cameraTransform.GetUp() * dt);
-        if (Input.IsKeyDown(Key.Q)) cameraTransform.Rotate(Quaternion.FromAxisAngle(Vector3.Up, -40 * dt));
-        if (Input.IsKeyDown(Key.E)) cameraTransform.Rotate(Quaternion.FromAxisAngle(Vector3.Up, 40 * dt));
-        if (Input.IsKeyDown(Key.R)) cameraTransform.Rotate(Quaternion.FromAxisAngle(Vector3.Right, -40 * dt));
-        if (Input.IsKeyDown(Key.T)) cameraTransform.Rotate(Quaternion.FromAxisAngle(Vector3.Right, 40 * dt));
-        if (Input.IsKeyDown(Key.Z)) cameraTransform.Rotate(Quaternion.FromAxisAngle(Vector3.Forward, -40 * dt));
-        if (Input.IsKeyDown(Key.U)) cameraTransform.Rotate(Quaternion.FromAxisAngle(Vector3.Forward, 40 * dt));
+        if (Input.IsKeyDown(Key.W)) m_transform.Translate(cameraTransform.GetForward() * dt);
+        if (Input.IsKeyDown(Key.A)) m_transform.Translate(-cameraTransform.GetRight() * dt);
+        if (Input.IsKeyDown(Key.S)) m_transform.Translate(-cameraTransform.GetForward() * dt);
+        if (Input.IsKeyDown(Key.D)) m_transform.Translate(cameraTransform.GetRight() * dt);
+        if (Input.IsKeyDown(Key.Space)) m_transform.Translate(cameraTransform.GetUp() * dt);
+        if (Input.IsKeyDown(Key.ControlLeft)) m_transform.Translate(-cameraTransform.GetUp() * dt);
+        if (Input.IsKeyDown(Key.Q)) m_transform.Rotate(Quaternion.FromAxisAngle(Vector3.Up, -40 * dt));
+        if (Input.IsKeyDown(Key.E)) m_transform.Rotate(Quaternion.FromAxisAngle(Vector3.Up, 40 * dt));
+        if (Input.IsKeyDown(Key.R)) m_transform.Rotate(Quaternion.FromAxisAngle(Vector3.Right, -40 * dt));
+        if (Input.IsKeyDown(Key.T)) m_transform.Rotate(Quaternion.FromAxisAngle(Vector3.Right, 40 * dt));
+        if (Input.IsKeyDown(Key.Z)) m_transform.Rotate(Quaternion.FromAxisAngle(Vector3.Forward, -40 * dt));
+        if (Input.IsKeyDown(Key.U)) m_transform.Rotate(Quaternion.FromAxisAngle(Vector3.Forward, 40 * dt));
+
+        if (Input.IsKeyPressed(Key.AltLeft))
+        {
+            m_transform.SetLocalScale(Vector3.One);
+            m_transform.SetWorldPosition(Vector3.Zero);
+            m_transform.SetLocalRotation(Quaternion.Identity);
+        }
 
         if (Input.IsKeyDown(Key.Y)) m_shaderInstance.SetMetallic(m_shaderInstance.GetMetallic() - dt);
         if (Input.IsKeyDown(Key.X)) m_shaderInstance.SetMetallic(m_shaderInstance.GetMetallic() + dt);
@@ -149,6 +155,8 @@ internal class Window : IDisposable
             m_pointLights[i].SetRange(m_lightRange);
             m_pointLights[i].SetIntensity(m_lightIntensity);
         }
+
+        Input.RefreshInputStates();
     }
 
     private unsafe void OnRender(double deltaTime)
@@ -160,7 +168,7 @@ internal class Window : IDisposable
         //m_cubeModel.Draw(System.Numerics.Matrix4x4.CreateTranslation(new System.Numerics.Vector3(0f, 0f, 0f)), m_shaderInstance);
         //m_testModel.Draw(System.Numerics.Matrix4x4.CreateTranslation(new System.Numerics.Vector3(3f, 0f, 0f)), m_shaderInstance);
         m_sphereModel.Draw(System.Numerics.Matrix4x4.CreateTranslation(new System.Numerics.Vector3(-1f, 0f, 0f)), m_shaderInstance);
-        m_sphereModel.DrawTextured(System.Numerics.Matrix4x4.CreateTranslation(new System.Numerics.Vector3(1f, 0f, 0f)), m_textureShaderInstance, m_albedoMap, m_normalMap, m_metallicMap, m_roughnessMap, m_ambientOcclusionMap);
+        m_sphereModel.DrawTextured(m_transform.GetWorldMatrix(), m_textureShaderInstance, m_albedoMap, m_normalMap, m_metallicMap, m_roughnessMap, m_ambientOcclusionMap);
 
         // Light sources
         for (int i = 0; i < m_pointLightEntites.Length; i++)

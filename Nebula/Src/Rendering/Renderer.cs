@@ -1,5 +1,4 @@
 ﻿using Silk.NET.OpenGL;
-using System.Numerics;
 
 namespace Nebula.Rendering;
 
@@ -43,8 +42,8 @@ public static class Renderer
         shader.SetMat4("u_model", modelMatrix);
         if (modelMatrix.GetDeterminant() != 0f)
         {
-            Matrix4x4.Invert(modelMatrix, out modelMatrix);
-            modelMatrix = Matrix4x4.Transpose(modelMatrix);
+            modelMatrix.Invert();
+            modelMatrix.Transpose();
             Silk.NET.Maths.Matrix3X3<float> modelNormalMatrix = new Silk.NET.Maths.Matrix3X3<float>();
             modelNormalMatrix.M11 = modelMatrix.M11;
             modelNormalMatrix.M12 = modelMatrix.M12;
@@ -79,8 +78,8 @@ public static class Renderer
         shader.SetMat4("u_model", modelMatrix);
         if (modelMatrix.GetDeterminant() != 0f)
         {
-            Matrix4x4.Invert(modelMatrix, out modelMatrix);
-            modelMatrix = Matrix4x4.Transpose(modelMatrix);
+            modelMatrix.Invert();
+            modelMatrix.Transpose();
             Silk.NET.Maths.Matrix3X3<float> modelNormalMatrix = new Silk.NET.Maths.Matrix3X3<float>();
             modelNormalMatrix.M11 = modelMatrix.M11;
             modelNormalMatrix.M12 = modelMatrix.M12;

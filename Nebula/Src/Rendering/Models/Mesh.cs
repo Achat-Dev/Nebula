@@ -1,5 +1,4 @@
 ﻿using Silk.NET.OpenGL;
-using System.Numerics;
 using AssimpFace = Silk.NET.Assimp.Face;
 using AssimpMesh = Silk.NET.Assimp.Mesh;
 

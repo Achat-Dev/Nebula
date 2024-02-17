@@ -1,6 +1,4 @@
-﻿using System.Numerics;
-
-namespace Nebula;
+﻿namespace Nebula;
 
 public class TransformComponent : Component
 {
@@ -16,6 +14,11 @@ public class TransformComponent : Component
     public void Rotate(Quaternion rotation)
     {
         m_localRotation *= rotation;
+    }
+
+    public void SetLocalRotation(Quaternion rotation)
+    {
+        m_localRotation = rotation;
     }
 
     public void SetLocalScale(Vector3 scale)
@@ -58,6 +61,6 @@ public class TransformComponent : Component
 
     public Matrix4x4 GetWorldMatrix()
     {
-        return Matrix4x4.CreateFromQuaternion(m_localRotation) * Matrix4x4.CreateScale(m_localScale) * Matrix4x4.CreateTranslation(m_localPosition);
+        return Matrix4x4.CreateScale(m_localScale) * Matrix4x4.CreateRotation(m_localRotation) * Matrix4x4.CreateTranslation(m_localPosition);
     }
 }

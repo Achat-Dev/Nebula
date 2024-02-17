@@ -2,9 +2,9 @@
 
 public struct Vector3i : IEquatable<Vector3i>
 {
-    public int X = 0;
-    public int Y = 0;
-    public int Z = 0;
+    public int X;
+    public int Y;
+    public int Z;
 
     public static readonly Vector3i Zero = new Vector3i(0, 0, 0);
     public static readonly Vector3i One = new Vector3i(1, 1, 1);

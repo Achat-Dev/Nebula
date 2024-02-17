@@ -107,6 +107,8 @@ internal class Window : IDisposable
         m_pointLights[1].SetColour(Colour.Green);
         m_pointLights[2].SetColour(Colour.Blue);
 
+        m_transform.SetWorldPosition(new Vector3(1f, 0f, 0f));
+
         Lighting.GetDirectionalLight().SetIntensity(1f);
     }
 

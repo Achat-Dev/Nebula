@@ -2,8 +2,8 @@
 
 public struct Vector2i : IEquatable<Vector2i>
 {
-    public int X = 0;
-    public int Y = 0;
+    public int X;
+    public int Y;
 
     public static readonly Vector2i Zero = new Vector2i(0, 0);
     public static readonly Vector2i One = new Vector2i(1, 1);

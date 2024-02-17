@@ -2,10 +2,10 @@
 
 public struct Quaternion : IEquatable<Quaternion>
 {
-    public float X = 0f;
-    public float Y = 0f;
-    public float Z = 0f;
-    public float W = 1f;
+    public float X;
+    public float Y;
+    public float Z;
+    public float W;
 
     public static readonly Quaternion Identity = new Quaternion(0f, 0f, 0f, 1f);
 

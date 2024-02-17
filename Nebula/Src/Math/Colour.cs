@@ -2,10 +2,10 @@
 
 public struct Colour : IEquatable<Colour>
 {
-    public float R = 0f;
-    public float G = 0f;
-    public float B = 0f;
-    public float A = 1f;
+    public float R;
+    public float G;
+    public float B;
+    public float A;
 
     public static readonly Colour White = new Colour(1f, 1f, 1f);
     public static readonly Colour Black = new Colour(0f, 0f, 0f);
@@ -14,11 +14,17 @@ public struct Colour : IEquatable<Colour>
     public static readonly Colour Blue = new Colour(0f, 0f, 1f);
     public static readonly Colour Transparent = new Colour(1f, 1f, 1f, 0f);
 
+    public Colour()
+    {
+        A = 1f;
+    }
+
     public Colour(float r, float g, float b)
     {
         R = r;
         G = g;
         B = b;
+        A = 1f;
     }
 
     public Colour(float r, float g, float b, float a)

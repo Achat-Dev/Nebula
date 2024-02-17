@@ -16,9 +16,39 @@ public class TransformComponent : Component
         m_localRotation *= rotation;
     }
 
+    public void Scale(float scale)
+    {
+        m_localScale *= scale;
+    }
+
+    public void Scale(Vector3 scale)
+    {
+        m_localScale *= scale;
+    }
+
+    public Vector3 GetLocalPosition()
+    {
+        return m_localPosition;
+    }
+
+    public void SetLocalPosition(Vector3 position)
+    {
+        m_localPosition = position;
+    }
+
+    public Quaternion GetLocalRotation()
+    {
+        return m_localRotation;
+    }
+
     public void SetLocalRotation(Quaternion rotation)
     {
         m_localRotation = rotation;
+    }
+
+    public Vector3 GetLocalScale()
+    {
+        return m_localScale;
     }
 
     public void SetLocalScale(Vector3 scale)
@@ -28,20 +58,38 @@ public class TransformComponent : Component
 
     public Vector3 GetWorldPosition()
     {
-        // Rework once parenting is introduced
+        // Properly implement once parenting is implemented
         return m_localPosition;
     }
 
     public void SetWorldPosition(Vector3 position)
     {
-        // Rework once parenting is introduced
+        // Properly implement once parenting is implemented
         m_localPosition = position;
     }
 
     public Quaternion GetWorldRotation()
     {
-        // Rework once parenting is introduced
+        // Properly implement once parenting is implemented
         return m_localRotation;
+    }
+
+    public void SetWorldRotation(Quaternion rotation)
+    {
+        // Properly implement once parenting is implemented
+        m_localRotation = rotation;
+    }
+
+    public Vector3 GetWorldScale()
+    {
+        // Properly implement once parenting is implemented
+        return m_localScale;
+    }
+
+    public void SetWorldScale(Vector3 scale)
+    {
+        // Properly implement once parenting is implemented
+        m_localScale = scale;
     }
 
     public Vector3 GetRight()

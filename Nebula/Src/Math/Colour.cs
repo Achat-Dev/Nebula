@@ -43,12 +43,12 @@ public struct Colour : IEquatable<Colour>
 
     /* -------------------- Conversions -------------------- */
 
-    public static implicit operator System.Numerics.Vector4(Colour colour)
+    public static explicit operator System.Numerics.Vector4(Colour colour)
     {
         return new System.Numerics.Vector4(colour.R, colour.G, colour.B, colour.A);
     }
 
-    public static implicit operator Colour(System.Numerics.Vector4 colour)
+    public static explicit operator Colour(System.Numerics.Vector4 colour)
     {
         return new Colour(colour.X, colour.Y, colour.Z, colour.W);
     }

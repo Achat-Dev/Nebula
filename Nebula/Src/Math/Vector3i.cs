@@ -1,6 +1,4 @@
-﻿using Silk.NET.Maths;
-
-namespace Nebula;
+﻿namespace Nebula;
 
 public struct Vector3i : IEquatable<Vector3i>
 {
@@ -118,14 +116,19 @@ public struct Vector3i : IEquatable<Vector3i>
 
     /* -------------------- Conversions -------------------- */
 
-    public static implicit operator Vector3D<int>(Vector3i value)
+    public static implicit operator Silk.NET.Maths.Vector3D<int>(Vector3i value)
     {
-        return new Vector3D<int>(value.X, value.Y, value.Z);
+        return new Silk.NET.Maths.Vector3D<int>(value.X, value.Y, value.Z);
     }
 
-    public static implicit operator Vector3i(Vector3D<int> value)
+    public static implicit operator Vector3i(Silk.NET.Maths.Vector3D<int> value)
     {
         return new Vector3i(value.X, value.Y, value.Z);
+    }
+
+    public static explicit operator Vector2(Vector3i value)
+    {
+        return new Vector2(value.X, value.Y);
     }
 
     public static explicit operator Vector3(Vector3i value)
@@ -133,9 +136,19 @@ public struct Vector3i : IEquatable<Vector3i>
         return new Vector3(value.X, value.Y, value.Z);
     }
 
+    public static explicit operator Vector4(Vector3i value)
+    {
+        return new Vector4(value.X, value.Y, value.Z, 0f);
+    }
+
     public static explicit operator Vector2i(Vector3i value)
     {
         return new Vector2i(value.X, value.Y);
+    }
+
+    public static explicit operator Vector4i(Vector3i value)
+    {
+        return new Vector4i(value.X, value.Y, value.Z, 0);
     }
 
     /* -------------------- Overrides -------------------- */
@@ -147,7 +160,7 @@ public struct Vector3i : IEquatable<Vector3i>
 
     public override bool Equals(object obj)
     {
-        if (obj is Vector3 other)
+        if (obj is Vector3i other)
         {
             Equals(other);
         }

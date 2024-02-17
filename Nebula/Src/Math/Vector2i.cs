@@ -1,6 +1,4 @@
-﻿using Silk.NET.Maths;
-
-namespace Nebula;
+﻿namespace Nebula;
 
 public struct Vector2i : IEquatable<Vector2i>
 {
@@ -105,12 +103,12 @@ public struct Vector2i : IEquatable<Vector2i>
 
     /* -------------------- Conversions -------------------- */
 
-    public static implicit operator Vector2D<int>(Vector2i value)
+    public static implicit operator Silk.NET.Maths.Vector2D<int>(Vector2i value)
     {
-        return new Vector2D<int>(value.X, value.Y);
+        return new Silk.NET.Maths.Vector2D<int>(value.X, value.Y);
     }
 
-    public static implicit operator Vector2i(Vector2D<int> value)
+    public static implicit operator Vector2i(Silk.NET.Maths.Vector2D<int> value)
     {
         return new Vector2i(value.X, value.Y);
     }
@@ -120,9 +118,24 @@ public struct Vector2i : IEquatable<Vector2i>
         return new Vector2(value.X, value.Y);
     }
 
+    public static explicit operator Vector3(Vector2i value)
+    {
+        return new Vector3(value.X, value.Y, 0f);
+    }
+
+    public static explicit operator Vector4(Vector2i value)
+    {
+        return new Vector4(value.X, value.Y, 0f, 0f);
+    }
+
     public static explicit operator Vector3i(Vector2i value)
     {
         return new Vector3i(value.X, value.Y, 0);
+    }
+
+    public static explicit operator Vector4i(Vector2i value)
+    {
+        return new Vector4i(value.X, value.Y, 0, 0);
     }
 
     /* -------------------- Overrides -------------------- */

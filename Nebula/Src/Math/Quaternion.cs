@@ -1,6 +1,4 @@
-﻿using Silk.NET.Maths;
-
-namespace Nebula;
+﻿namespace Nebula;
 
 public struct Quaternion : IEquatable<Quaternion>
 {
@@ -21,7 +19,7 @@ public struct Quaternion : IEquatable<Quaternion>
 
     /* -------------------- Methods -------------------- */
 
-    public Vector3 GetXyz()
+    internal Vector3 GetXyz()
     {
         return new Vector3(X, Y, Z);
     }
@@ -71,13 +69,7 @@ public struct Quaternion : IEquatable<Quaternion>
         axis.Normalise();
         Vector3 xyz = axis * MathF.Sin(angle);
 
-        Quaternion result = Identity;
-        result.X = xyz.X;
-        result.Y = xyz.Y;
-        result.Z = xyz.Z;
-        result.W = MathF.Cos(angle);
-
-        return result;
+        return new Quaternion(xyz.X, xyz.Y, xyz.Z, MathF.Cos(angle));
     }
 
     /* -------------------- Operators -------------------- */
@@ -144,12 +136,12 @@ public struct Quaternion : IEquatable<Quaternion>
 
     /* -------------------- Conversions -------------------- */
 
-    public static implicit operator Quaternion<float>(Quaternion value)
+    public static implicit operator Silk.NET.Maths.Quaternion<float>(Quaternion value)
     {
-        return new Quaternion<float>(value.X, value.Y, value.Z, value.W);
+        return new Silk.NET.Maths.Quaternion<float>(value.X, value.Y, value.Z, value.W);
     }
 
-    public static implicit operator Quaternion(Quaternion<float> value)
+    public static implicit operator Quaternion(Silk.NET.Maths.Quaternion<float> value)
     {
         return new Quaternion(value.X, value.Y, value.Z, value.W);
     }

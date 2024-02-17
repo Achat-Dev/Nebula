@@ -26,6 +26,11 @@ public struct Vector3 : IEquatable<Vector3>
         return MathF.Sqrt(X * X + Y * Y + Z * Z);
     }
 
+    public float SqrMagnitude()
+    {
+        return X * X + Y * Y + Z * Z;
+    }
+
     public void Normalise()
     {
         float coefficient = 1f / Magnitude();
@@ -39,11 +44,6 @@ public struct Vector3 : IEquatable<Vector3>
         Vector3 result = this;
         result.Normalise();
         return result;
-    }
-
-    public float SqrMagnitude()
-    {
-        return X * X + Y * Y + Z * Z;
     }
 
     /* -------------------- Static Methods -------------------- */
@@ -73,15 +73,21 @@ public struct Vector3 : IEquatable<Vector3>
         return result;
     }
 
+    public static float Dot(Vector3 a, Vector3 b)
+    {
+        return a.X * b.X + a.Y * b.Y + a.Z * b.Z;
+    }
+
     public static float Distance(Vector3 a, Vector3 b)
     {
         a = b - a;
         return MathF.Sqrt(a.X * a.X + a.Y * a.Y + a.Z * a.Z);
     }
 
-    public static float Dot(Vector3 a, Vector3 b)
+    public static float SqrDistance(Vector3 a, Vector3 b)
     {
-        return a.X * b.X + a.Y * b.Y + a.Z * b.Z;
+        a = b - a;
+        return a.X * a.X + a.Y * a.Y + a.Z * a.Z;
     }
 
     public static Vector3 Lerp(Vector3 a, Vector3 b, float t)
@@ -90,12 +96,6 @@ public struct Vector3 : IEquatable<Vector3>
         a.Y = a.Y + (b.Y - a.Y) * t;
         a.Z = a.Z + (b.Z - a.Z) * t;
         return a;
-    }
-
-    public static float SqrDistance(Vector3 a, Vector3 b)
-    {
-        a = b - a;
-        return a.X * a.X + a.Y * a.Y + a.Z * a.Z;
     }
 
     /* -------------------- Operators -------------------- */
@@ -208,9 +208,19 @@ public struct Vector3 : IEquatable<Vector3>
         return new Vector3(value.X, value.Y, value.Z);
     }
 
+    public static explicit operator Vector2(Vector3 value)
+    {
+        return new Vector2(value.X, value.Y);
+    }
+
     public static explicit operator Vector4(Vector3 value)
     {
         return new Vector4(value.X, value.Y, value.Z, 0f);
+    }
+
+    public static explicit operator Vector2i(Vector3 value)
+    {
+        return new Vector2i((int)value.X, (int)value.Y);
     }
 
     public static explicit operator Vector3i(Vector3 value)
@@ -218,9 +228,14 @@ public struct Vector3 : IEquatable<Vector3>
         return new Vector3i((int)value.X, (int)value.Y, (int)value.Z);
     }
 
-    public static explicit operator Vector2(Vector3 value)
+    public static explicit operator Vector4i(Vector3 value)
     {
-        return new Vector2(value.X, value.Y);
+        return new Vector4i((int)value.X, (int)value.Y, (int)value.Z, 0);
+    }
+
+    public static explicit operator Colour(Vector3 value)
+    {
+        return new Colour(value.X, value.Y, value.Z);
     }
 
     /* -------------------- Overrides -------------------- */

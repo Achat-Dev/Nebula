@@ -1,6 +1,4 @@
-﻿using Silk.NET.Maths;
-
-namespace Nebula;
+﻿namespace Nebula;
 
 public struct Vector2 : IEquatable<Vector2>
 {
@@ -25,6 +23,11 @@ public struct Vector2 : IEquatable<Vector2>
         return MathF.Sqrt(X * X + Y * Y);
     }
 
+    public float SqrMagnitude()
+    {
+        return X * X + Y * Y;
+    }
+
     public void Normalise()
     {
         float coefficient = 1f / Magnitude();
@@ -37,11 +40,6 @@ public struct Vector2 : IEquatable<Vector2>
         Vector2 result = this;
         result.Normalise();
         return result;
-    }
-
-    public float SqrMagnitude()
-    {
-        return X * X + Y * Y;
     }
 
     /* -------------------- Static Methods -------------------- */
@@ -60,15 +58,21 @@ public struct Vector2 : IEquatable<Vector2>
         return value;
     }
 
+    public static float Dot(Vector2 a, Vector2 b)
+    {
+        return a.X * b.X + a.Y * b.Y;
+    }
+
     public static float Distance(Vector2 a, Vector2 b)
     {
         a = b - a;
         return MathF.Sqrt(a.X * a.X + a.Y * a.Y);
     }
 
-    public static float Dot(Vector2 a, Vector2 b)
+    public static float SqrDistance(Vector2 a, Vector2 b)
     {
-        return a.X * b.X + a.Y * b.Y;
+        a = b - a;
+        return a.X * a.X + a.Y * a.Y;
     }
 
     public static Vector2 Lerp(Vector2 a, Vector2 b, float t)
@@ -76,12 +80,6 @@ public struct Vector2 : IEquatable<Vector2>
         a.X = a.X + (b.X - a.X) * t;
         a.Y = a.Y + (b.Y - a.Y) * t;
         return a;
-    }
-
-    public static float SqrDistance(Vector2 a, Vector2 b)
-    {
-        a = b - a;
-        return a.X * a.X + a.Y * a.Y;
     }
 
     /* -------------------- Operators -------------------- */
@@ -162,12 +160,12 @@ public struct Vector2 : IEquatable<Vector2>
 
     /* -------------------- Conversions -------------------- */
 
-    public static implicit operator Vector2D<float>(Vector2 value)
+    public static implicit operator Silk.NET.Maths.Vector2D<float>(Vector2 value)
     {
-        return new Vector2D<float>(value.X, value.Y);
+        return new Silk.NET.Maths.Vector2D<float>(value.X, value.Y);
     }
 
-    public static implicit operator Vector2(Vector2D<float> value)
+    public static implicit operator Vector2(Silk.NET.Maths.Vector2D<float> value)
     {
         return new Vector2(value.X, value.Y);
     }
@@ -182,14 +180,29 @@ public struct Vector2 : IEquatable<Vector2>
         return new Vector2(value.X, value.Y);
     }
 
+    public static explicit operator Vector3(Vector2 value)
+    {
+        return new Vector3(value.X, value.Y, 0f);
+    }
+
+    public static explicit operator Vector4(Vector2 value)
+    {
+        return new Vector4(value.X, value.Y, 0f, 0f);
+    }
+
     public static explicit operator Vector2i(Vector2 value)
     {
         return new Vector2i((int)value.X, (int)value.Y);
     }
 
-    public static explicit operator Vector3(Vector2 value)
+    public static explicit operator Vector3i(Vector2 value)
     {
-        return new Vector3(value.X, value.Y, 0f);
+        return new Vector3i((int)value.X, (int)value.Y, 0);
+    }
+
+    public static explicit operator Vector4i(Vector2 value)
+    {
+        return new Vector4i((int)value.X, (int)value.Y, 0, 0);
     }
 
     /* -------------------- Overrides -------------------- */

@@ -25,6 +25,11 @@ public struct Vector4 : IEquatable<Vector4>
         return MathF.Sqrt(X * X + Y * Y + Z * Z + W * W);
     }
 
+    public float SqrMagnitude()
+    {
+        return X * X + Y * Y + Z * Z + W * W;
+    }
+
     public void Normalise()
     {
         float coefficient = 1f / Magnitude();
@@ -41,9 +46,45 @@ public struct Vector4 : IEquatable<Vector4>
         return result;
     }
 
-    public float SqrMagnitude()
+    /* -------------------- Static Methods -------------------- */
+
+    public static Vector4 Abs(Vector4 value)
     {
-        return X * X + Y * Y + Z * Z + W * W;
+        value.X = MathF.Abs(value.X);
+        value.Y = MathF.Abs(value.Y);
+        value.Z = MathF.Abs(value.Z);
+        value.W = MathF.Abs(value.W);
+        return value;
+    }
+
+    public static Vector4 Clamp(Vector4 value, Vector4 min, Vector4 max)
+    {
+        value.X = System.Math.Clamp(value.X, min.X, max.X);
+        value.Y = System.Math.Clamp(value.Y, min.Y, max.Y);
+        value.Z = System.Math.Clamp(value.Z, min.Z, max.Z);
+        value.W = System.Math.Clamp(value.W, min.W, max.W);
+        return value;
+    }
+
+    public static float Distance(Vector4 a, Vector4 b)
+    {
+        a = b - a;
+        return MathF.Sqrt(a.X * a.X + a.Y * a.Y + a.Z * a.Z + a.W * a.W);
+    }
+
+    public static float SqrDistance(Vector4 a, Vector4 b)
+    {
+        a = b - a;
+        return a.X * a.X + a.Y * a.Y + a.Z * a.Z + a.W * a.W;
+    }
+
+    public static Vector4 Lerp(Vector4 a, Vector4 b, float t)
+    {
+        a.X = a.X + (b.X - a.X) * t;
+        a.Y = a.Y + (b.Y - a.Y) * t;
+        a.Z = a.Z + (b.Z - a.Z) * t;
+        a.W = a.W + (b.W - a.W) * t;
+        return a;
     }
 
     /* -------------------- Operators -------------------- */
@@ -153,14 +194,34 @@ public struct Vector4 : IEquatable<Vector4>
         return new Vector4(value.X, value.Y, value.Z, value.W);
     }
 
+    public static explicit operator Vector2(Vector4 value)
+    {
+        return new Vector2(value.X, value.Y);
+    }
+
     public static explicit operator Vector3(Vector4 value)
     {
         return new Vector3(value.X, value.Y, value.Z);
     }
 
-    public static explicit operator Colour(Vector4 colour)
+    public static explicit operator Vector2i(Vector4 value)
     {
-        return new Colour(colour.X, colour.Y, colour.Z, colour.W);
+        return new Vector2i((int)value.X, (int)value.Y);
+    }
+
+    public static explicit operator Vector3i(Vector4 value)
+    {
+        return new Vector3i((int)value.X, (int)value.Y, (int)value.Z);
+    }
+
+    public static explicit operator Vector4i(Vector4 value)
+    {
+        return new Vector4i((int)value.X, (int)value.Y, (int)value.Z, (int)value.W);
+    }
+
+    public static explicit operator Colour(Vector4 value)
+    {
+        return new Colour(value.X, value.Y, value.Z, value.W);
     }
 
     /* -------------------- Overrides -------------------- */

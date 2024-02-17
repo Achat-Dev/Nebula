@@ -1,5 +1,4 @@
 ﻿using Silk.NET.OpenGL;
-using System.Numerics;
 using System.Text;
 
 namespace Nebula.Rendering;
@@ -145,12 +144,12 @@ public class Shader : IDisposable
         GL.Get().Uniform1(r_uniformLocationCache[name], value);
     }
 
-    public void SetVec3(string name, System.Numerics.Vector3 value)
+    public void SetVec3(string name, Vector3 value)
     {
-        GL.Get().Uniform3(r_uniformLocationCache[name], ref value);
+        GL.Get().Uniform3(r_uniformLocationCache[name], value.X, value.Y, value.Z);
     }
 
-    public unsafe void SetMat3(string name, Silk.NET.Maths.Matrix3X3<float> value)
+    public unsafe void SetMat3(string name, Matrix3x3 value)
     {
         GL.Get().UniformMatrix3(r_uniformLocationCache[name], 1, false, (float*)&value);
     }

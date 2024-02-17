@@ -44,21 +44,11 @@ public static class Renderer
         {
             modelMatrix.Invert();
             modelMatrix.Transpose();
-            Silk.NET.Maths.Matrix3X3<float> modelNormalMatrix = new Silk.NET.Maths.Matrix3X3<float>();
-            modelNormalMatrix.M11 = modelMatrix.M11;
-            modelNormalMatrix.M12 = modelMatrix.M12;
-            modelNormalMatrix.M13 = modelMatrix.M13;
-            modelNormalMatrix.M21 = modelMatrix.M21;
-            modelNormalMatrix.M22 = modelMatrix.M22;
-            modelNormalMatrix.M23 = modelMatrix.M23;
-            modelNormalMatrix.M31 = modelMatrix.M31;
-            modelNormalMatrix.M32 = modelMatrix.M32;
-            modelNormalMatrix.M33 = modelMatrix.M33;
-            shader.SetMat3("u_modelNormalMatrix", modelNormalMatrix);
+            shader.SetMat3("u_modelNormalMatrix", (Matrix3x3)modelMatrix);
         }
         else
         {
-            shader.SetMat3("u_modelNormalMatrix", Silk.NET.Maths.Matrix3X3<float>.Identity);
+            shader.SetMat3("u_modelNormalMatrix", Matrix3x3.Identity);
         }
 
         // Shader instance
@@ -80,21 +70,11 @@ public static class Renderer
         {
             modelMatrix.Invert();
             modelMatrix.Transpose();
-            Silk.NET.Maths.Matrix3X3<float> modelNormalMatrix = new Silk.NET.Maths.Matrix3X3<float>();
-            modelNormalMatrix.M11 = modelMatrix.M11;
-            modelNormalMatrix.M12 = modelMatrix.M12;
-            modelNormalMatrix.M13 = modelMatrix.M13;
-            modelNormalMatrix.M21 = modelMatrix.M21;
-            modelNormalMatrix.M22 = modelMatrix.M22;
-            modelNormalMatrix.M23 = modelMatrix.M23;
-            modelNormalMatrix.M31 = modelMatrix.M31;
-            modelNormalMatrix.M32 = modelMatrix.M32;
-            modelNormalMatrix.M33 = modelMatrix.M33;
-            shader.SetMat3("u_modelNormalMatrix", modelNormalMatrix);
+            shader.SetMat3("u_modelNormalMatrix", (Matrix3x3)modelMatrix);
         }
         else
         {
-            shader.SetMat3("u_modelNormalMatrix", Silk.NET.Maths.Matrix3X3<float>.Identity);
+            shader.SetMat3("u_modelNormalMatrix", Matrix3x3.Identity);
         }
 
         // Shader instance

@@ -9,6 +9,8 @@ internal class Window : IDisposable
     private bool m_isOpen = true;
     private readonly IWindow m_window;
 
+    public static event Action<Vector2i> Resizing;
+
     // Temporary
     private TransformComponent m_transform = new TransformComponent();
     private Entity[] m_pointLightEntites = new Entity[3];
@@ -41,6 +43,7 @@ internal class Window : IDisposable
         options.VSync = vSync;
 
         m_window = Silk.NET.Windowing.Window.Create(options);
+        m_window.Resize += OnResize;
         m_window.Load += OnLoad;
         m_window.Update += OnUpdate;
         m_window.Render += OnRender;
@@ -65,6 +68,12 @@ internal class Window : IDisposable
     {
         Logger.EngineInfo("Disposing window");
         m_window.Dispose();
+    }
+
+    private void OnResize(Silk.NET.Maths.Vector2D<int> size)
+    {
+        GL.Get().Viewport(size);
+        Resizing?.Invoke(size);
     }
 
     private void OnLoad()
@@ -161,7 +170,7 @@ internal class Window : IDisposable
         Input.RefreshInputStates();
     }
 
-    private unsafe void OnRender(double deltaTime)
+    private void OnRender(double deltaTime)
     {
         Renderer.Clear();
         Renderer.StartFrame(m_camera);

@@ -1,8 +1,6 @@
-﻿using System.Numerics;
+﻿namespace Nebula;
 
-namespace Nebula;
-
-public class CameraComponent : Component
+public class CameraComponent : StartableComponent
 {
     private float m_aspectRatio = 16f / 9f;
     private float m_fov = MathHelper.DegreesToRadians(45f);
@@ -10,8 +8,21 @@ public class CameraComponent : Component
     private float m_farClippingPlane = 500f;
     private Matrix4x4 m_projectionMatrix;
 
-    public CameraComponent()
+    public override void OnCreate()
     {
+        Window.Resizing += OnResize;
+        RecalculateProjectionMatrix();
+    }
+
+    public override void OnDestroy()
+    {
+        base.OnDestroy();
+        Window.Resizing -= OnResize;
+    }
+
+    private void OnResize(Vector2i size)
+    {
+        m_aspectRatio = (float)size.X / (float)size.Y;
         RecalculateProjectionMatrix();
     }
 

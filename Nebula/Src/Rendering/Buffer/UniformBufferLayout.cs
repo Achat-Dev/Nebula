@@ -27,7 +27,7 @@ internal struct UniformBufferLayout
         {
             elementSize = elements[i].GetByteSize();
             elementOffset = elements[i].GetBaseOffset();
-            byteSize += CalculatePadding(ByteSize, elementOffset) + elementSize;
+            byteSize += CalculatePadding(byteSize, elementOffset) + elementSize;
         }
 
         return byteSize;

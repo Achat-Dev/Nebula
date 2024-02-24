@@ -4,6 +4,8 @@ namespace Nebula.Rendering;
 
 public static class Renderer
 {
+    private static List<ModelRendererComponent> s_modelRenderers = new List<ModelRendererComponent>();
+
     internal static void Init()
     {
         Logger.EngineInfo("Initialising Renderer");
@@ -14,6 +16,24 @@ public static class Renderer
     internal static void Clear()
     {
         GL.Get().Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+    }
+
+    internal static void RegisterModelRenderer(ModelRendererComponent modelRenderer)
+    {
+        s_modelRenderers.Add(modelRenderer);
+    }
+
+    internal static void RemoveModelRenderer(ModelRendererComponent modelRenderer)
+    {
+        s_modelRenderers.Remove(modelRenderer);
+    }
+
+    internal static void RenderFrame()
+    {
+        for (int i = 0; i < s_modelRenderers.Count; i++)
+        {
+            s_modelRenderers[i].DrawLit();
+        }
     }
 
     internal static void StartFrame(CameraComponent camera)
@@ -38,6 +58,7 @@ public static class Renderer
         vao.Bind();
         Shader shader = shaderInstance.GetShader();
         shader.Use();
+        shaderInstance.SubmitDataToShader();
 
         shader.SetMat4("u_model", modelMatrix);
         if (modelMatrix.GetDeterminant() != 0f)
@@ -50,42 +71,6 @@ public static class Renderer
         {
             shader.SetMat3("u_modelNormalMatrix", Matrix3x3.Identity);
         }
-
-        // Shader instance
-        shader.SetVec3("u_albedo", (Vector3)shaderInstance.GetColour());
-        shader.SetFloat("u_metallic", shaderInstance.GetMetallic());
-        shader.SetFloat("u_roughness", shaderInstance.GetRoughness());
-
-        GL.Get().DrawElements(PrimitiveType.Triangles, vao.GetIndexCount(), DrawElementsType.UnsignedInt, null);
-    }
-
-    internal static unsafe void DrawLitMeshTextured(VertexArrayObject vao, Matrix4x4 modelMatrix, ShaderInstance shaderInstance, Texture albedoMap, Texture normalMap, Texture metallicMap, Texture roughnessMap, Texture ambientOcclusionMap)
-    {
-        vao.Bind();
-        Shader shader = shaderInstance.GetShader();
-        shader.Use();
-
-        shader.SetMat4("u_model", modelMatrix);
-        if (modelMatrix.GetDeterminant() != 0f)
-        {
-            modelMatrix.Invert();
-            modelMatrix.Transpose();
-            shader.SetMat3("u_modelNormalMatrix", (Matrix3x3)modelMatrix);
-        }
-        else
-        {
-            shader.SetMat3("u_modelNormalMatrix", Matrix3x3.Identity);
-        }
-
-        // Shader instance
-        albedoMap.Bind(TextureUnit.Texture0);
-        normalMap.Bind(TextureUnit.Texture1);
-        //metallicMap.Bind(TextureUnit.Texture2);
-        roughnessMap.Bind(TextureUnit.Texture3);
-        shader.SetInt("u_albedoMap", 0);
-        shader.SetInt("u_normalMap", 1);
-        shader.SetInt("u_metallicMap", 2);
-        shader.SetInt("u_roughnessMap", 3);
 
         GL.Get().DrawElements(PrimitiveType.Triangles, vao.GetIndexCount(), DrawElementsType.UnsignedInt, null);
     }
@@ -95,7 +80,7 @@ public static class Renderer
         vao.Bind();
         shader.Use();
         shader.SetMat4("u_model", modelMatrix);
-        shader.SetVec3("u_colour", (Vector3)colour);
+        //shader.SetVec3("u_colour", (Vector3)colour);
         GL.Get().DrawElements(PrimitiveType.Triangles, vao.GetIndexCount(), DrawElementsType.UnsignedInt, null);
     }
 }

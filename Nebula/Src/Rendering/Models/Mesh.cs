@@ -62,14 +62,9 @@ internal class Mesh : IDisposable
         return new Mesh(vertices.ToArray(), indices.ToArray());
     }
 
-    public void Draw(Matrix4x4 modelMatrix, ShaderInstance shaderInstance)
+    public void DrawLit(Matrix4x4 modelMatrix, ShaderInstance shaderInstance)
     {
         Renderer.DrawLitMesh(r_vao, modelMatrix, shaderInstance);
-    }
-
-    public void DrawTextured(Matrix4x4 modelMatrix, ShaderInstance shaderInstance, Texture albedoMap, Texture normalMap, Texture metallicMap, Texture roughnessMap, Texture ambientOcclusionMap)
-    {
-        Renderer.DrawLitMeshTextured(r_vao, modelMatrix, shaderInstance, albedoMap, normalMap, metallicMap, roughnessMap, ambientOcclusionMap);
     }
 
     public void Dispose()

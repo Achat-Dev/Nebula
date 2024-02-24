@@ -134,29 +134,69 @@ public class Shader : IDisposable
         return source;
     }
 
-    public void SetInt(string name, int value)
+    internal void SetFloat(int location, float value)
     {
-        GL.Get().Uniform1(r_uniformLocationCache[name], value);
+        GL.Get().Uniform1(location, value);
     }
 
-    public void SetFloat(string name, float value)
+    internal void SetVec2(int location, Vector2 value)
     {
-        GL.Get().Uniform1(r_uniformLocationCache[name], value);
+        GL.Get().Uniform2(location, value.X, value.Y);
     }
 
-    public void SetVec3(string name, Vector3 value)
+    internal void SetVec3(int location, Vector3 value)
     {
-        GL.Get().Uniform3(r_uniformLocationCache[name], value.X, value.Y, value.Z);
+        GL.Get().Uniform3(location, value.X, value.Y, value.Z);
     }
 
-    public unsafe void SetMat3(string name, Matrix3x3 value)
+    internal void SetVec4(int location, Vector4 value)
+    {
+        GL.Get().Uniform4(location, value.X, value.Y, value.Z, value.W);
+    }
+
+    internal void SetInt(int location, int value)
+    {
+        GL.Get().Uniform1(location, value);
+    }
+
+    internal void SetVec2i(int location, Vector2i value)
+    {
+        GL.Get().Uniform2(location, value.X, value.Y);
+    }
+
+    internal void SetVec3i(int location, Vector3i value)
+    {
+        GL.Get().Uniform3(location, value.X, value.Y, value.Z);
+    }
+
+    internal void SetVec4i(int location, Vector4i value)
+    {
+        GL.Get().Uniform4(location, value.X, value.Y, value.Z, value.W);
+    }
+
+    internal unsafe void SetMat3(int location, Matrix3x3 value)
+    {
+        GL.Get().UniformMatrix3(location, 1, false, (float*)&value);
+    }
+
+    internal unsafe void SetMat3(string name, Matrix3x3 value)
     {
         GL.Get().UniformMatrix3(r_uniformLocationCache[name], 1, false, (float*)&value);
     }
 
-    public unsafe void SetMat4(string name, Matrix4x4 value)
+    internal unsafe void SetMat4(int location, Matrix4x4 value)
     {
-        GL.Get().UniformMatrix4(r_uniformLocationCache[name], 1, false, (float*) &value);
+        GL.Get().UniformMatrix4(location, 1, false, (float*) &value);
+    }
+
+    internal unsafe void SetMat4(string name, Matrix4x4 value)
+    {
+        GL.Get().UniformMatrix4(r_uniformLocationCache[name], 1, false, (float*)&value);
+    }
+
+    internal int GetCachedUniformLocation(string name)
+    {
+        return r_uniformLocationCache[name];
     }
 
     internal void Use()

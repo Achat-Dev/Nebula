@@ -19,6 +19,42 @@ public class Texture : IDisposable
         Nearest = 9728,
     }
 
+    public enum Unit
+    {
+        Texture0 = 33984,
+        Texture1,
+        Texture2,
+        Texture3,
+        Texture4,
+        Texture5,
+        Texture6,
+        Texture7,
+        Texture8,
+        Texture9,
+        Texture10,
+        Texture11,
+        Texture12,
+        Texture13,
+        Texture14,
+        Texture15,
+        Texture16,
+        Texture17,
+        Texture18,
+        Texture19,
+        Texture20,
+        Texture21,
+        Texture22,
+        Texture23,
+        Texture24,
+        Texture25,
+        Texture26,
+        Texture27,
+        Texture28,
+        Texture29,
+        Texture30,
+        Texture31,
+    }
+
     private readonly uint r_width;
     private readonly uint r_height;
     private readonly uint r_handle;
@@ -26,7 +62,7 @@ public class Texture : IDisposable
     public unsafe Texture(string path, WrapMode wrapMode, FilterMode filterMode)
     {
         r_handle = GL.Get().GenTexture();
-        Bind();
+        Bind(Unit.Texture0);
 
         ImageResult result = ImageResult.FromMemory(AssetLoader.LoadAsByteArray(path, out int dataSize), ColorComponents.RedGreenBlueAlpha);
 
@@ -58,9 +94,9 @@ public class Texture : IDisposable
         return r_height;
     }
 
-    internal void Bind(TextureUnit textureUnit = TextureUnit.Texture0)
+    internal void Bind(Unit textureUnit)
     {
-        GL.Get().ActiveTexture(textureUnit);
+        GL.Get().ActiveTexture((TextureUnit)textureUnit);
         GL.Get().BindTexture(TextureTarget.Texture2D, r_handle);
     }
 

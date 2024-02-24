@@ -50,19 +50,11 @@ public class Model : IDisposable
         r_meshes.Add(mesh);
     }
 
-    internal void Draw(Matrix4x4 modelMatrix, ShaderInstance shaderInstance)
+    internal void DrawLit(Matrix4x4 modelMatrix, ShaderInstance shaderInstance)
     {
         for (int i = 0; i < r_meshes.Count; i++)
         {
-            r_meshes[i].Draw(modelMatrix, shaderInstance);
-        }
-    }
-
-    internal void DrawTextured(Matrix4x4 modelMatrix, ShaderInstance shaderInstance, Texture albedoMap, Texture normalMap, Texture metallicMap, Texture roughnessMap, Texture ambientOcclusionMap)
-    {
-        for (int i = 0; i < r_meshes.Count; i++)
-        {
-            r_meshes[i].DrawTextured(modelMatrix, shaderInstance, albedoMap, normalMap, metallicMap, roughnessMap, ambientOcclusionMap);
+            r_meshes[i].DrawLit(modelMatrix, shaderInstance);
         }
     }
 

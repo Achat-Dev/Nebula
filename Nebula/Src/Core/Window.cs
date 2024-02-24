@@ -97,22 +97,20 @@ internal class Window : IDisposable
         m_roughnessMap = new Texture("Art/Textures/Bricks_Roughness.jpg", Texture.WrapMode.Repeat, Texture.FilterMode.Linear);
         m_ambientOcclusionMap = new Texture("Art/Textures/Bricks_AmbientOcclusion.jpg", Texture.WrapMode.Repeat, Texture.FilterMode.Linear);
 
-        // Untextured
-        Shader shader = Shader.Create(Shader.DefaultType.PBRFlat);
-        m_shaderInstance = new ShaderInstance(shader);
+        // PBR Flat
+        m_shaderInstance = new ShaderInstance(Shader.Create(Shader.DefaultType.PBRFlat));
         m_shaderInstance.SetVec3("u_albedo", (Vector3)Colour.White);
         m_shaderInstance.SetFloat("u_metallic", 0.5f);
         m_shaderInstance.SetFloat("u_roughness", 0.5f);
 
-        Entity modelEntity = new Entity("Model");
-        modelEntity.GetTransform().SetWorldPosition(new Vector3(-1f, 0f, 0f));
-        ModelRendererComponent modelRenderer = modelEntity.AddComponent<ModelRendererComponent>();
+        Entity pbrFlatEntity = new Entity("PBR flat");
+        pbrFlatEntity.GetTransform().SetWorldPosition(new Vector3(-1f, 0f, 0f));
+        ModelRendererComponent modelRenderer = pbrFlatEntity.AddComponent<ModelRendererComponent>();
         modelRenderer.SetModel(m_sphereModel);
         modelRenderer.SetShaderInstance(m_shaderInstance);
 
-        // Textured
-        Shader texturedShader = Shader.Create(Shader.DefaultType.PBRTextured);
-        m_textureShaderInstance = new ShaderInstance(texturedShader);
+        // PBR Textured
+        m_textureShaderInstance = new ShaderInstance(Shader.Create(Shader.DefaultType.PBRTextured));
         m_textureShaderInstance.SetTexture("u_albedoMap", m_albedoMap, Texture.Unit.Texture0);
         m_textureShaderInstance.SetTexture("u_normalMap", m_normalMap, Texture.Unit.Texture1);
         //m_textureShaderInstance.SetTexture("u_metallicMap", m_metallicMap, Texture.Unit.Texture2);
@@ -120,11 +118,11 @@ internal class Window : IDisposable
         m_textureShaderInstance.SetInt("u_metallicMap", 2);
         //m_textureShaderInstance.SetTexture("u_ambientOcclusionMap", m_ambientOcclusionMap, Texture.Unit.Texture4);
 
-        Entity texturedModelEntity = new Entity("Model");
-        texturedModelEntity.GetTransform().SetWorldPosition(new Vector3(1f, 0f, 0f));
-        ModelRendererComponent texturedModelRenderer = texturedModelEntity.AddComponent<ModelRendererComponent>();
-        texturedModelRenderer.SetModel(m_sphereModel);
-        texturedModelRenderer.SetShaderInstance(m_textureShaderInstance);
+        Entity pbrTexturedEntity = new Entity("PBR textured");
+        pbrTexturedEntity.GetTransform().SetWorldPosition(new Vector3(1f, 0f, 0f));
+        modelRenderer = pbrTexturedEntity.AddComponent<ModelRendererComponent>();
+        modelRenderer.SetModel(m_sphereModel);
+        modelRenderer.SetShaderInstance(m_textureShaderInstance);
 
         // Camera
         Entity cameraEntity = new Entity("Camera");
@@ -132,24 +130,30 @@ internal class Window : IDisposable
         TransformComponent transform = cameraEntity.GetTransform();
         transform.Translate(new Vector3(0, 0, -5));
 
+        ShaderInstance[] flatShaderInstances = new ShaderInstance[3];
         // Lighting
         for (int i = 0; i < 3; i++)
         {
             m_pointLightEntites[i] = new Entity();
             m_pointLights[i] = m_pointLightEntites[i].AddComponent<PointLightComponent>();
+            modelRenderer = m_pointLightEntites[i].AddComponent<ModelRendererComponent>();
+            modelRenderer.SetModel(m_cubeModel);
+            flatShaderInstances[i] = new ShaderInstance(Shader.Create(Shader.DefaultType.Colour));
+            modelRenderer.SetShaderInstance(flatShaderInstances[i]);
             m_pointLights[i].GetEntity().GetTransform().SetLocalScale(Vector3.One * 0.2f);
         }
         m_pointLights[0].SetColour(Colour.Red);
         m_pointLights[1].SetColour(Colour.Green);
         m_pointLights[2].SetColour(Colour.Blue);
+        flatShaderInstances[0].SetVec3("u_colour", (Vector3)Colour.Red);
+        flatShaderInstances[1].SetVec3("u_colour", (Vector3)Colour.Green);
+        flatShaderInstances[2].SetVec3("u_colour", (Vector3)Colour.Blue);
 
         Lighting.GetDirectionalLight().SetIntensity(1f);
     }
 
     private void OnUpdate(double deltaTime)
     {
-        Scene.GetActive().Update((float)deltaTime);
-
         float dt = (float)deltaTime;
 
         TransformComponent cameraTransform = m_camera.GetEntity().GetTransform();
@@ -173,17 +177,6 @@ internal class Window : IDisposable
             cameraTransform.SetLocalRotation(Quaternion.Identity);
         }
 
-        if (Input.IsKeyDown(Key.Y)) m_shaderInstance.SetFloat("u_metallic", m_shaderInstance.GetFloat("u_metallic") - dt);
-        if (Input.IsKeyDown(Key.X)) m_shaderInstance.SetFloat("u_metallic", m_shaderInstance.GetFloat("u_metallic") + dt);
-        if (Input.IsKeyDown(Key.C)) m_shaderInstance.SetFloat("u_roughness", m_shaderInstance.GetFloat("u_roughness") - dt);
-        if (Input.IsKeyDown(Key.V)) m_shaderInstance.SetFloat("u_roughness", m_shaderInstance.GetFloat("u_roughness") + dt);
-        if (Input.IsKeyDown(Key.B)) m_lightRange -= dt;
-        if (Input.IsKeyDown(Key.N)) m_lightRange += dt;
-        if (Input.IsKeyDown(Key.M)) m_lightIntensity -= dt;
-        if (Input.IsKeyDown(Key.Comma)) m_lightIntensity += dt;
-
-        Logger.EngineInfo($"Metallic: {m_shaderInstance.GetFloat("u_metallic")} | Roughness: {m_shaderInstance.GetFloat("u_roughness")} | Range: {m_lightRange} | Intensity: {m_lightIntensity}");
-
         float piThird = (MathF.PI * 2f) / 3f;
         for (int i = 0; i < m_pointLightEntites.Length; i++)
         {
@@ -192,6 +185,7 @@ internal class Window : IDisposable
             m_pointLights[i].SetIntensity(m_lightIntensity);
         }
 
+        Scene.GetActive().Update((float)deltaTime);
         Input.RefreshInputStates();
     }
 
@@ -200,19 +194,6 @@ internal class Window : IDisposable
         Renderer.Clear();
         Renderer.StartFrame(m_camera);
         Renderer.RenderFrame();
-
-        //m_monkeyModel.Draw(System.Numerics.Matrix4x4.CreateTranslation(new System.Numerics.Vector3(-3f, 0f, 0f)), m_shaderInstance);
-        //m_cubeModel.Draw(System.Numerics.Matrix4x4.CreateTranslation(new System.Numerics.Vector3(0f, 0f, 0f)), m_shaderInstance);
-        //m_testModel.Draw(System.Numerics.Matrix4x4.CreateTranslation(new System.Numerics.Vector3(3f, 0f, 0f)), m_shaderInstance);
-        //m_sphereModel.Draw(System.Numerics.Matrix4x4.CreateTranslation(new System.Numerics.Vector3(-1f, 0f, 0f)), m_shaderInstance);
-        //m_sphereModel.DrawTextured(m_transform.GetWorldMatrix(), m_textureShaderInstance, m_albedoMap, m_normalMap, m_metallicMap, m_roughnessMap, m_ambientOcclusionMap);
-
-        // Light sources
-        for (int i = 0; i < m_pointLightEntites.Length; i++)
-        {
-            //m_cubeModel.Draw(m_pointLightEntites[i].GetTransform().GetWorldMatrix(), m_material);
-            //Renderer.DrawUnlitMesh(m_vao, m_lightSourceShader, m_pointLightEntites[i].GetTransform().GetWorldMatrix(), m_pointLights[i].GetColour());
-        }
     }
 
     private void OnClose()

@@ -11,7 +11,7 @@ public static class Input
 
     internal static void Init(IInputContext inputContext)
     {
-        Logger.EngineInfo("Initialising input");
+        Logger.EngineInfo("Initialising Input");
         inputContext.Keyboards[0].KeyDown += OnKeyPressed;
         inputContext.Keyboards[0].KeyUp += OnKeyReleased;
 

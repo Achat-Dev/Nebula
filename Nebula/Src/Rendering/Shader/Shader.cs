@@ -3,8 +3,14 @@ using System.Text;
 
 namespace Nebula.Rendering;
 
-public class Shader : IDisposable
+public class Shader
 {
+    public enum NormalMode
+    {
+        UseNormals,
+        NoNormals,
+    }
+
     public enum DefaultType
     {
         Colour,
@@ -27,13 +33,16 @@ public class Shader : IDisposable
         Bool,
     }
 
+    private readonly bool r_useNormalMatrix;
     private readonly uint r_handle;
     private readonly Dictionary<string, int> r_uniformLocationCache = new Dictionary<string, int>();
 
     private readonly static Dictionary<(string, string), Shader> s_cache = new Dictionary<(string, string), Shader>();
 
-    private Shader(string vertexPath, string fragmentPath)
+    private Shader(string vertexPath, string fragmentPath, bool useNormalMatrix)
     {
+        r_useNormalMatrix = useNormalMatrix;
+
         // Create shaders
         uint vertexShaderHandle = CreateGLShader(ShaderType.VertexShader, GetSourceWithIncludes(AssetLoader.LoadAsFileContent(vertexPath)));
         uint fragmentShaderHandle = CreateGLShader(ShaderType.FragmentShader, GetSourceWithIncludes(AssetLoader.LoadAsFileContent(fragmentPath)));
@@ -66,7 +75,7 @@ public class Shader : IDisposable
         }
     }
 
-    public static Shader Create(string vertexPath, string fragmentPath)
+    public static Shader Create(string vertexPath, string fragmentPath, bool useNormalMatrix)
     {
         if (s_cache.TryGetValue((vertexPath, fragmentPath), out Shader shader))
         {
@@ -74,7 +83,7 @@ public class Shader : IDisposable
         }
 
         Logger.EngineDebug($"Creating new shader from sources: {vertexPath} and {fragmentPath}");
-        shader = new Shader(vertexPath, fragmentPath);
+        shader = new Shader(vertexPath, fragmentPath, useNormalMatrix);
         s_cache.Add((vertexPath, fragmentPath), shader);
         return shader;
     }
@@ -84,13 +93,13 @@ public class Shader : IDisposable
         switch (defaultType)
         {
             case DefaultType.Colour:
-                return Create("Shader/Colour.vert", "Shader/Colour.frag");
+                return Create("Shader/Colour.vert", "Shader/Colour.frag", false);
             case DefaultType.PBRFlat:
-                return Create("Shader/PBR_Flat.vert", "Shader/PBR_Flat.frag");
+                return Create("Shader/PBR_Flat.vert", "Shader/PBR_Flat.frag", true);
             case DefaultType.PBRTextured:
-                return Create("Shader/PBR_Textured.vert", "Shader/PBR_Textured.frag");
+                return Create("Shader/PBR_Textured.vert", "Shader/PBR_Textured.frag", true);
             default:
-                return Create("Shader/Fallback.vert", "Shader/Fallback.frag");
+                return Create("Shader/Fallback.vert", "Shader/Fallback.frag", false);
         }
     }
 
@@ -132,6 +141,33 @@ public class Shader : IDisposable
         }
 
         return source;
+    }
+
+    internal void Use()
+    {
+        GL.Get().UseProgram(r_handle);
+    }
+
+    internal bool UsesNormalMatrix()
+    {
+        return r_useNormalMatrix;
+    }
+
+    public void Delete()
+    {
+        (string, string) key = ("", "");
+        foreach (var item in s_cache)
+        {
+            if (item.Value == this)
+            {
+                key = item.Key;
+                break;
+            }
+        }
+
+        Logger.EngineDebug($"Deleting shader with sources: {key.Item1} and {key.Item2}");
+        Dispose();
+        s_cache.Remove(key);
     }
 
     internal void SetFloat(int location, float value)
@@ -179,33 +215,25 @@ public class Shader : IDisposable
         GL.Get().UniformMatrix3(location, 1, false, (float*)&value);
     }
 
-    internal unsafe void SetMat3(string name, Matrix3x3 value)
-    {
-        GL.Get().UniformMatrix3(r_uniformLocationCache[name], 1, false, (float*)&value);
-    }
-
     internal unsafe void SetMat4(int location, Matrix4x4 value)
     {
         GL.Get().UniformMatrix4(location, 1, false, (float*) &value);
     }
 
-    internal unsafe void SetMat4(string name, Matrix4x4 value)
-    {
-        GL.Get().UniformMatrix4(r_uniformLocationCache[name], 1, false, (float*)&value);
-    }
-
     internal int GetCachedUniformLocation(string name)
     {
-        return r_uniformLocationCache[name];
+        if (r_uniformLocationCache.TryGetValue(name, out int location))
+        {
+            return location;
+        }
+
+        Logger.EngineError($"Uniform \"{name}\" not found");
+        return -1;
     }
 
-    internal void Use()
+    private void Dispose()
     {
-        GL.Get().UseProgram(r_handle);
-    }
-
-    public void Dispose()
-    {
+        r_uniformLocationCache.Clear();
         GL.Get().DeleteProgram(r_handle);
     }
 

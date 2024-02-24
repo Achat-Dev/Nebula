@@ -2,25 +2,32 @@
 
 namespace Nebula;
 
-public class ModelRendererComponent : StartableComponent
+public class ModelRendererComponent : Component
 {
     private Model m_model;
     private ShaderInstance m_shaderInstance;
 
-    public override void OnCreate()
-    {
-        Renderer.RegisterModelRenderer(this);
-    }
-
     public override void OnDestroy()
     {
         base.OnDestroy();
-        Renderer.RemoveModelRenderer(this);
+        Renderer.UnregisterModelRenderer(this);
     }
 
-    internal void DrawLit()
+    internal void Draw()
     {
-        m_model.DrawLit(GetEntity().GetTransform().GetWorldMatrix(), m_shaderInstance);
+        m_model.Draw(GetEntity().GetTransform().GetWorldMatrix(), m_shaderInstance);
+    }
+
+    private void UpdateRegistration()
+    {
+        if (m_model != null && m_shaderInstance != null)
+        {
+            Renderer.RegisterModelRenderer(this);
+        }
+        else
+        {
+            Renderer.UnregisterModelRenderer(this);
+        }
     }
 
     public Model GetModel()
@@ -31,6 +38,7 @@ public class ModelRendererComponent : StartableComponent
     public void SetModel(Model model)
     {
         m_model = model;
+        UpdateRegistration();
     }
 
     public ShaderInstance GetShaderInstance()
@@ -41,5 +49,6 @@ public class ModelRendererComponent : StartableComponent
     public void SetShaderInstance(ShaderInstance shaderInstance)
     {
         m_shaderInstance = shaderInstance;
+        UpdateRegistration();
     }
 }

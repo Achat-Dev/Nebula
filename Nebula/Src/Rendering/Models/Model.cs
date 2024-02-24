@@ -50,11 +50,11 @@ public class Model : IDisposable
         r_meshes.Add(mesh);
     }
 
-    internal void DrawLit(Matrix4x4 modelMatrix, ShaderInstance shaderInstance)
+    internal void Draw(Matrix4x4 modelMatrix, ShaderInstance shaderInstance)
     {
         for (int i = 0; i < r_meshes.Count; i++)
         {
-            r_meshes[i].DrawLit(modelMatrix, shaderInstance);
+            r_meshes[i].Draw(modelMatrix, shaderInstance);
         }
     }
 

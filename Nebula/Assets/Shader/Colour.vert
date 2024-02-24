@@ -2,8 +2,9 @@
 
 layout (location = 0) in vec3 i_position;
 
+#include Shader/Include/UB_Matrices.glsl
+
 uniform mat4 u_model;
-uniform mat4 u_viewProjection;
 
 void main()
 {

@@ -4,7 +4,7 @@ namespace Nebula.Rendering;
 
 public static class Renderer
 {
-    private static List<ModelRendererComponent> s_modelRenderers = new List<ModelRendererComponent>();
+    private static HashSet<ModelRendererComponent> s_modelRenderers = new HashSet<ModelRendererComponent>();
 
     internal static void Init()
     {
@@ -16,24 +16,6 @@ public static class Renderer
     internal static void Clear()
     {
         GL.Get().Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-    }
-
-    internal static void RegisterModelRenderer(ModelRendererComponent modelRenderer)
-    {
-        s_modelRenderers.Add(modelRenderer);
-    }
-
-    internal static void RemoveModelRenderer(ModelRendererComponent modelRenderer)
-    {
-        s_modelRenderers.Remove(modelRenderer);
-    }
-
-    internal static void RenderFrame()
-    {
-        for (int i = 0; i < s_modelRenderers.Count; i++)
-        {
-            s_modelRenderers[i].DrawLit();
-        }
     }
 
     internal static void StartFrame(CameraComponent camera)
@@ -53,34 +35,45 @@ public static class Renderer
         matrixBuffer.BufferData(0, camera.GetViewProjectionMatrix());
     }
 
-    internal static unsafe void DrawLitMesh(VertexArrayObject vao, Matrix4x4 modelMatrix, ShaderInstance shaderInstance)
+    internal static void RenderFrame()
+    {
+        foreach (var modelRenderer in s_modelRenderers)
+        {
+            modelRenderer.Draw();
+        }
+    }
+
+    internal static unsafe void DrawMesh(VertexArrayObject vao, Matrix4x4 modelMatrix, ShaderInstance shaderInstance)
     {
         vao.Bind();
-        Shader shader = shaderInstance.GetShader();
-        shader.Use();
-        shaderInstance.SubmitDataToShader();
+        shaderInstance.SetMat4("u_model", modelMatrix);
+        if (shaderInstance.GetShader().UsesNormalMatrix())
+        {
+            if (modelMatrix.GetDeterminant() != 0f)
+            {
+                modelMatrix.Invert();
+                modelMatrix.Transpose();
+                shaderInstance.SetMat3("u_modelNormalMatrix", (Matrix3x3)modelMatrix);
+            }
+            else
+            {
+                shaderInstance.SetMat3("u_modelNormalMatrix", Matrix3x3.Identity);
+            }
+        }
 
-        shader.SetMat4("u_model", modelMatrix);
-        if (modelMatrix.GetDeterminant() != 0f)
-        {
-            modelMatrix.Invert();
-            modelMatrix.Transpose();
-            shader.SetMat3("u_modelNormalMatrix", (Matrix3x3)modelMatrix);
-        }
-        else
-        {
-            shader.SetMat3("u_modelNormalMatrix", Matrix3x3.Identity);
-        }
+        shaderInstance.GetShader().Use();
+        shaderInstance.SubmitDataToShader();
 
         GL.Get().DrawElements(PrimitiveType.Triangles, vao.GetIndexCount(), DrawElementsType.UnsignedInt, null);
     }
 
-    internal static unsafe void DrawUnlitMesh(VertexArrayObject vao, Shader shader, Matrix4x4 modelMatrix, Colour colour)
+    internal static void RegisterModelRenderer(ModelRendererComponent modelRenderer)
     {
-        vao.Bind();
-        shader.Use();
-        shader.SetMat4("u_model", modelMatrix);
-        //shader.SetVec3("u_colour", (Vector3)colour);
-        GL.Get().DrawElements(PrimitiveType.Triangles, vao.GetIndexCount(), DrawElementsType.UnsignedInt, null);
+        s_modelRenderers.Add(modelRenderer);
+    }
+
+    internal static void UnregisterModelRenderer(ModelRendererComponent modelRenderer)
+    {
+        s_modelRenderers.Remove(modelRenderer);
     }
 }

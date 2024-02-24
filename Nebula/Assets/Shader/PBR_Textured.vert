@@ -12,14 +12,14 @@ out vec3 io_normal;
 out vec3 io_tangent;
 out vec2 io_uv;
 
-uniform mat4 u_model;
-uniform mat3 u_modelNormalMatrix;
+uniform mat4 u_modelMatrix;
+uniform mat3 u_normalMatrix;
 
 void main()
 {
-	io_vertexPosition = vec3(u_model * vec4(i_position, 1.0));
-	io_normal = u_modelNormalMatrix * i_normal;
-	io_tangent = u_modelNormalMatrix * i_tangent;
+	io_vertexPosition = vec3(u_modelMatrix * vec4(i_position, 1.0));
+	io_normal = u_normalMatrix * i_normal;
+	io_tangent = u_normalMatrix * i_tangent;
 	io_uv = i_uv;
 	gl_Position = u_viewProjection * vec4(io_vertexPosition, 1.0);
 }

@@ -46,18 +46,18 @@ public static class Renderer
     internal static unsafe void DrawMesh(VertexArrayObject vao, Matrix4x4 modelMatrix, ShaderInstance shaderInstance)
     {
         vao.Bind();
-        shaderInstance.SetMat4("u_model", modelMatrix);
+        shaderInstance.SetMat4("u_modelMatrix", modelMatrix);
         if (shaderInstance.GetShader().UsesNormalMatrix())
         {
             if (modelMatrix.GetDeterminant() != 0f)
             {
                 modelMatrix.Invert();
                 modelMatrix.Transpose();
-                shaderInstance.SetMat3("u_modelNormalMatrix", (Matrix3x3)modelMatrix);
+                shaderInstance.SetMat3("u_normalMatrix", (Matrix3x3)modelMatrix);
             }
             else
             {
-                shaderInstance.SetMat3("u_modelNormalMatrix", Matrix3x3.Identity);
+                shaderInstance.SetMat3("u_normalMatrix", Matrix3x3.Identity);
             }
         }
 

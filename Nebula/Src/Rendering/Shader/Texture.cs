@@ -3,7 +3,7 @@ using StbImageSharp;
 
 namespace Nebula.Rendering;
 
-public class Texture : IDisposable
+public class Texture : ICacheable, IDisposable
 {
     public enum WrapMode
     {
@@ -59,7 +59,7 @@ public class Texture : IDisposable
     private readonly uint r_height;
     private readonly uint r_handle;
 
-    public unsafe Texture(string path, WrapMode wrapMode, FilterMode filterMode)
+    private unsafe Texture(string path, WrapMode wrapMode, FilterMode filterMode)
     {
         r_handle = GL.Get().GenTexture();
         Bind(Unit.Texture0);
@@ -84,6 +84,20 @@ public class Texture : IDisposable
         GL.Get().GenerateMipmap(TextureTarget.Texture2D);
     }
 
+    public static Texture Create(string path, WrapMode wrapMode, FilterMode filterMode)
+    {
+        if (Cache.TextureCache.GetValue(path, out Texture texture))
+        {
+            Logger.EngineDebug($"Texture from path \"{path}\" already exists, returning cached instance");
+            return texture;
+        }
+
+        Logger.EngineDebug($"Creating texture from path \"{path}\" with wrap mode {wrapMode} and filter mode {filterMode}");
+        texture = new Texture(path, wrapMode, filterMode);
+        Cache.TextureCache.CacheData(path, texture);
+        return texture;
+    }
+
     public uint GetWidth()
     {
         return r_width;
@@ -100,7 +114,19 @@ public class Texture : IDisposable
         GL.Get().BindTexture(TextureTarget.Texture2D, r_handle);
     }
 
-    public void Dispose()
+    public void Delete()
+    {
+        string key = Cache.TextureCache.GetKey(this);
+
+        Logger.EngineDebug($"Deleting texture loaded from path {key}");
+
+        IDisposable disposable = this;
+        disposable.Dispose();
+
+        Cache.TextureCache.RemoveData(key);
+    }
+
+    void IDisposable.Dispose()
     {
         GL.Get().DeleteTexture(r_handle);
     }

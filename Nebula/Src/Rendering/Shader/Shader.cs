@@ -3,14 +3,8 @@ using System.Text;
 
 namespace Nebula.Rendering;
 
-public class Shader
+public class Shader : ICacheable, IDisposable
 {
-    public enum NormalMode
-    {
-        UseNormals,
-        NoNormals,
-    }
-
     public enum DefaultType
     {
         Colour,
@@ -36,8 +30,6 @@ public class Shader
     private readonly bool r_useNormalMatrix;
     private readonly uint r_handle;
     private readonly Dictionary<string, int> r_uniformLocationCache = new Dictionary<string, int>();
-
-    private readonly static Dictionary<(string, string), Shader> s_cache = new Dictionary<(string, string), Shader>();
 
     private Shader(string vertexPath, string fragmentPath, bool useNormalMatrix)
     {
@@ -77,14 +69,15 @@ public class Shader
 
     public static Shader Create(string vertexPath, string fragmentPath, bool useNormalMatrix)
     {
-        if (s_cache.TryGetValue((vertexPath, fragmentPath), out Shader shader))
+        if (Cache.ShaderCache.GetValue((vertexPath, fragmentPath), out Shader shader))
         {
+            Logger.EngineDebug($"Shader from sources \"{vertexPath}\" and \"{fragmentPath}\" already exists, returning cached instance");
             return shader;
         }
 
-        Logger.EngineDebug($"Creating new shader from sources: {vertexPath} and {fragmentPath}");
+        Logger.EngineDebug($"Creating shader from sources \"{vertexPath}\" and \"{fragmentPath}\"");
         shader = new Shader(vertexPath, fragmentPath, useNormalMatrix);
-        s_cache.Add((vertexPath, fragmentPath), shader);
+        Cache.ShaderCache.CacheData((vertexPath, fragmentPath), shader);
         return shader;
     }
 
@@ -148,28 +141,6 @@ public class Shader
         GL.Get().UseProgram(r_handle);
     }
 
-    internal bool UsesNormalMatrix()
-    {
-        return r_useNormalMatrix;
-    }
-
-    public void Delete()
-    {
-        (string, string) key = ("", "");
-        foreach (var item in s_cache)
-        {
-            if (item.Value == this)
-            {
-                key = item.Key;
-                break;
-            }
-        }
-
-        Logger.EngineDebug($"Deleting shader with sources: {key.Item1} and {key.Item2}");
-        Dispose();
-        s_cache.Remove(key);
-    }
-
     internal void SetFloat(int location, float value)
     {
         GL.Get().Uniform1(location, value);
@@ -231,19 +202,26 @@ public class Shader
         return -1;
     }
 
-    private void Dispose()
+    internal bool UsesNormalMatrix()
+    {
+        return r_useNormalMatrix;
+    }
+
+    public void Delete()
+    {
+        (string, string) key = Cache.ShaderCache.GetKey(this);
+
+        Logger.EngineDebug($"Deleting shader with sources \"{key.Item1}\" and \"{key.Item2}\"");
+
+        IDisposable disposable = this;
+        disposable.Dispose();
+
+        Cache.ShaderCache.RemoveData(key);
+    }
+
+    void IDisposable.Dispose()
     {
         r_uniformLocationCache.Clear();
         GL.Get().DeleteProgram(r_handle);
-    }
-
-    internal static void DisposeCache()
-    {
-        Logger.EngineInfo("Disposing cached shaders");
-        foreach (var item in s_cache)
-        {
-            item.Value.Dispose();
-        }
-        s_cache.Clear();
     }
 }

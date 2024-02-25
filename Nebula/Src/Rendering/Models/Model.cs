@@ -5,16 +5,27 @@ using AssimpScene = Silk.NET.Assimp.Scene;
 
 namespace Nebula.Rendering;
 
-public class Model : IDisposable
+public class Model : ICacheable, IDisposable
 {
     private readonly List<Mesh> r_meshes = new List<Mesh>();
 
     private const uint c_postProcessSteps = (uint)(PostProcessSteps.Triangulate | PostProcessSteps.GenerateNormals | PostProcessSteps.GenerateUVCoords | PostProcessSteps.CalculateTangentSpace | PostProcessSteps.JoinIdenticalVertices);
 
-    private Model() { }
+    private unsafe Model(AssimpScene* assimpScene, AssimpNode* assimpNode)
+    {
+        CreateFromAssimpScene(this, assimpScene, assimpNode);
+    }
 
     public static unsafe Model Load(string path)
     {
+        if (Cache.ModelCache.GetValue(path, out Model model))
+        {
+            Logger.EngineDebug($"Model at path \"{path}\" is already loaded, returning cached instance");
+            return model;
+        }
+
+        Logger.EngineDebug($"Loading model at path \"{path}\"");
+
         AssimpScene* assimpScene = Assimp.Get().ImportFileFromMemory(AssetLoader.LoadAsByteArray(path, out int dataSize), (uint)dataSize, c_postProcessSteps, "");
 
         if (assimpScene == null || assimpScene->MFlags == Silk.NET.Assimp.Assimp.SceneFlagsIncomplete || assimpScene->MRootNode == null)
@@ -23,31 +34,27 @@ public class Model : IDisposable
             return null;
         }
 
-        Model model = new Model();
-        CreateFromAssimpScene(model, assimpScene, assimpScene->MRootNode);
+        model = new Model(assimpScene, assimpScene->MRootNode);
         Assimp.Get().FreeScene(assimpScene);
+
+        Cache.ModelCache.CacheData(path, model);
 
         return model;
     }
 
-    private static unsafe void CreateFromAssimpScene(Model model, AssimpScene* assimpScene, AssimpNode* assimpNode)
+    private unsafe void CreateFromAssimpScene(Model model, AssimpScene* assimpScene, AssimpNode* assimpNode)
     {
         for (int i = 0; i < assimpNode->MNumMeshes; i++)
         {
             AssimpMesh* assimpMesh = assimpScene->MMeshes[assimpNode->MMeshes[i]];
             Mesh mesh = Mesh.CreateFromAssimpMesh(assimpMesh);
-            model.AddMesh(mesh);
+            model.r_meshes.Add(mesh);
         }
 
         for (int i = 0; i < assimpNode->MNumChildren; i++)
         {
             CreateFromAssimpScene(model, assimpScene, assimpNode->MChildren[i]);
         }
-    }
-
-    private void AddMesh(Mesh mesh)
-    {
-        r_meshes.Add(mesh);
     }
 
     internal void Draw(Matrix4x4 modelMatrix, ShaderInstance shaderInstance)
@@ -58,7 +65,19 @@ public class Model : IDisposable
         }
     }
 
-    public void Dispose()
+    public void Delete()
+    {
+        string key = Cache.ModelCache.GetKey(this);
+
+        Logger.EngineDebug($"Deleting model loaded from path \"{key}\"");
+
+        IDisposable disposable = this;
+        disposable.Dispose();
+
+        Cache.ModelCache.RemoveData(key);
+    }
+
+    void IDisposable.Dispose()
     {
         for (int i = 0; i < r_meshes.Count; i++)
         {

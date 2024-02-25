@@ -2,7 +2,7 @@
 
 namespace Nebula.Rendering;
 
-internal class UniformBuffer : IDisposable
+internal class UniformBuffer : ICacheable, IDisposable
 {
     public enum DefaultType
     {
@@ -12,8 +12,6 @@ internal class UniformBuffer : IDisposable
     }
 
     private readonly uint r_handle;
-
-    private static readonly Dictionary<int, UniformBuffer> s_cache = new Dictionary<int, UniformBuffer>();
 
     private unsafe UniformBuffer(uint size, int location)
     {
@@ -26,7 +24,7 @@ internal class UniformBuffer : IDisposable
 
     public static UniformBuffer Create(int location, params UniformBufferLayout[] bufferLayouts)
     {
-        if (s_cache.TryGetValue(location, out _))
+        if (Cache.UniformBufferCache.GetValue(location, out _))
         {
             Logger.EngineError($"Couldn't create uniform buffer at location {location} because it already exists.\nEngine reserved uniform locations are 0, 1 and 2.\nReturning null");
             return null;
@@ -40,7 +38,7 @@ internal class UniformBuffer : IDisposable
 
         Logger.EngineDebug($"Creating uniform buffer at location {location} with a size of {bufferSize} bytes");
         UniformBuffer uniformBuffer = new UniformBuffer(bufferSize, location);
-        s_cache.Add(location, uniformBuffer);
+        Cache.UniformBufferCache.CacheData(location, uniformBuffer);
         return uniformBuffer;
     }
 
@@ -57,7 +55,8 @@ internal class UniformBuffer : IDisposable
 
     internal static UniformBuffer GetDefault(DefaultType defaultType)
     {
-        return s_cache[(int)defaultType];
+        Cache.UniformBufferCache.GetValue((int)defaultType, out UniformBuffer uniformBuffer);
+        return uniformBuffer;
     }
 
     private void Bind()
@@ -98,18 +97,19 @@ internal class UniformBuffer : IDisposable
         return stringBuilder.ToString();
     }
 
-    public void Dispose()
+    public void Delete()
     {
-        GL.Get().DeleteBuffer(r_handle);
+        int key = Cache.UniformBufferCache.GetKey(this);
+
+        Logger.EngineDebug($"Deleting uniform buffer at location {key}");
+        IDisposable disposable = this;
+        disposable.Dispose();
+
+        Cache.UniformBufferCache.RemoveData(key);
     }
 
-    public static void DisposeCache()
+    void IDisposable.Dispose()
     {
-        Logger.EngineInfo("Disposing cached uniform buffers");
-        for (int i = 0; i < s_cache.Count; i++)
-        {
-            s_cache[i].Dispose();
-        }
-        s_cache.Clear();
+        GL.Get().DeleteBuffer(r_handle);
     }
 }

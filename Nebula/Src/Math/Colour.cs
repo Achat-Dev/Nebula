@@ -49,6 +49,11 @@ public struct Colour : IEquatable<Colour>
 
     /* -------------------- Conversions -------------------- */
 
+    public static implicit operator System.Drawing.Color(Colour colour)
+    {
+        return System.Drawing.Color.FromArgb((int)(colour.A * 255), (int)(colour.R * 255), (int)(colour.G * 255), (int)(colour.B * 255));
+    }
+
     public static explicit operator System.Numerics.Vector4(Colour colour)
     {
         return new System.Numerics.Vector4(colour.R, colour.G, colour.B, colour.A);

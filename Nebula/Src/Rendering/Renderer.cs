@@ -13,6 +13,11 @@ public static class Renderer
         GL.Get().Enable(GLEnum.DepthTest);
     }
 
+    public static void SetClearColour(Colour colour)
+    {
+        GL.Get().ClearColor(colour);
+    }
+
     internal static void Clear()
     {
         GL.Get().Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);

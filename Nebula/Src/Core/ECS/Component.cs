@@ -4,14 +4,14 @@ public abstract class Component
 {
     protected Entity m_entity;
 
-    internal void SetEntity(Entity entity)
-    {
-        m_entity = entity;
-    }
-
     public Entity GetEntity()
     {
         return m_entity;
+    }
+
+    internal void SetEntity(Entity entity)
+    {
+        m_entity = entity;
     }
 
     public void Destroy()

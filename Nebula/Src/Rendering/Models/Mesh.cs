@@ -20,7 +20,7 @@ internal class Mesh : IDisposable
         r_vao = new VertexArrayObject(vbo, ibo, new BufferLayout(BufferElement.Vec3, BufferElement.Vec3, BufferElement.Vec3, BufferElement.Vec2));
     }
 
-    public static unsafe Mesh CreateFromAssimpMesh(AssimpMesh* assimpMesh)
+    internal static unsafe Mesh CreateFromAssimpMesh(AssimpMesh* assimpMesh)
     {
         // Load vertices
         List<Vertex> vertices = new List<Vertex>();
@@ -62,7 +62,7 @@ internal class Mesh : IDisposable
         return new Mesh(vertices.ToArray(), indices.ToArray());
     }
 
-    public void Draw(Matrix4x4 modelMatrix, ShaderInstance shaderInstance)
+    internal void Draw(Matrix4x4 modelMatrix, ShaderInstance shaderInstance)
     {
         Renderer.DrawMesh(r_vao, modelMatrix, shaderInstance);
     }

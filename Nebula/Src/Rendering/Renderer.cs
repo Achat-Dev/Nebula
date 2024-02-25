@@ -8,7 +8,7 @@ public static class Renderer
 
     internal static void Init()
     {
-        Logger.EngineInfo("Initialising Renderer");
+        Logger.EngineInfo("Initialising renderer");
         GL.Get().ClearColor(System.Drawing.Color.LightBlue);
         GL.Get().Enable(GLEnum.DepthTest);
     }

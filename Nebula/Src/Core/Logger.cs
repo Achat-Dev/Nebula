@@ -46,12 +46,12 @@ public static class Logger
             .WriteTo.File(path: filePath, outputTemplate: clientOutputTemplate, shared: true)
             .CreateLogger();
 
-        EngineInfo("Initialising log");
+        EngineInfo("Initialising logger");
     }
 
     internal static void Flush()
     {
-        EngineInfo("Flushing log");
+        EngineInfo("Flushing logger");
         Serilog.Log.CloseAndFlush();
     }
 

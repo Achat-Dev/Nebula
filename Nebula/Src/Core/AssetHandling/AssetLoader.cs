@@ -6,13 +6,13 @@ internal static class AssetLoader
 {
     private static Assembly s_assembly;
 
-    public static void Init()
+    internal static void Init()
     {
-        Logger.EngineInfo("Initialising engine resources");
+        Logger.EngineInfo("Initialising asset loader");
         s_assembly = typeof(AssetLoader).Assembly;
     }
 
-    public static string LoadAsFileContent(string path)
+    internal static string LoadAsFileContent(string path)
     {
         if (GetStream(path, out Stream stream))
         {
@@ -24,7 +24,7 @@ internal static class AssetLoader
         return string.Empty;
     }
 
-    public static byte[] LoadAsByteArray(string path, out int dataSize)
+    internal static byte[] LoadAsByteArray(string path, out int dataSize)
     {
         if (GetStream(path, out Stream stream))
         {
@@ -40,13 +40,13 @@ internal static class AssetLoader
         return default(byte[]);
     }
 
-    public static Stream LoadAsStream(string path)
+    internal static Stream LoadAsStream(string path)
     {
         GetStream(path, out Stream stream);
         return stream;
     }
 
-    internal static bool GetStream(string path, out Stream stream)
+    private static bool GetStream(string path, out Stream stream)
     {
         path = path.Replace('/', '.');
         path = "Nebula.Assets." + path;

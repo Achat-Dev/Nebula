@@ -6,22 +6,18 @@ internal class VertexArrayObject : IDisposable
     private readonly BufferObject<uint> r_ibo;
     private readonly uint r_handle;
 
-    public VertexArrayObject(BufferObject<Vertex> vertexBuffer, BufferObject<uint> indexBuffer, BufferLayout bufferLayout)
+    public unsafe VertexArrayObject(BufferObject<Vertex> vertexBuffer, BufferObject<uint> indexBuffer, BufferLayout bufferLayout)
     {
         r_vbo = vertexBuffer;
         r_ibo = indexBuffer;
         r_handle = GL.Get().GenVertexArray();
 
         Bind();
-        SetVertexBufferLayout(bufferLayout);
-    }
 
-    private unsafe void SetVertexBufferLayout(BufferLayout bufferLayout)
-    {
         BufferElement[] bufferElements = bufferLayout.GetElements();
         for (uint i = 0; i < bufferElements.Length; i++)
         {
-            GL.Get().VertexAttribPointer(i, bufferElements[i].GetCount(), bufferElements[i].GetGLType(), false, bufferLayout.GetStride(), (void*)bufferElements[i].Offset);
+            GL.Get().VertexAttribPointer(i, bufferElements[i].GetCount(), bufferElements[i].GetGLType(), false, bufferLayout.GetByteSize(), (void*)bufferElements[i].Offset);
             GL.Get().EnableVertexAttribArray(i);
         }
     }

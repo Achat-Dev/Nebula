@@ -40,7 +40,7 @@ public class Game
 
     private void Dispose()
     {
-        Logger.EngineInfo("Closing game");
+        Logger.EngineInfo("Disposing game");
         m_window.Close();
         m_window.Dispose();
         Logger.Flush();

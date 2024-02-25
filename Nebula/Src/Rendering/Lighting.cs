@@ -21,11 +21,6 @@ public static class Lighting
     private static readonly List<PointLightComponent> s_pointLights = new List<PointLightComponent>();
     private static int s_pointLightCount = 0;
 
-    public static DirectionalLight GetDirectionalLight()
-    {
-        return s_directionalLight;
-    }
-
     internal static void AddPointLight(PointLightComponent pointLight)
     {
         s_pointLights.Add(pointLight);
@@ -38,11 +33,6 @@ public static class Lighting
         s_pointLightCount = Math.Max(0, s_pointLightCount - 1);
     }
 
-    public static List<PointLightComponent> GetPointLights()
-    {
-        return s_pointLights;
-    }
-
     internal static PointLightData[] GetPointLightData()
     {
         PointLightData[] data = new PointLightData[s_pointLightCount];
@@ -53,6 +43,11 @@ public static class Lighting
             data[i].Range = s_pointLights[i].GetRange();
         }
         return data;
+    }
+
+    public static DirectionalLight GetDirectionalLight()
+    {
+        return s_directionalLight;
     }
 
     public static int GetPointLightCount()

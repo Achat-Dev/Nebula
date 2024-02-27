@@ -4,13 +4,34 @@ namespace Nebula.Rendering;
 
 public static class Renderer
 {
+    private static Framebuffer s_framebuffer;
+    private static Shader s_screenShader;
+    private static RawVertexArrayObject s_screenRvao;
     private static HashSet<ModelRendererComponent> s_modelRenderers = new HashSet<ModelRendererComponent>();
 
-    internal static void Init()
+    internal static void Init(Vector2i windowSize)
     {
         Logger.EngineInfo("Initialising renderer");
+
+        s_framebuffer = new Framebuffer(windowSize);
+        s_screenShader = Shader.Create("Shader/Output.vert", "Shader/Output.frag", false);
+
+        float[] screenVertices =
+        {
+            -1f,  1f, 0f, 1f,
+            -1f, -1f, 0f, 0f,
+             1f, -1f, 1f, 0f,
+
+            -1f,  1f, 0f, 1f,
+             1f, -1f, 1f, 0f,
+             1f,  1f, 1f, 1f,
+        };
+
+        BufferObject<float> rvbo = new BufferObject<float>(screenVertices, BufferTargetARB.ArrayBuffer);
+        BufferLayout bufferLayout = new BufferLayout(BufferElement.Vec2, BufferElement.Vec2);
+        s_screenRvao = new RawVertexArrayObject(rvbo, bufferLayout);
+
         GL.Get().ClearColor(System.Drawing.Color.LightBlue);
-        GL.Get().Enable(GLEnum.DepthTest);
     }
 
     public static void SetClearColour(Colour colour)
@@ -18,17 +39,31 @@ public static class Renderer
         GL.Get().ClearColor(colour);
     }
 
-    internal static void Render()
+    internal static void Render(CameraComponent camera)
     {
-
-    }
-
-    internal static void Clear()
-    {
+        // Render to framebuffer
+        s_framebuffer.Bind();
+        GL.Get().Enable(GLEnum.DepthTest);
         GL.Get().Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
+        UpdateUniformBuffers(camera);
+
+        foreach (var modelRenderer in s_modelRenderers)
+        {
+            modelRenderer.Draw();
+        }
+
+        // Render framebuffer to screen
+        s_framebuffer.Unbind();
+        s_screenShader.Use();
+        GL.Get().Disable(GLEnum.DepthTest);
+        GL.Get().Clear(ClearBufferMask.ColorBufferBit);
+        GL.Get().ActiveTexture(TextureUnit.Texture0);
+        GL.Get().BindTexture(TextureTarget.Texture2D, s_framebuffer.GetColourAttachment());
+        s_screenRvao.Draw();
     }
 
-    internal static void StartFrame(CameraComponent camera)
+    private static void UpdateUniformBuffers(CameraComponent camera)
     {
         UniformBuffer cameraBuffer = UniformBuffer.GetDefault(UniformBuffer.DefaultType.Camera);
         cameraBuffer.BufferData(0, camera.GetEntity().GetTransform().GetWorldPosition());
@@ -45,17 +80,8 @@ public static class Renderer
         matrixBuffer.BufferData(0, camera.GetViewProjectionMatrix());
     }
 
-    internal static void RenderFrame()
+    internal static void DrawMesh(VertexArrayObject vao, Matrix4x4 modelMatrix, ShaderInstance shaderInstance)
     {
-        foreach (var modelRenderer in s_modelRenderers)
-        {
-            modelRenderer.Draw();
-        }
-    }
-
-    internal static unsafe void DrawMesh(VertexArrayObject vao, Matrix4x4 modelMatrix, ShaderInstance shaderInstance)
-    {
-        vao.Bind();
         shaderInstance.SetMat4("u_modelMatrix", modelMatrix);
         if (shaderInstance.GetShader().UsesNormalMatrix())
         {
@@ -73,9 +99,7 @@ public static class Renderer
 
         shaderInstance.GetShader().Use();
         shaderInstance.SubmitDataToShader();
-
         vao.Draw();
-        //GL.Get().DrawElements(PrimitiveType.Triangles, vao.GetIndexCount(), DrawElementsType.UnsignedInt, null);
     }
 
     internal static void RegisterModelRenderer(ModelRendererComponent modelRenderer)
@@ -86,5 +110,12 @@ public static class Renderer
     internal static void UnregisterModelRenderer(ModelRendererComponent modelRenderer)
     {
         s_modelRenderers.Remove(modelRenderer);
+    }
+
+    internal static void Dispose()
+    {
+        Logger.EngineInfo("Disposing renderer");
+        s_framebuffer.Dispose();
+        s_screenRvao.Dispose();
     }
 }

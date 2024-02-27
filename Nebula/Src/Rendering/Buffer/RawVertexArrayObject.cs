@@ -15,8 +15,8 @@ internal class RawVertexArrayObject : IDisposable
 
         Bind();
 
-        BufferElement[] bufferElements = bufferLayout.GetElements();
         uint vertexCount = 0;
+        BufferElement[] bufferElements = bufferLayout.GetElements();
         for (uint i = 0; i < bufferElements.Length; i++)
         {
             vertexCount += (uint)bufferElements[i].GetCount();
@@ -24,10 +24,9 @@ internal class RawVertexArrayObject : IDisposable
             GL.Get().EnableVertexAttribArray(i);
         }
         r_vertexCount = vertexBuffer.GetElementCount() / vertexCount;
-        Logger.EngineInfo(r_vertexCount);
     }
 
-    public void Bind()
+    private void Bind()
     {
         GL.Get().BindVertexArray(r_handle);
         r_vbo.Bind();
@@ -41,6 +40,7 @@ internal class RawVertexArrayObject : IDisposable
 
     public unsafe void Draw()
     {
+        Bind();
         GL.Get().DrawArrays(PrimitiveType.Triangles, 0, r_vertexCount);
     }
 }

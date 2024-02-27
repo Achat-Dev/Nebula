@@ -12,10 +12,6 @@ internal class Window : IDisposable
     public static event Action<Vector2i> Resizing;
 
     // Temporary
-    private Framebuffer m_framebuffer;
-    private RawVertexArrayObject m_rvao;
-    private Shader m_screenshader;
-
     private CameraComponent m_camera;
     private Entity[] m_pointLightEntites = new Entity[3];
 
@@ -67,27 +63,10 @@ internal class Window : IDisposable
         Nebula.Input.Init(m_window.CreateInput());
         Nebula.Rendering.GL.Init(Silk.NET.OpenGL.GL.GetApi(m_window));
         Nebula.Rendering.Assimp.Init();
+        Nebula.Rendering.Renderer.Init(m_window.Size);
         Nebula.Rendering.UniformBuffer.CreateDefaults();
-        Nebula.Rendering.Renderer.Init();
 
         // Temporary
-        m_framebuffer = new Framebuffer(m_window.Size);
-        m_screenshader = Shader.Create("Shader/Output.vert", "Shader/Output.frag", false);
-
-        float[] rawVertices =
-        {
-            -1f,  1f, 0f, 1f,
-            -1f, -1f, 0f, 0f,
-             1f, -1f, 1f, 0f,
-
-            -1f,  1f, 0f, 1f,
-             1f, -1f, 1f, 0f,
-             1f,  1f, 1f, 1f,
-        };
-
-        BufferObject<float> rvbo = new BufferObject<float>(rawVertices, Silk.NET.OpenGL.BufferTargetARB.ArrayBuffer);
-        m_rvao = new RawVertexArrayObject(rvbo, new BufferLayout(BufferElement.Vec2, BufferElement.Vec2));
-
         // PBR Flat
         ShaderInstance shaderInstance = new ShaderInstance(Shader.Create(Shader.DefaultType.PBRFlat));
         shaderInstance.SetVec3("u_albedo", (Vector3)Colour.White);
@@ -186,22 +165,7 @@ internal class Window : IDisposable
 
     private unsafe void OnRender(double deltaTime)
     {
-        m_framebuffer.Bind();
-        GL.Get().Enable(Silk.NET.OpenGL.GLEnum.DepthTest);
-        Renderer.Clear();
-        Renderer.StartFrame(m_camera);
-        Renderer.RenderFrame();
-
-        m_framebuffer.Unbind();
-        GL.Get().Disable(Silk.NET.OpenGL.GLEnum.DepthTest);
-        GL.Get().Clear(Silk.NET.OpenGL.ClearBufferMask.ColorBufferBit);
-
-        m_screenshader.Use();
-        m_rvao.Bind();
-        GL.Get().ActiveTexture(Silk.NET.OpenGL.TextureUnit.Texture0);
-        GL.Get().BindTexture(Silk.NET.OpenGL.TextureTarget.Texture2D, m_framebuffer.GetColourAttachment());
-        m_rvao.Draw();
-        //GL.Get().DrawElements(Silk.NET.OpenGL.PrimitiveType.Triangles, m_vao.GetIndexCount(), Silk.NET.OpenGL.DrawElementsType.UnsignedInt, null);
+        Nebula.Rendering.Renderer.Render(m_camera);
     }
 
     private void OnClose()
@@ -209,8 +173,9 @@ internal class Window : IDisposable
         Logger.EngineInfo("Closing window");
         m_isOpen = false;
         Game.Closing?.Invoke();
+        Renderer.Dispose();
+        GL.Dispose();
+        Assimp.Dispose();
         Cache.Dispose();
-        m_framebuffer.Dispose();
-        m_rvao.Dispose();
     }
 }

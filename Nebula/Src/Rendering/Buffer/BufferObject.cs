@@ -13,6 +13,7 @@ internal class BufferObject<T> : IDisposable
         r_handle = GL.Get().GenBuffer();
         r_elementCount = (uint)data.Length;
         r_bufferTarget = bufferTarget;
+
         Bind();
 
         fixed (void* d = data)

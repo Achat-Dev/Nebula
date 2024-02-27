@@ -24,7 +24,7 @@ internal class VertexArrayObject : IDisposable
         }
     }
 
-    public void Bind()
+    private void Bind()
     {
         GL.Get().BindVertexArray(r_handle);
         r_vbo.Bind();
@@ -40,6 +40,7 @@ internal class VertexArrayObject : IDisposable
 
     public unsafe void Draw()
     {
+        Bind();
         GL.Get().DrawElements(PrimitiveType.Triangles, r_ibo.GetElementCount(), DrawElementsType.UnsignedInt, null);
     }
 }

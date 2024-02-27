@@ -13,18 +13,21 @@ public static class Renderer
     {
         Logger.EngineInfo("Initialising renderer");
 
-        s_framebuffer = new Framebuffer(windowSize);
+        FramebufferAttachment colourAttachment = new FramebufferAttachment(windowSize, FramebufferAttachment.AttachmentType.Colour, FramebufferAttachment.ReadWriteMode.Readable);
+        FramebufferAttachment depthAttachment = new FramebufferAttachment(windowSize, FramebufferAttachment.AttachmentType.Depth, FramebufferAttachment.ReadWriteMode.Writeonly);
+        s_framebuffer = new Framebuffer(windowSize, colourAttachment, depthAttachment);
         s_screenShader = Shader.Create("Shader/Output.vert", "Shader/Output.frag", false);
 
         float[] screenVertices =
         {
-            -1f,  1f, 0f, 1f,
-            -1f, -1f, 0f, 0f,
-             1f, -1f, 1f, 0f,
+            // Position     // UV
+            -1f,  1f,       0f, 1f,
+            -1f, -1f,       0f, 0f,
+             1f, -1f,       1f, 0f,
 
-            -1f,  1f, 0f, 1f,
-             1f, -1f, 1f, 0f,
-             1f,  1f, 1f, 1f,
+            -1f,  1f,       0f, 1f,
+             1f, -1f,       1f, 0f,
+             1f,  1f,       1f, 1f,
         };
 
         BufferObject<float> rvbo = new BufferObject<float>(screenVertices, BufferTargetARB.ArrayBuffer);
@@ -59,7 +62,7 @@ public static class Renderer
         GL.Get().Disable(GLEnum.DepthTest);
         GL.Get().Clear(ClearBufferMask.ColorBufferBit);
         GL.Get().ActiveTexture(TextureUnit.Texture0);
-        GL.Get().BindTexture(TextureTarget.Texture2D, s_framebuffer.GetColourAttachment());
+        GL.Get().BindTexture(TextureTarget.Texture2D, s_framebuffer.GetAttachment(FramebufferAttachment.AttachmentType.Colour));
         s_screenRvao.Draw();
     }
 

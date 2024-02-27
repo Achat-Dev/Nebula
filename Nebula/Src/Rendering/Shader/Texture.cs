@@ -55,9 +55,9 @@ public class Texture : ICacheable, IDisposable
         Texture31,
     }
 
+    private readonly uint r_handle;
     private readonly uint r_width;
     private readonly uint r_height;
-    private readonly uint r_handle;
 
     private unsafe Texture(string path, WrapMode wrapMode, FilterMode filterMode)
     {

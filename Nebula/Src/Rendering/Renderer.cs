@@ -18,6 +18,11 @@ public static class Renderer
         GL.Get().ClearColor(colour);
     }
 
+    internal static void Render()
+    {
+
+    }
+
     internal static void Clear()
     {
         GL.Get().Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
@@ -69,7 +74,8 @@ public static class Renderer
         shaderInstance.GetShader().Use();
         shaderInstance.SubmitDataToShader();
 
-        GL.Get().DrawElements(PrimitiveType.Triangles, vao.GetIndexCount(), DrawElementsType.UnsignedInt, null);
+        vao.Draw();
+        //GL.Get().DrawElements(PrimitiveType.Triangles, vao.GetIndexCount(), DrawElementsType.UnsignedInt, null);
     }
 
     internal static void RegisterModelRenderer(ModelRendererComponent modelRenderer)

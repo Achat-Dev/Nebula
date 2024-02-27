@@ -27,8 +27,8 @@ public class Shader : ICacheable, IDisposable
         Bool,
     }
 
-    private readonly bool r_useNormalMatrix;
     private readonly uint r_handle;
+    private readonly bool r_useNormalMatrix;
     private readonly Dictionary<string, int> r_uniformLocationCache = new Dictionary<string, int>();
 
     private Shader(string vertexPath, string fragmentPath, bool useNormalMatrix)

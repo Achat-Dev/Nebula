@@ -13,7 +13,7 @@ internal class Window : IDisposable
 
     // Temporary
     private Framebuffer m_framebuffer;
-    private VertexArrayObject m_vao;
+    private RawVertexArrayObject m_rvao;
     private Shader m_screenshader;
 
     private CameraComponent m_camera;
@@ -73,23 +73,20 @@ internal class Window : IDisposable
         // Temporary
         m_framebuffer = new Framebuffer(m_window.Size);
         m_screenshader = Shader.Create("Shader/Output.vert", "Shader/Output.frag", false);
-        Vertex[] vertices =
+
+        float[] rawVertices =
         {
-            new Vertex{ Position = new Vector3(-1f,  1f, 0f), UV = new Vector2(0f, 1f) },
-            new Vertex{ Position = new Vector3(-1f,  -1f, 0f), UV = new Vector2(0f, 0f) },
-            new Vertex{ Position = new Vector3(1f,  -1f, 0f), UV = new Vector2(1f, 0f) },
-            new Vertex{ Position = new Vector3(1f,  1f, 0f), UV = new Vector2(1f, 1f) },
+            -1f,  1f, 0f, 1f,
+            -1f, -1f, 0f, 0f,
+             1f, -1f, 1f, 0f,
+
+            -1f,  1f, 0f, 1f,
+             1f, -1f, 1f, 0f,
+             1f,  1f, 1f, 1f,
         };
 
-        uint[] indices =
-        {
-            0, 1, 2,
-            0, 2, 3
-        };
-
-        BufferObject<Vertex> vbo = new BufferObject<Vertex>(vertices, Silk.NET.OpenGL.BufferTargetARB.ArrayBuffer);
-        BufferObject<uint> ibo = new BufferObject<uint>(indices, Silk.NET.OpenGL.BufferTargetARB.ElementArrayBuffer);
-        m_vao = new VertexArrayObject(vbo, ibo, new BufferLayout(BufferElement.Vec3, BufferElement.Vec3, BufferElement.Vec3, BufferElement.Vec2));
+        BufferObject<float> rvbo = new BufferObject<float>(rawVertices, Silk.NET.OpenGL.BufferTargetARB.ArrayBuffer);
+        m_rvao = new RawVertexArrayObject(rvbo, new BufferLayout(BufferElement.Vec2, BufferElement.Vec2));
 
         // PBR Flat
         ShaderInstance shaderInstance = new ShaderInstance(Shader.Create(Shader.DefaultType.PBRFlat));
@@ -200,10 +197,11 @@ internal class Window : IDisposable
         GL.Get().Clear(Silk.NET.OpenGL.ClearBufferMask.ColorBufferBit);
 
         m_screenshader.Use();
-        m_vao.Bind();
+        m_rvao.Bind();
         GL.Get().ActiveTexture(Silk.NET.OpenGL.TextureUnit.Texture0);
         GL.Get().BindTexture(Silk.NET.OpenGL.TextureTarget.Texture2D, m_framebuffer.GetColourAttachment());
-        GL.Get().DrawElements(Silk.NET.OpenGL.PrimitiveType.Triangles, m_vao.GetIndexCount(), Silk.NET.OpenGL.DrawElementsType.UnsignedInt, null);
+        m_rvao.Draw();
+        //GL.Get().DrawElements(Silk.NET.OpenGL.PrimitiveType.Triangles, m_vao.GetIndexCount(), Silk.NET.OpenGL.DrawElementsType.UnsignedInt, null);
     }
 
     private void OnClose()
@@ -213,6 +211,6 @@ internal class Window : IDisposable
         Game.Closing?.Invoke();
         Cache.Dispose();
         m_framebuffer.Dispose();
-        m_vao.Dispose();
+        m_rvao.Dispose();
     }
 }

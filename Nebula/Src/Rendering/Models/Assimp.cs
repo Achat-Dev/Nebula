@@ -10,6 +10,12 @@ internal static class Assimp
         r_assimp = Silk.NET.Assimp.Assimp.GetApi();
     }
 
+    internal static void Dispose()
+    {
+        Logger.EngineInfo("Disposing Assimp");
+        r_assimp.Dispose();
+    }
+
     public static Silk.NET.Assimp.Assimp Get()
     {
         return r_assimp;

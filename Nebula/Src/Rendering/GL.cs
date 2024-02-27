@@ -10,6 +10,12 @@ internal static class GL
         r_gl = gl;
     }
 
+    internal static void Dispose()
+    {
+        Logger.EngineInfo("Disposing OpenGL");
+        r_gl.Dispose();
+    }
+
     public static Silk.NET.OpenGL.GL Get()
     {
         return r_gl;

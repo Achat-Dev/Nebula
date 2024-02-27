@@ -12,6 +12,10 @@ internal class Window : IDisposable
     public static event Action<Vector2i> Resizing;
 
     // Temporary
+    private Framebuffer m_framebuffer;
+    private VertexArrayObject m_vao;
+    private Shader m_screenshader;
+
     private CameraComponent m_camera;
     private Entity[] m_pointLightEntites = new Entity[3];
 
@@ -58,7 +62,7 @@ internal class Window : IDisposable
         Resizing?.Invoke(size);
     }
 
-    private void OnLoad()
+    private unsafe void OnLoad()
     {
         Nebula.Input.Init(m_window.CreateInput());
         Nebula.Rendering.GL.Init(Silk.NET.OpenGL.GL.GetApi(m_window));
@@ -67,6 +71,26 @@ internal class Window : IDisposable
         Nebula.Rendering.Renderer.Init();
 
         // Temporary
+        m_framebuffer = new Framebuffer(m_window.Size);
+        m_screenshader = Shader.Create("Shader/Output.vert", "Shader/Output.frag", false);
+        Vertex[] vertices =
+        {
+            new Vertex{ Position = new Vector3(-1f,  1f, 0f), UV = new Vector2(0f, 1f) },
+            new Vertex{ Position = new Vector3(-1f,  -1f, 0f), UV = new Vector2(0f, 0f) },
+            new Vertex{ Position = new Vector3(1f,  -1f, 0f), UV = new Vector2(1f, 0f) },
+            new Vertex{ Position = new Vector3(1f,  1f, 0f), UV = new Vector2(1f, 1f) },
+        };
+
+        uint[] indices =
+        {
+            0, 1, 2,
+            0, 2, 3
+        };
+
+        BufferObject<Vertex> vbo = new BufferObject<Vertex>(vertices, Silk.NET.OpenGL.BufferTargetARB.ArrayBuffer);
+        BufferObject<uint> ibo = new BufferObject<uint>(indices, Silk.NET.OpenGL.BufferTargetARB.ElementArrayBuffer);
+        m_vao = new VertexArrayObject(vbo, ibo, new BufferLayout(BufferElement.Vec3, BufferElement.Vec3, BufferElement.Vec3, BufferElement.Vec2));
+
         // PBR Flat
         ShaderInstance shaderInstance = new ShaderInstance(Shader.Create(Shader.DefaultType.PBRFlat));
         shaderInstance.SetVec3("u_albedo", (Vector3)Colour.White);
@@ -163,11 +187,23 @@ internal class Window : IDisposable
         Input.RefreshInputStates();
     }
 
-    private void OnRender(double deltaTime)
+    private unsafe void OnRender(double deltaTime)
     {
+        m_framebuffer.Bind();
+        GL.Get().Enable(Silk.NET.OpenGL.GLEnum.DepthTest);
         Renderer.Clear();
         Renderer.StartFrame(m_camera);
         Renderer.RenderFrame();
+
+        m_framebuffer.Unbind();
+        GL.Get().Disable(Silk.NET.OpenGL.GLEnum.DepthTest);
+        GL.Get().Clear(Silk.NET.OpenGL.ClearBufferMask.ColorBufferBit);
+
+        m_screenshader.Use();
+        m_vao.Bind();
+        GL.Get().ActiveTexture(Silk.NET.OpenGL.TextureUnit.Texture0);
+        GL.Get().BindTexture(Silk.NET.OpenGL.TextureTarget.Texture2D, m_framebuffer.GetColourAttachment());
+        GL.Get().DrawElements(Silk.NET.OpenGL.PrimitiveType.Triangles, m_vao.GetIndexCount(), Silk.NET.OpenGL.DrawElementsType.UnsignedInt, null);
     }
 
     private void OnClose()
@@ -176,5 +212,7 @@ internal class Window : IDisposable
         m_isOpen = false;
         Game.Closing?.Invoke();
         Cache.Dispose();
+        m_framebuffer.Dispose();
+        m_vao.Dispose();
     }
 }

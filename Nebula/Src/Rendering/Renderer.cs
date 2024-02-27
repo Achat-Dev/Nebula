@@ -4,18 +4,14 @@ namespace Nebula.Rendering;
 
 public static class Renderer
 {
-    private static Framebuffer s_framebuffer;
     private static Shader s_screenShader;
     private static RawVertexArrayObject s_screenRvao;
     private static HashSet<ModelRendererComponent> s_modelRenderers = new HashSet<ModelRendererComponent>();
 
-    internal static void Init(Vector2i windowSize)
+    internal static void Init()
     {
         Logger.EngineInfo("Initialising renderer");
 
-        FramebufferAttachment colourAttachment = new FramebufferAttachment(windowSize, FramebufferAttachment.AttachmentType.Colour, FramebufferAttachment.ReadWriteMode.Readable);
-        FramebufferAttachment depthAttachment = new FramebufferAttachment(windowSize, FramebufferAttachment.AttachmentType.Depth, FramebufferAttachment.ReadWriteMode.Writeonly);
-        s_framebuffer = new Framebuffer(windowSize, colourAttachment, depthAttachment);
         s_screenShader = Shader.Create("Shader/Output.vert", "Shader/Output.frag", false);
 
         float[] screenVertices =
@@ -45,7 +41,8 @@ public static class Renderer
     internal static void Render(CameraComponent camera)
     {
         // Render to framebuffer
-        s_framebuffer.Bind();
+        Framebuffer framebuffer = camera.GetFramebuffer();
+        framebuffer.Bind();
         GL.Get().Enable(GLEnum.DepthTest);
         GL.Get().Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
@@ -57,12 +54,12 @@ public static class Renderer
         }
 
         // Render framebuffer to screen
-        s_framebuffer.Unbind();
+        framebuffer.Unbind();
         s_screenShader.Use();
         GL.Get().Disable(GLEnum.DepthTest);
         GL.Get().Clear(ClearBufferMask.ColorBufferBit);
         GL.Get().ActiveTexture(TextureUnit.Texture0);
-        GL.Get().BindTexture(TextureTarget.Texture2D, s_framebuffer.GetAttachment(FramebufferAttachment.AttachmentType.Colour));
+        GL.Get().BindTexture(TextureTarget.Texture2D, framebuffer.GetAttachment(FramebufferAttachment.AttachmentType.Colour));
         s_screenRvao.Draw();
     }
 
@@ -118,7 +115,6 @@ public static class Renderer
     internal static void Dispose()
     {
         Logger.EngineInfo("Disposing renderer");
-        s_framebuffer.Dispose();
         s_screenRvao.Dispose();
     }
 }

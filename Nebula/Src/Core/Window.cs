@@ -52,6 +52,11 @@ internal class Window : IDisposable
         m_window.Dispose();
     }
 
+    internal Vector2i GetSize()
+    {
+        return m_window.Size;
+    }
+
     private void OnResize(Silk.NET.Maths.Vector2D<int> size)
     {
         GL.Get().Viewport(size);
@@ -63,7 +68,7 @@ internal class Window : IDisposable
         Nebula.Input.Init(m_window.CreateInput());
         Nebula.Rendering.GL.Init(Silk.NET.OpenGL.GL.GetApi(m_window));
         Nebula.Rendering.Assimp.Init();
-        Nebula.Rendering.Renderer.Init(m_window.Size);
+        Nebula.Rendering.Renderer.Init();
         Nebula.Rendering.UniformBuffer.CreateDefaults();
 
         // Temporary

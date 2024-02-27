@@ -9,7 +9,6 @@ internal class Framebuffer : IDisposable
 
     public Framebuffer(Vector2i size, params FramebufferAttachment[] attachments)
     {
-        Window.Resizing += Resize;
         r_attachments = attachments;
         Resize(size);
     }
@@ -73,6 +72,5 @@ internal class Framebuffer : IDisposable
             r_attachments[i].Dispose();
         }
         GL.Get().DeleteFramebuffer(m_handle);
-        Window.Resizing -= Resize;
     }
 }

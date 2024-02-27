@@ -46,6 +46,11 @@ public class Game
         Logger.Flush();
     }
 
+    internal static Vector2i GetWindowSize()
+    {
+        return s_instance.m_window.GetSize();
+    }
+
     public static void Close()
     {
         s_instance.m_window.Close();

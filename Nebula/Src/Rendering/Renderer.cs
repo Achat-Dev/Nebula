@@ -58,8 +58,7 @@ public static class Renderer
         s_screenShader.Use();
         GL.Get().Disable(GLEnum.DepthTest);
         GL.Get().Clear(ClearBufferMask.ColorBufferBit);
-        GL.Get().ActiveTexture(TextureUnit.Texture0);
-        GL.Get().BindTexture(TextureTarget.Texture2D, framebuffer.GetAttachment(FramebufferAttachment.AttachmentType.Colour));
+        framebuffer.GetAttachment(FramebufferAttachment.AttachmentType.Colour).Bind(Texture.Unit.Texture0);
         s_screenRvao.Draw();
     }
 

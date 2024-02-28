@@ -2,7 +2,7 @@
 
 namespace Nebula.Rendering;
 
-internal struct FramebufferAttachment : IDisposable
+internal class FramebufferAttachment : IDisposable
 {
     public enum AttachmentType
     {
@@ -66,6 +66,17 @@ internal struct FramebufferAttachment : IDisposable
         GL.Get().BindRenderbuffer(RenderbufferTarget.Renderbuffer, 0);
 
         GL.Get().FramebufferRenderbuffer(FramebufferTarget.Framebuffer, Silk.NET.OpenGL.FramebufferAttachment.DepthStencilAttachment, RenderbufferTarget.Renderbuffer, m_handle);
+    }
+
+    public void Bind(Texture.Unit textureUnit)
+    {
+        if (r_readWriteMode == ReadWriteMode.Writeonly)
+        {
+            Logger.EngineError("Trying to bind a writeonly framebuffer attachment");
+            return;
+        }
+        GL.Get().ActiveTexture((TextureUnit)textureUnit);
+        GL.Get().BindTexture(TextureTarget.Texture2D, m_handle);
     }
 
     public uint GetHandle()

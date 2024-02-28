@@ -52,17 +52,17 @@ internal class Framebuffer : IDisposable
         GL.Get().BindFramebuffer(FramebufferTarget.Framebuffer, 0);
     }
 
-    public uint GetAttachment(FramebufferAttachment.AttachmentType attachmentType)
+    public FramebufferAttachment GetAttachment(FramebufferAttachment.AttachmentType attachmentType)
     {
         for (int i = 0; i < r_attachments.Length; i++)
         {
             if (r_attachments[i].GetAttachmentType() == attachmentType)
             {
-                return r_attachments[i].GetHandle();
+                return r_attachments[i];
             }
         }
         Logger.EngineError($"Framebuffer doesn't have an attachment of type {attachmentType}");
-        return 0;
+        return null;
     }
 
     public void Dispose()

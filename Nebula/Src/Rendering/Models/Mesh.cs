@@ -8,7 +8,7 @@ internal class Mesh : IDisposable
 {
     private readonly Vertex[] r_vertices;
     private readonly uint[] r_indices;
-    private readonly VertexArrayObject r_vao;
+    private readonly VertexArrayObject<Vertex> r_vao;
 
     private Mesh(Vertex[] vertices, uint[] indices)
     {
@@ -17,7 +17,7 @@ internal class Mesh : IDisposable
 
         BufferObject<Vertex> vbo = new BufferObject<Vertex>(vertices, BufferTargetARB.ArrayBuffer);
         BufferObject<uint> ibo = new BufferObject<uint>(indices, BufferTargetARB.ElementArrayBuffer);
-        r_vao = new VertexArrayObject(vbo, ibo, new BufferLayout(BufferElement.Vec3, BufferElement.Vec3, BufferElement.Vec3, BufferElement.Vec2));
+        r_vao = new VertexArrayObject<Vertex>(vbo, ibo, new BufferLayout(BufferElement.Vec3, BufferElement.Vec3, BufferElement.Vec3, BufferElement.Vec2));
     }
 
     internal static unsafe Mesh CreateFromAssimpMesh(AssimpMesh* assimpMesh)

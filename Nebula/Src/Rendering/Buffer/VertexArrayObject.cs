@@ -2,13 +2,13 @@
 
 namespace Nebula.Rendering;
 
-internal class VertexArrayObject : IDisposable
+internal class VertexArrayObject<T> : IDisposable
 {
     private readonly uint r_handle;
-    private readonly BufferObject<Vertex> r_vbo;
+    private readonly BufferObject<T> r_vbo;
     private readonly BufferObject<uint> r_ibo;
 
-    public unsafe VertexArrayObject(BufferObject<Vertex> vertexBuffer, BufferObject<uint> indexBuffer, BufferLayout bufferLayout)
+    public unsafe VertexArrayObject(BufferObject<T> vertexBuffer, BufferObject<uint> indexBuffer, BufferLayout bufferLayout)
     {
         r_vbo = vertexBuffer;
         r_ibo = indexBuffer;

@@ -1,8 +1,8 @@
 ﻿namespace Nebula.Rendering;
 
-internal struct UniformBufferLayout
+public struct UniformBufferLayout
 {
-    public readonly uint ByteSize;
+    internal readonly uint ByteSize;
 
     public UniformBufferLayout(params UniformBufferElement[] elements)
         : this(1, elements) { }

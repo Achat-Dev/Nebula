@@ -7,6 +7,9 @@ internal class Framebuffer : IDisposable
     private uint m_handle;
     private readonly FramebufferAttachment[] r_attachments;
 
+    public Framebuffer(params FramebufferAttachment[] attachments)
+        : this(Game.GetWindowSize(), attachments) { }
+
     public Framebuffer(Vector2i size, params FramebufferAttachment[] attachments)
     {
         r_attachments = attachments;
@@ -23,7 +26,8 @@ internal class Framebuffer : IDisposable
 
         if (m_handle != 0)
         {
-            Dispose();
+            IDisposable disposable = this;
+            disposable.Dispose();
         }
 
         m_handle = GL.Get().GenFramebuffer();
@@ -65,11 +69,13 @@ internal class Framebuffer : IDisposable
         return null;
     }
 
-    public void Dispose()
+    void IDisposable.Dispose()
     {
+        IDisposable disposable;
         for (int i = 0; i < r_attachments.Length; i++)
         {
-            r_attachments[i].Dispose();
+            disposable = r_attachments[i];
+            disposable.Dispose();
         }
         GL.Get().DeleteFramebuffer(m_handle);
     }

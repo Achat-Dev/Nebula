@@ -104,8 +104,7 @@ internal class Window : IDisposable
         // Camera
         Entity cameraEntity = new Entity("Camera");
         m_camera = cameraEntity.AddComponent<CameraComponent>();
-        TransformComponent transform = cameraEntity.GetTransform();
-        transform.Translate(new Vector3(0, 0, -5));
+        cameraEntity.GetTransform().Translate(new Vector3(0, 0, -5));
 
         PointLightComponent[] pointLights = new PointLightComponent[3];
         ShaderInstance[] flatShaderInstances = new ShaderInstance[3];

@@ -20,7 +20,7 @@ internal class FramebufferAttachment : IDisposable
     private readonly AttachmentType r_attachmentType;
     private readonly ReadWriteMode r_readWriteMode;
 
-    public unsafe FramebufferAttachment(Vector2i size, AttachmentType attachmentType, ReadWriteMode readWriteMode)
+    public FramebufferAttachment(Vector2i size, AttachmentType attachmentType, ReadWriteMode readWriteMode)
     {
         r_attachmentType = attachmentType;
         r_readWriteMode = readWriteMode;
@@ -28,11 +28,12 @@ internal class FramebufferAttachment : IDisposable
         Resize(size);
     }
 
-    public void Resize(Vector2i size)
+    internal void Resize(Vector2i size)
     {
         if (m_handle != 0)
         {
-            Dispose();
+            IDisposable disposable = this;
+            disposable.Dispose();
         }
 
         switch (r_attachmentType)
@@ -89,12 +90,12 @@ internal class FramebufferAttachment : IDisposable
         return m_handle;
     }
 
-    public AttachmentType GetAttachmentType()
+    internal AttachmentType GetAttachmentType()
     {
         return r_attachmentType;
     }
 
-    public void Dispose()
+    void IDisposable.Dispose()
     {
         switch (r_attachmentType)
         {

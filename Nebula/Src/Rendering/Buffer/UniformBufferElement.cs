@@ -1,6 +1,6 @@
 ﻿namespace Nebula.Rendering;
 
-internal struct UniformBufferElement
+public struct UniformBufferElement
 {
     private readonly Shader.DataType r_shaderDataType;
 
@@ -21,7 +21,7 @@ internal struct UniformBufferElement
         r_shaderDataType = shaderDataType;
     }
 
-    public uint GetByteSize()
+    internal uint GetByteSize()
     {
         switch (r_shaderDataType)
         {
@@ -42,7 +42,7 @@ internal struct UniformBufferElement
         }
     }
 
-    public uint GetBaseOffset()
+    internal uint GetBaseOffset()
     {
         switch (r_shaderDataType)
         {

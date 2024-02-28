@@ -2,9 +2,9 @@
 
 namespace Nebula.Rendering;
 
-internal class UniformBuffer : ICacheable, IDisposable
+public class UniformBuffer : ICacheable, IDisposable
 {
-    public enum DefaultType
+    internal enum DefaultType
     {
         Matrices,
         Camera,
@@ -53,10 +53,19 @@ internal class UniformBuffer : ICacheable, IDisposable
             new UniformBufferLayout(128, UniformBufferElement.Float, UniformBufferElement.Vec3, UniformBufferElement.Vec3));
     }
 
-    internal static UniformBuffer GetDefault(DefaultType defaultType)
+    public static UniformBuffer GetAtLocation(int location)
     {
-        Cache.UniformBufferCache.GetValue((int)defaultType, out UniformBuffer uniformBuffer);
-        return uniformBuffer;
+        if (Cache.UniformBufferCache.GetValue(location, out UniformBuffer uniformBuffer))
+        {
+            return uniformBuffer;
+        }
+        Logger.EngineError($"No uniform buffer at location {location} exists");
+        return null;
+    }
+
+    internal static UniformBuffer GetAtLocation(DefaultType defaultType)
+    {
+        return GetAtLocation((int)defaultType);
     }
 
     private void Bind()
@@ -79,7 +88,7 @@ internal class UniformBuffer : ICacheable, IDisposable
         Unbind();
     }
 
-    public unsafe string ReadData<T>(int offset, int length)
+    public unsafe T[] ReadData<T>(int offset, int length)
     {
         Bind();
 
@@ -88,13 +97,9 @@ internal class UniformBuffer : ICacheable, IDisposable
         fixed (void* d = &data[0])
         {
             GL.Get().GetBufferSubData(BufferTargetARB.UniformBuffer, offset, (nuint)length, d);
-            for (int i = 0; i < data.Length; i++)
-            {
-                stringBuilder.AppendLine(data[i].ToString());
-            }
         }
 
-        return stringBuilder.ToString();
+        return data;
     }
 
     public void Delete()

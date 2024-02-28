@@ -64,18 +64,18 @@ public static class Renderer
 
     private static void UpdateUniformBuffers(CameraComponent camera)
     {
-        UniformBuffer cameraBuffer = UniformBuffer.GetDefault(UniformBuffer.DefaultType.Camera);
+        UniformBuffer cameraBuffer = UniformBuffer.GetAtLocation(UniformBuffer.DefaultType.Camera);
         cameraBuffer.BufferData(0, camera.GetEntity().GetTransform().GetWorldPosition());
 
         DirectionalLight directionalLight = Lighting.GetDirectionalLight();
         Vector4 directionalLightColour = ((Vector4)directionalLight.GetColour()) * directionalLight.GetIntensity();
 
-        UniformBuffer lightBuffer = UniformBuffer.GetDefault(UniformBuffer.DefaultType.Lights);
+        UniformBuffer lightBuffer = UniformBuffer.GetAtLocation(UniformBuffer.DefaultType.Lights);
         lightBuffer.BufferData(0, Lighting.GetPointLightCount());
         lightBuffer.BufferData(16, (Vector4)directionalLight.GetDirection(), directionalLightColour);
         lightBuffer.BufferData(48, Lighting.GetPointLightData());
 
-        UniformBuffer matrixBuffer = UniformBuffer.GetDefault(UniformBuffer.DefaultType.Matrices);
+        UniformBuffer matrixBuffer = UniformBuffer.GetAtLocation(UniformBuffer.DefaultType.Matrices);
         matrixBuffer.BufferData(0, camera.GetViewProjectionMatrix());
     }
 

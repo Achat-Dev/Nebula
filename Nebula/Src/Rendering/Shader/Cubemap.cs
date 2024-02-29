@@ -81,7 +81,8 @@ internal class Cubemap : ICacheable, IDisposable
         }
 
         framebuffer.Unbind();
-        framebuffer.Dispose();
+        IDisposable disposable = framebuffer;
+        disposable.Dispose();
 
         hdrTexture.Delete();
 

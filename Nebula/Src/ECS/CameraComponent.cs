@@ -27,7 +27,8 @@ public class CameraComponent : StartableComponent
     public override void OnDestroy()
     {
         base.OnDestroy();
-        m_framebuffer.Dispose();
+        IDisposable disposable = m_framebuffer;
+        disposable.Dispose();
         Window.Resizing -= OnResize;
     }
 

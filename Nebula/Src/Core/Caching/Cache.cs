@@ -4,7 +4,7 @@ namespace Nebula;
 
 internal static class Cache
 {
-    internal static readonly CacheObject<string, Cubemap> CubemapCache = new CacheObject<string, Cubemap>();
+    internal static readonly CacheObject<object, Cubemap> CubemapCache = new CacheObject<object, Cubemap>();
     internal static readonly CacheObject<string, Model> ModelCache = new CacheObject<string, Model>();
     internal static readonly CacheObject<(string, string), Shader> ShaderCache = new CacheObject<(string, string), Shader>();
     internal static readonly CacheObject<string, Texture> TextureCache = new CacheObject<string, Texture>();

@@ -161,6 +161,11 @@ public class Texture : ICacheable, IDisposable
         GL.Get().BindTexture(TextureTarget.Texture2D, r_handle);
     }
 
+    internal uint GetHandle()
+    {
+        return r_handle;
+    }
+
     public void Delete()
     {
         string key = Cache.TextureCache.GetKey(this);

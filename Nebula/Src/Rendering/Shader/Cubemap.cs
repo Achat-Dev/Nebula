@@ -106,8 +106,16 @@ internal class Cubemap : ICacheable, IDisposable
 
     public static Cubemap Create(Texture hdrTexture, Vector2i faceSize)
     {
-        // Todo: Add caching
-        Cubemap cubemap = new Cubemap(hdrTexture, faceSize);
+        uint handle = hdrTexture.GetHandle();
+
+        if (Cache.CubemapCache.GetValue(handle, out Cubemap cubemap))
+        {
+            Logger.EngineDebug($"Cubemap from texture with handle {handle} already exists, returning cached instance");
+            return cubemap;
+        }
+        Logger.EngineDebug($"Creating cubemap from texture with handle {handle}");
+        cubemap = new Cubemap(hdrTexture, faceSize);
+        Cache.CubemapCache.CacheData(handle, cubemap);
         return cubemap;
     }
 
@@ -119,9 +127,9 @@ internal class Cubemap : ICacheable, IDisposable
 
     public void Delete()
     {
-        string key = Cache.CubemapCache.GetKey(this);
+        object key = Cache.CubemapCache.GetKey(this);
 
-        Logger.EngineDebug($"Deleting cubemap loaded from path {key}");
+        Logger.EngineDebug($"Deleting cubemap loaded from path / from texture with handle \"{key}\"");
 
         IDisposable disposable = this;
         disposable.Dispose();

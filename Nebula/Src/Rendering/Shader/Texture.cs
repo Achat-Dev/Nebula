@@ -83,7 +83,7 @@ public class Texture : ICacheable, IDisposable
         }
     }
 
-    public static Texture Create(string path, WrapMode wrapMode, FilterMode filterMode, Format format)
+    public static Texture Create(string path, WrapMode wrapMode, FilterMode filterMode, Format format, bool flipVertical = false)
     {
         if (Cache.TextureCache.GetValue(path, out Texture texture))
         {
@@ -92,7 +92,12 @@ public class Texture : ICacheable, IDisposable
         }
 
         Logger.EngineDebug($"Creating texture from path \"{path}\" with wrap mode {wrapMode}, filter mode {filterMode} and format {format}");
+        if (flipVertical)
+        {
+            StbImage.stbi_set_flip_vertically_on_load(1);
+        }
         texture = new Texture(path, wrapMode, filterMode, format);
+        StbImage.stbi_set_flip_vertically_on_load(0);
         Cache.TextureCache.CacheData(path, texture);
         return texture;
     }

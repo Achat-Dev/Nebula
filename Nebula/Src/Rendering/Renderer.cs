@@ -73,7 +73,7 @@ public static class Renderer
             "Art/Textures/Cubemap_Bottom.jpg",
             "Art/Textures/Cubemap_Front.jpg",
             "Art/Textures/Cubemap_Back.jpg");*/
-        s_skybox = Cubemap.Create(Texture.Create("Art/Textures/Skydome.hdr", Texture.WrapMode.ClampToEdge, Texture.FilterMode.Linear, Texture.Format.Hdr));
+        s_skybox = Cubemap.Create(Texture.Create("Art/Textures/Skydome.hdr", Texture.WrapMode.ClampToEdge, Texture.FilterMode.Linear, Texture.Format.Hdr, true), new Vector2i(512, 512));
 
         GL.Get().ClearColor(System.Drawing.Color.LightBlue);
     }

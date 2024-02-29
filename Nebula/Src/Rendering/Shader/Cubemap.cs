@@ -29,10 +29,8 @@ internal class Cubemap : ICacheable, IDisposable
         GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
     }
 
-    private unsafe Cubemap(Texture hdrTexture)
+    private unsafe Cubemap(Texture hdrTexture, Vector2i faceSize)
     {
-        Vector2i faceSize = new Vector2i(512, 512);
-
         r_handle = GL.Get().GenTexture();
         Bind(Texture.Unit.Texture0);
 
@@ -135,9 +133,10 @@ internal class Cubemap : ICacheable, IDisposable
         return cubemap;
     }
 
-    public static Cubemap Create(Texture hdrTexture)
+    public static Cubemap Create(Texture hdrTexture, Vector2i faceSize)
     {
-        Cubemap cubemap = new Cubemap(hdrTexture);
+        // Todo: Add caching
+        Cubemap cubemap = new Cubemap(hdrTexture, faceSize);
         return cubemap;
     }
 

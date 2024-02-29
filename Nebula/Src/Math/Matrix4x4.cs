@@ -262,13 +262,25 @@ public struct Matrix4x4 : IEquatable<Matrix4x4>
         return result;
     }
 
+    public static Matrix4x4 CreateLookAt(Vector3 position, Vector3 target, Vector3 up)
+    {
+        return System.Numerics.Matrix4x4.CreateLookAt(position, target, up);
+    }
+
     public static Matrix4x4 CreateLookAtLeftHanded(Vector3 position, Vector3 target, Vector3 up)
     {
         return System.Numerics.Matrix4x4.CreateLookAtLeftHanded(position, target, up);
     }
 
+    public static Matrix4x4 CreatePerspectiveFieldOfView(float fov, float aspectRatio, float nearClippingPlane, float farClippingPlane)
+    {
+        fov = MathHelper.DegreesToRadians(fov);
+        return System.Numerics.Matrix4x4.CreatePerspectiveFieldOfView(fov, aspectRatio, nearClippingPlane, farClippingPlane);
+    }
+
     public static Matrix4x4 CreatePerspectiveFieldOfViewLeftHanded(float fov, float aspectRatio, float nearClippingPlane, float farClippingPlane)
     {
+        fov = MathHelper.DegreesToRadians(fov);
         return System.Numerics.Matrix4x4.CreatePerspectiveFieldOfViewLeftHanded(fov, aspectRatio, nearClippingPlane, farClippingPlane);
     }
 

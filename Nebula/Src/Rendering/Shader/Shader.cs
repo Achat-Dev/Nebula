@@ -71,7 +71,7 @@ public class Shader : ICacheable, IDisposable
     {
         if (Cache.ShaderCache.GetValue((vertexPath, fragmentPath), out Shader shader))
         {
-            Logger.EngineDebug($"Shader from sources \"{vertexPath}\" and \"{fragmentPath}\" already exists, returning cached instance");
+            Logger.EngineVerbose($"Shader from sources \"{vertexPath}\" and \"{fragmentPath}\" already exists, returning cached instance");
             return shader;
         }
 

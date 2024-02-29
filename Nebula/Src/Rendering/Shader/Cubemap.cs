@@ -96,7 +96,7 @@ internal class Cubemap : ICacheable, IDisposable
         // | But if they are mixed this can lead to retrieving the wrong cubemap from cache
         if (Cache.CubemapCache.GetValue(pathRight, out Cubemap cubemap))
         {
-            Logger.EngineDebug($"Cubemap from path \"{pathRight}\", ... already exists, returning cached instance");
+            Logger.EngineVerbose($"Cubemap from path \"{pathRight}\", ... already exists, returning cached instance");
             return cubemap;
         }
         Logger.EngineDebug($"Creating cubemap from path \"{pathRight}\", ...");
@@ -111,7 +111,7 @@ internal class Cubemap : ICacheable, IDisposable
 
         if (Cache.CubemapCache.GetValue(handle, out Cubemap cubemap))
         {
-            Logger.EngineDebug($"Cubemap from texture with handle {handle} already exists, returning cached instance");
+            Logger.EngineVerbose($"Cubemap from texture with handle {handle} already exists, returning cached instance");
             return cubemap;
         }
         Logger.EngineDebug($"Creating cubemap from texture with handle {handle}");

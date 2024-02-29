@@ -87,11 +87,11 @@ public class Texture : ICacheable, IDisposable
     {
         if (Cache.TextureCache.GetValue(path, out Texture texture))
         {
-            Logger.EngineDebug($"Texture from path \"{path}\" already exists, returning cached instance");
+            Logger.EngineVerbose($"Texture from path \"{path}\" already exists, returning cached instance");
             return texture;
         }
 
-        Logger.EngineDebug($"Creating texture from path \"{path}\" with wrap mode {wrapMode}, filter mode {filterMode} and format {format}");
+        Logger.EngineDebug($"Creating texture from path \"{path}\" with wrap mode \"{wrapMode}\", filter mode \"{filterMode}\" and format \"{format}\"");
         if (flipVertical)
         {
             StbImage.stbi_set_flip_vertically_on_load(1);

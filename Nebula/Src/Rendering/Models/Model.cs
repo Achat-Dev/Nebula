@@ -25,7 +25,7 @@ public class Model : ICacheable, IDisposable
     {
         if (Cache.ModelCache.GetValue(path, out Model model))
         {
-            Logger.EngineDebug($"Model at path \"{path}\" is already loaded, returning cached instance");
+            Logger.EngineVerbose($"Model at path \"{path}\" is already loaded, returning cached instance");
             return model;
         }
 

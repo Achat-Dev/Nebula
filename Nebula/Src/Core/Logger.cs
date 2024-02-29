@@ -7,11 +7,12 @@ namespace Nebula;
 
 public enum LogLevel
 {
-    Debug = 1,
-    Info = 2,
-    Warn = 3,
-    Error = 4,
-    Fatal = 5,
+    Verbose,
+    Debug,
+    Info,
+    Warn,
+    Error,
+    Fatal,
 }
 
 public static class Logger
@@ -55,6 +56,7 @@ public static class Logger
         Serilog.Log.CloseAndFlush();
     }
 
+    internal static void EngineVerbose(object o) { m_devLogger.Verbose(o.ToString()); }
     internal static void EngineDebug(object o) { m_devLogger.Debug(o.ToString()); }
     internal static void EngineInfo(object o) { m_devLogger.Information(o.ToString()); }
     internal static void EngineWarn(object o) { m_devLogger.Warning(o.ToString() + Environment.NewLine + new StackTrace(1, true).ToString()); }
@@ -72,6 +74,7 @@ public static class Logger
         }
     }
 
+    public static void Verbose(object o) { m_appLogger.Verbose(o.ToString()); }
     public static void Debug(object o) { m_appLogger.Debug(o.ToString()); }
     public static void Info(object o) { m_appLogger.Information(o.ToString()); }
     public static void Warn(object o) { m_appLogger.Warning(o.ToString()); }

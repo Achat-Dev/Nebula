@@ -6,46 +6,65 @@ namespace Nebula.Rendering;
 
 internal class Mesh : IDisposable
 {
-    private readonly Vertex[] r_vertices;
+    private readonly float[] r_vertices;
     private readonly uint[] r_indices;
-    private readonly VertexArrayObject<Vertex> r_vao;
+    private readonly VertexArrayObject r_vao;
 
-    private Mesh(Vertex[] vertices, uint[] indices)
+    private Mesh(float[] vertices, uint[] indices, VertexFlags vertexFlags)
     {
         r_vertices = vertices;
         r_indices = indices;
 
-        BufferObject<Vertex> vbo = new BufferObject<Vertex>(vertices, BufferTargetARB.ArrayBuffer);
+        BufferObject<float> vbo = new BufferObject<float>(vertices, BufferTargetARB.ArrayBuffer);
         BufferObject<uint> ibo = new BufferObject<uint>(indices, BufferTargetARB.ElementArrayBuffer);
-        r_vao = new VertexArrayObject<Vertex>(vbo, ibo, new BufferLayout(BufferElement.Vec3, BufferElement.Vec3, BufferElement.Vec3, BufferElement.Vec2));
+        r_vao = new VertexArrayObject(vbo, ibo, vertexFlags.GenerateBufferLayout());
     }
 
-    internal static unsafe Mesh CreateFromAssimpMesh(AssimpMesh* assimpMesh)
+    internal static unsafe Mesh CreateFromAssimpMesh(AssimpMesh* assimpMesh, VertexFlags vertexFlags)
     {
         // Load vertices
-        List<Vertex> vertices = new List<Vertex>();
+        int vertexCount = (int)assimpMesh->MNumVertices;
+        int elementCount = vertexFlags.GetElementCount();
+        float[] vertices = new float[vertexCount * elementCount];
+
+        Vector3 position;
+        Vector3 normal;
+        Vector3 tangent;
+        Vector3 uv;
+        int count = 0;
+
         for (int i = 0; i < assimpMesh->MNumVertices; i++)
         {
-            Vertex vertex = new Vertex();
-            vertex.Position = assimpMesh->MVertices[i];
-
-            if (assimpMesh->MNormals != null)
+            if (vertexFlags.HasFlag(VertexFlags.Position))
             {
-                vertex.Normal = assimpMesh->MNormals[i];
+                position = assimpMesh->MVertices[i];
+                vertices[count++] = position.X;
+                vertices[count++] = position.Y;
+                vertices[count++] = position.Z;
             }
 
-            if (assimpMesh->MTangents != null)
+            if (vertexFlags.HasFlag(VertexFlags.Normal) && assimpMesh->MNormals != null)
             {
-                vertex.Tangent = assimpMesh->MTangents[i];
+                normal = assimpMesh->MNormals[i];
+                vertices[count++] = normal.X;
+                vertices[count++] = normal.Y;
+                vertices[count++] = normal.Z;
             }
 
-            if (assimpMesh->MTextureCoords[0] != null)
+            if (vertexFlags.HasFlag(VertexFlags.Tangent) && assimpMesh->MTangents != null)
             {
-                Vector3 uv = assimpMesh->MTextureCoords[0][i];
-                vertex.UV = (Vector2)uv;
+                tangent = assimpMesh->MTangents[i];
+                vertices[count++] = tangent.X;
+                vertices[count++] = tangent.Y;
+                vertices[count++] = tangent.Z;
             }
 
-            vertices.Add(vertex);
+            if (vertexFlags.HasFlag(VertexFlags.UV) && assimpMesh->MTextureCoords[0] != null)
+            {
+                uv = assimpMesh->MTextureCoords[0][i];
+                vertices[count++] = uv.X;
+                vertices[count++] = uv.Y;
+            }
         }
 
         // Load indices
@@ -59,12 +78,17 @@ internal class Mesh : IDisposable
             }
         }
 
-        return new Mesh(vertices.ToArray(), indices.ToArray());
+        return new Mesh(vertices, indices.ToArray(), vertexFlags);
     }
 
     internal void Draw(Matrix4x4 modelMatrix, ShaderInstance shaderInstance)
     {
         Renderer.DrawMesh(r_vao, modelMatrix, shaderInstance);
+    }
+
+    internal VertexArrayObject GetVao()
+    {
+        return r_vao;
     }
 
     public void Dispose()

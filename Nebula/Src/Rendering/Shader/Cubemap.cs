@@ -62,38 +62,9 @@ internal class Cubemap : ICacheable, IDisposable
             Matrix4x4.CreateLookAt(Vector3.Zero, -Vector3.Forward, -Vector3.Up),
         };
 
-        float[] skyboxVertices =
-        {
-            // positions
-            -1.0f,  1.0f, -1.0f,
-            -1.0f, -1.0f, -1.0f,
-             1.0f, -1.0f, -1.0f,
-             1.0f,  1.0f, -1.0f,
-            -1.0f, -1.0f,  1.0f,
-            -1.0f,  1.0f,  1.0f,
-             1.0f, -1.0f,  1.0f,
-             1.0f,  1.0f,  1.0f,
-        };
-
-        uint[] skyboxIndices =
-        {
-            0, 1, 2,
-            2, 3, 0,
-            4, 1, 0,
-            0, 5, 4,
-            2, 6, 7,
-            7, 3, 2,
-            4, 5, 7,
-            7, 6, 4,
-            0, 3, 7,
-            7, 5, 0,
-            1, 4, 2,
-            2, 4, 6,
-        };
-
-        BufferObject<float> skyboxVbo = new BufferObject<float>(skyboxVertices, BufferTargetARB.ArrayBuffer);
-        BufferObject<uint> skyboxIbo = new BufferObject<uint>(skyboxIndices, BufferTargetARB.ElementArrayBuffer);
-        VertexArrayObject<float> vao = new VertexArrayObject<float>(skyboxVbo, skyboxIbo, new BufferLayout(BufferElement.Vec3));
+        // Don't dispose this as this is the vao from the cached cube model
+        // | Disposing this will make the cube model unable to render
+        VertexArrayObject vao = Model.Load("Art/Models/Cube.obj", VertexFlags.Position).GetMeshes()[0].GetVao();
 
         hdrTexture.Bind(Texture.Unit.Texture0);
         Shader mappingShader = Shader.Create("Shader/EquirectangularToCubemap.vert", "Shader/EquirectangularToCubemap.frag", false);
@@ -155,7 +126,7 @@ internal class Cubemap : ICacheable, IDisposable
         IDisposable disposable = this;
         disposable.Dispose();
 
-        Cache.TextureCache.RemoveData(key);
+        Cache.CubemapCache.RemoveData(key);
     }
 
     void IDisposable.Dispose()

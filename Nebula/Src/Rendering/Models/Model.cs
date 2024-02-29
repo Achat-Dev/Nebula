@@ -11,12 +11,17 @@ public class Model : ICacheable, IDisposable
 
     private const uint c_postProcessSteps = (uint)(PostProcessSteps.Triangulate | PostProcessSteps.GenerateNormals | PostProcessSteps.GenerateUVCoords | PostProcessSteps.CalculateTangentSpace | PostProcessSteps.JoinIdenticalVertices);
 
-    private unsafe Model(AssimpScene* assimpScene, AssimpNode* assimpNode)
+    private unsafe Model(AssimpScene* assimpScene, AssimpNode* assimpNode, VertexFlags vertexFlags)
     {
-        CreateFromAssimpScene(this, assimpScene, assimpNode);
+        CreateFromAssimpScene(this, assimpScene, assimpNode, vertexFlags);
     }
 
     public static unsafe Model Load(string path)
+    {
+        return Load(path, VertexFlags.Position | VertexFlags.Normal | VertexFlags.Tangent | VertexFlags.UV);
+    }
+
+    public static unsafe Model Load(string path, VertexFlags vertexFlags)
     {
         if (Cache.ModelCache.GetValue(path, out Model model))
         {
@@ -34,7 +39,7 @@ public class Model : ICacheable, IDisposable
             return null;
         }
 
-        model = new Model(assimpScene, assimpScene->MRootNode);
+        model = new Model(assimpScene, assimpScene->MRootNode, vertexFlags);
         Assimp.Get().FreeScene(assimpScene);
 
         Cache.ModelCache.CacheData(path, model);
@@ -42,18 +47,18 @@ public class Model : ICacheable, IDisposable
         return model;
     }
 
-    private unsafe void CreateFromAssimpScene(Model model, AssimpScene* assimpScene, AssimpNode* assimpNode)
+    private unsafe void CreateFromAssimpScene(Model model, AssimpScene* assimpScene, AssimpNode* assimpNode, VertexFlags vertexFlags)
     {
         for (int i = 0; i < assimpNode->MNumMeshes; i++)
         {
             AssimpMesh* assimpMesh = assimpScene->MMeshes[assimpNode->MMeshes[i]];
-            Mesh mesh = Mesh.CreateFromAssimpMesh(assimpMesh);
+            Mesh mesh = Mesh.CreateFromAssimpMesh(assimpMesh, vertexFlags);
             model.r_meshes.Add(mesh);
         }
 
         for (int i = 0; i < assimpNode->MNumChildren; i++)
         {
-            CreateFromAssimpScene(model, assimpScene, assimpNode->MChildren[i]);
+            CreateFromAssimpScene(model, assimpScene, assimpNode->MChildren[i], vertexFlags);
         }
     }
 
@@ -63,6 +68,11 @@ public class Model : ICacheable, IDisposable
         {
             r_meshes[i].Draw(modelMatrix, shaderInstance);
         }
+    }
+
+    internal List<Mesh> GetMeshes()
+    {
+        return r_meshes;
     }
 
     public void Delete()

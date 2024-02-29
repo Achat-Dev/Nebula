@@ -7,7 +7,7 @@ public static class Renderer
     private static Cubemap s_skybox;
     private static Shader s_skyboxShader;
     private static Shader s_screenShader;
-    private static VertexArrayObject<float> s_skyboxVao;
+    private static VertexArrayObject s_skyboxVao;
     private static RawVertexArrayObject s_screenRvao;
     private static HashSet<ModelRendererComponent> s_modelRenderers = new HashSet<ModelRendererComponent>();
 
@@ -33,38 +33,9 @@ public static class Renderer
         BufferLayout bufferLayout = new BufferLayout(BufferElement.Vec2, BufferElement.Vec2);
         s_screenRvao = new RawVertexArrayObject(screenVbo, bufferLayout);
 
-        float[] skyboxVertices =
-        {
-            // positions
-            -1.0f,  1.0f, -1.0f,
-            -1.0f, -1.0f, -1.0f,
-             1.0f, -1.0f, -1.0f,
-             1.0f,  1.0f, -1.0f,
-            -1.0f, -1.0f,  1.0f,
-            -1.0f,  1.0f,  1.0f,
-             1.0f, -1.0f,  1.0f,
-             1.0f,  1.0f,  1.0f,
-        };
-
-        uint[] skyboxIndices =
-        {
-            0, 1, 2,
-            2, 3, 0,
-            4, 1, 0,
-            0, 5, 4,
-            2, 6, 7,
-            7, 3, 2,
-            4, 5, 7,
-            7, 6, 4,
-            0, 3, 7,
-            7, 5, 0,
-            1, 4, 2,
-            2, 4, 6,
-        };
-
-        BufferObject<float> skyboxVbo = new BufferObject<float>(skyboxVertices, BufferTargetARB.ArrayBuffer);
-        BufferObject<uint> skyboxIbo = new BufferObject<uint>(skyboxIndices, BufferTargetARB.ElementArrayBuffer);
-        s_skyboxVao = new VertexArrayObject<float>(skyboxVbo, skyboxIbo, new BufferLayout(BufferElement.Vec3));
+        // This doesn't have to be disposed because this is the vao of the cube model
+        // | The vao is disposed automatically when the cache is disposed
+        s_skyboxVao = Model.Load("Art/Models/Cube.obj", VertexFlags.Position).GetMeshes()[0].GetVao();
 
         s_skyboxShader = Shader.Create("Shader/Skybox.vert", "Shader/Skybox.frag", false);
         /*s_skybox = Cubemap.Create("Art/Textures/Cubemap_Right.jpg",
@@ -141,7 +112,7 @@ public static class Renderer
         matrixBuffer.BufferData(0, camera.GetViewProjectionMatrix());
     }
 
-    internal static void DrawMesh<T>(VertexArrayObject<T> vao, Matrix4x4 modelMatrix, ShaderInstance shaderInstance)
+    internal static void DrawMesh(VertexArrayObject vao, Matrix4x4 modelMatrix, ShaderInstance shaderInstance)
     {
         shaderInstance.SetMat4("u_modelMatrix", modelMatrix);
         if (shaderInstance.GetShader().UsesNormalMatrix())
@@ -177,6 +148,5 @@ public static class Renderer
     {
         Logger.EngineInfo("Disposing renderer");
         s_screenRvao.Dispose();
-        s_skyboxVao.Dispose();
     }
 }

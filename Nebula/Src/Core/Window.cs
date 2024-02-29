@@ -85,9 +85,9 @@ internal class Window : IDisposable
         modelRenderer.SetShaderInstance(shaderInstance);
 
         // PBR Textured
-        Texture albedoMap = Texture.Create("Art/Textures/Bricks_Albedo.jpg", Texture.WrapMode.Repeat, Texture.FilterMode.Linear);
-        Texture normalMap = Texture.Create("Art/Textures/Bricks_NormalGL.jpg", Texture.WrapMode.Repeat, Texture.FilterMode.Linear);
-        Texture roughnessMap = Texture.Create("Art/Textures/Bricks_Roughness.jpg", Texture.WrapMode.Repeat, Texture.FilterMode.Linear);
+        Texture albedoMap = Texture.Create("Art/Textures/Bricks_Albedo.jpg", Texture.WrapMode.Repeat, Texture.FilterMode.Linear, Texture.Format.Rgba);
+        Texture normalMap = Texture.Create("Art/Textures/Bricks_NormalGL.jpg", Texture.WrapMode.Repeat, Texture.FilterMode.Linear, Texture.Format.Rgba);
+        Texture roughnessMap = Texture.Create("Art/Textures/Bricks_Roughness.jpg", Texture.WrapMode.Repeat, Texture.FilterMode.Linear, Texture.Format.Rgba);
 
         shaderInstance = new ShaderInstance(Shader.Create(Shader.DefaultType.PBRTextured));
         shaderInstance.SetTexture("u_albedoMap", albedoMap, Texture.Unit.Texture0);

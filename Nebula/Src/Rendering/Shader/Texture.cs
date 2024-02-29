@@ -19,6 +19,13 @@ public class Texture : ICacheable, IDisposable
         Nearest = 9728,
     }
 
+    public enum Format
+    {
+        Rgb,
+        Rgba,
+        Hdr,
+    }
+
     public enum Unit
     {
         Texture0 = 33984,
@@ -56,22 +63,47 @@ public class Texture : ICacheable, IDisposable
     }
 
     private readonly uint r_handle;
-    private readonly uint r_width;
-    private readonly uint r_height;
 
-    private unsafe Texture(string path, WrapMode wrapMode, FilterMode filterMode)
+    private Texture(string path, WrapMode wrapMode, FilterMode filterMode, Format format)
     {
         r_handle = GL.Get().GenTexture();
         Bind(Unit.Texture0);
 
-        ImageResult imageResult = ImageResult.FromMemory(AssetLoader.LoadAsByteArray(path, out _), ColorComponents.RedGreenBlueAlpha);
+        switch (format)
+        {
+            case Format.Rgb:
+                CreateRgbTexture(path, wrapMode, filterMode);
+                break;
+            case Format.Rgba:
+                CreateRgbaTexture(path, wrapMode, filterMode);
+                break;
+            case Format.Hdr:
+                CreateHdrTexture(path, wrapMode, filterMode);
+                break;
+        }
+    }
 
-        r_width = (uint)imageResult.Width;
-        r_height = (uint)imageResult.Height;
+    public static Texture Create(string path, WrapMode wrapMode, FilterMode filterMode, Format format)
+    {
+        if (Cache.TextureCache.GetValue(path, out Texture texture))
+        {
+            Logger.EngineDebug($"Texture from path \"{path}\" already exists, returning cached instance");
+            return texture;
+        }
+
+        Logger.EngineDebug($"Creating texture from path \"{path}\" with wrap mode {wrapMode}, filter mode {filterMode} and format {format}");
+        texture = new Texture(path, wrapMode, filterMode, format);
+        Cache.TextureCache.CacheData(path, texture);
+        return texture;
+    }
+
+    private unsafe void CreateRgbTexture(string path, WrapMode wrapMode, FilterMode filterMode)
+    {
+        ImageResult imageResult = ImageResult.FromMemory(AssetLoader.LoadAsByteArray(path, out _), ColorComponents.RedGreenBlue);
 
         fixed (void* d = imageResult.Data)
         {
-            GL.Get().TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba, r_width, r_height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, d);
+            GL.Get().TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgb, (uint)imageResult.Width, (uint)imageResult.Height, 0, PixelFormat.Rgb, PixelType.UnsignedByte, d);
         }
 
         GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)wrapMode);
@@ -84,28 +116,38 @@ public class Texture : ICacheable, IDisposable
         GL.Get().GenerateMipmap(TextureTarget.Texture2D);
     }
 
-    public static Texture Create(string path, WrapMode wrapMode, FilterMode filterMode)
+    private unsafe void CreateRgbaTexture(string path, WrapMode wrapMode, FilterMode filterMode)
     {
-        if (Cache.TextureCache.GetValue(path, out Texture texture))
+        ImageResult imageResult = ImageResult.FromMemory(AssetLoader.LoadAsByteArray(path, out _), ColorComponents.RedGreenBlueAlpha);
+
+        fixed (void* d = imageResult.Data)
         {
-            Logger.EngineDebug($"Texture from path \"{path}\" already exists, returning cached instance");
-            return texture;
+            GL.Get().TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba, (uint)imageResult.Width, (uint)imageResult.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, d);
         }
 
-        Logger.EngineDebug($"Creating texture from path \"{path}\" with wrap mode {wrapMode} and filter mode {filterMode}");
-        texture = new Texture(path, wrapMode, filterMode);
-        Cache.TextureCache.CacheData(path, texture);
-        return texture;
+        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)wrapMode);
+        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)wrapMode);
+        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)filterMode);
+        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)filterMode);
+        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureBaseLevel, 0);
+        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLevel, 8);
+
+        GL.Get().GenerateMipmap(TextureTarget.Texture2D);
     }
 
-    public uint GetWidth()
+    private unsafe void CreateHdrTexture(string path, WrapMode wrapMode, FilterMode filterMode)
     {
-        return r_width;
-    }
+        ImageResultFloat imageResultFloat = ImageResultFloat.FromMemory(AssetLoader.LoadAsByteArray(path, out _), ColorComponents.RedGreenBlue);
 
-    public uint GetHeight()
-    {
-        return r_height;
+        fixed (void* d = imageResultFloat.Data)
+        {
+            GL.Get().TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgb16f, (uint)imageResultFloat.Width, (uint)imageResultFloat.Height, 0, PixelFormat.Rgb, PixelType.Float, d);
+        }
+
+        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)wrapMode);
+        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)wrapMode);
+        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)filterMode);
+        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)filterMode);
     }
 
     internal void Bind(Unit textureUnit)
@@ -118,7 +160,7 @@ public class Texture : ICacheable, IDisposable
     {
         string key = Cache.TextureCache.GetKey(this);
 
-        Logger.EngineDebug($"Deleting texture loaded from path {key}");
+        Logger.EngineDebug($"Deleting texture loaded from path \"{key}\"");
 
         IDisposable disposable = this;
         disposable.Dispose();

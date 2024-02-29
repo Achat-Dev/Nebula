@@ -29,7 +29,7 @@ internal class Cubemap : ICacheable, IDisposable
         GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
     }
 
-    private unsafe Cubemap(HDRTexture texture)
+    private unsafe Cubemap(Texture hdrTexture)
     {
         Vector2i faceSize = new Vector2i(512, 512);
 
@@ -97,7 +97,7 @@ internal class Cubemap : ICacheable, IDisposable
         BufferObject<uint> skyboxIbo = new BufferObject<uint>(skyboxIndices, BufferTargetARB.ElementArrayBuffer);
         VertexArrayObject<float> vao = new VertexArrayObject<float>(skyboxVbo, skyboxIbo, new BufferLayout(BufferElement.Vec3));
 
-        texture.Bind(Texture.Unit.Texture0);
+        hdrTexture.Bind(Texture.Unit.Texture0);
         Shader mappingShader = Shader.Create("Shader/EquirectangularToCubemap.vert", "Shader/EquirectangularToCubemap.frag", false);
         mappingShader.Use();
         mappingShader.SetInt(mappingShader.GetCachedUniformLocation("u_equirectangularMap"), 0);
@@ -114,7 +114,7 @@ internal class Cubemap : ICacheable, IDisposable
         framebuffer.Unbind();
         framebuffer.Dispose();
 
-        texture.Dispose();
+        hdrTexture.Delete();
 
         GL.Get().Viewport(Game.GetWindowSize());
     }
@@ -135,9 +135,9 @@ internal class Cubemap : ICacheable, IDisposable
         return cubemap;
     }
 
-    public static Cubemap Create(HDRTexture texture)
+    public static Cubemap Create(Texture hdrTexture)
     {
-        Cubemap cubemap = new Cubemap(texture);
+        Cubemap cubemap = new Cubemap(hdrTexture);
         return cubemap;
     }
 

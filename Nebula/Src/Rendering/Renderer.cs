@@ -67,12 +67,13 @@ public static class Renderer
         s_skyboxVao = new VertexArrayObject<float>(skyboxVbo, skyboxIbo, new BufferLayout(BufferElement.Vec3));
 
         s_skyboxShader = Shader.Create("Shader/Skybox.vert", "Shader/Skybox.frag", false);
-        s_skybox = Cubemap.Create("Art/Textures/Cubemap_Right.jpg",
+        /*s_skybox = Cubemap.Create("Art/Textures/Cubemap_Right.jpg",
             "Art/Textures/Cubemap_Left.jpg",
             "Art/Textures/Cubemap_Top.jpg",
             "Art/Textures/Cubemap_Bottom.jpg",
             "Art/Textures/Cubemap_Front.jpg",
-            "Art/Textures/Cubemap_Back.jpg");
+            "Art/Textures/Cubemap_Back.jpg");*/
+        s_skybox = Cubemap.Create(HDRTexture.Create("Art/Textures/Skydome.hdr", Texture.WrapMode.ClampToEdge, Texture.FilterMode.Linear));
 
         GL.Get().ClearColor(System.Drawing.Color.LightBlue);
     }

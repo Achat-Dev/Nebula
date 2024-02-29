@@ -69,7 +69,7 @@ internal class Framebuffer : IDisposable
         return null;
     }
 
-    void IDisposable.Dispose()
+    public void Dispose()
     {
         IDisposable disposable;
         for (int i = 0; i < r_attachments.Length; i++)

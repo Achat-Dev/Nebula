@@ -8,5 +8,13 @@ uniform samplerCube u_cubemap;
 
 void main()
 {
-	o_colour = texture(u_cubemap, io_uv);
+	vec3 colour = texture(u_cubemap, io_uv).rgb;
+
+	// HDR tonemapping
+	colour = colour / (colour + vec3(1.0));
+
+	// Gamma correction
+	colour = pow(colour, vec3(1.0/2.2));
+
+	o_colour = vec4(colour, 1.0);
 }

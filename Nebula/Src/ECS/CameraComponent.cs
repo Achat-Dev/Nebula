@@ -5,7 +5,7 @@ namespace Nebula;
 public class CameraComponent : StartableComponent
 {
     private float m_aspectRatio = 16f / 9f;
-    private float m_fov = MathHelper.DegreesToRadians(45f);
+    private float m_fov = 45f;
     private float m_nearClippingPlane = 0.001f;
     private float m_farClippingPlane = 500f;
     private Matrix4x4 m_projectionMatrix;
@@ -27,8 +27,7 @@ public class CameraComponent : StartableComponent
     public override void OnDestroy()
     {
         base.OnDestroy();
-        IDisposable disposable = m_framebuffer;
-        disposable.Dispose();
+        m_framebuffer.Dispose();
         Window.Resizing -= OnResize;
     }
 

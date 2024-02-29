@@ -64,12 +64,12 @@ public class Texture : ICacheable, IDisposable
         r_handle = GL.Get().GenTexture();
         Bind(Unit.Texture0);
 
-        ImageResult result = ImageResult.FromMemory(AssetLoader.LoadAsByteArray(path, out int dataSize), ColorComponents.RedGreenBlueAlpha);
+        ImageResult imageResult = ImageResult.FromMemory(AssetLoader.LoadAsByteArray(path, out _), ColorComponents.RedGreenBlueAlpha);
 
-        r_width = (uint)result.Width;
-        r_height = (uint)result.Height;
+        r_width = (uint)imageResult.Width;
+        r_height = (uint)imageResult.Height;
 
-        fixed (void* d = result.Data)
+        fixed (void* d = imageResult.Data)
         {
             GL.Get().TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba, r_width, r_height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, d);
         }

@@ -31,8 +31,6 @@ internal static class VertexFlagsExtensions
             bitCount++;
         }
 
-        Logger.EngineInfo(bitCount);
-
         int i = 0;
         BufferElement[] bufferElements = new BufferElement[bitCount];
         if (vertexFlags.HasFlag(VertexFlags.Position)) bufferElements[i++] = BufferElement.Vec3;

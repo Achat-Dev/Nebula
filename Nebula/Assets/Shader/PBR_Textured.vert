@@ -5,7 +5,7 @@ layout (location = 1) in vec3 i_normal;
 layout (location = 2) in vec3 i_tangent;
 layout (location = 3) in vec2 i_uv;
 
-#include Shader/Include/UB_Matrices.glsl
+#include Shader/Include/UniformBuffer/Matrices.glsl
 
 out vec3 io_vertexPosition;
 out vec3 io_normal;

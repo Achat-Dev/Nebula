@@ -118,7 +118,7 @@ internal class Window : IDisposable
 
             modelRenderer = m_pointLightEntites[i].AddComponent<ModelRendererComponent>();
             modelRenderer.SetModel(Model.Load("Art/Models/Cube.obj"));
-            flatShaderInstances[i] = new ShaderInstance(Shader.Create(Shader.DefaultType.Colour));
+            flatShaderInstances[i] = new ShaderInstance(Shader.Create(Shader.DefaultType.UnlitFlat));
             modelRenderer.SetShaderInstance(flatShaderInstances[i]);
         }
 

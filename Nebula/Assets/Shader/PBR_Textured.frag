@@ -1,8 +1,8 @@
 ﻿#version 460 core
 
-#include Shader/Include/UB_Lights.glsl
-#include Shader/Include/UB_Camera.glsl
-#include Shader/Include/Pi.glsl
+#include Shader/Include/UniformBuffer/Lights.glsl
+#include Shader/Include/UniformBuffer/Camera.glsl
+#include Shader/Include/Math/Pi.glsl
 
 out vec4 o_colour;
 

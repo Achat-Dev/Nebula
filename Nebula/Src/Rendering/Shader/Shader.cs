@@ -7,7 +7,7 @@ public class Shader : ICacheable, IDisposable
 {
     public enum DefaultType
     {
-        Colour,
+        UnlitFlat,
         PBRFlat,
         PBRTextured,
     }
@@ -85,8 +85,8 @@ public class Shader : ICacheable, IDisposable
     {
         switch (defaultType)
         {
-            case DefaultType.Colour:
-                return Create("Shader/Colour.vert", "Shader/Colour.frag", false);
+            case DefaultType.UnlitFlat:
+                return Create("Shader/Unlit_Flat.vert", "Shader/Unlit_Flat.frag", false);
             case DefaultType.PBRFlat:
                 return Create("Shader/PBR_Flat.vert", "Shader/PBR_Flat.frag", true);
             case DefaultType.PBRTextured:

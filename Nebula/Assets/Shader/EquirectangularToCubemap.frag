@@ -1,6 +1,6 @@
 ﻿#version 460 core
 
-#include Shader/Include/InverseAtan.glsl
+#include Shader/Include/Math/InverseAtan.glsl
 
 in vec3 io_position;
 

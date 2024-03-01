@@ -5,6 +5,7 @@ namespace Nebula.Rendering;
 public static class Renderer
 {
     private static Cubemap s_skybox;
+    private static Cubemap s_irradianceMap;
     private static Shader s_skyboxShader;
     private static Shader s_screenShader;
     private static VertexArrayObject s_skyboxVao;
@@ -44,7 +45,9 @@ public static class Renderer
             "Art/Textures/Cubemap_Bottom.jpg",
             "Art/Textures/Cubemap_Front.jpg",
             "Art/Textures/Cubemap_Back.jpg");*/
-        s_skybox = Cubemap.Create(Texture.Create("Art/Textures/Skydome.hdr", Texture.WrapMode.ClampToEdge, Texture.FilterMode.Linear, Texture.Format.Hdr, true), new Vector2i(512, 512));
+        Texture skyboxTexture = Texture.Create("Art/Textures/Skybox_v2.hdr", Texture.WrapMode.ClampToEdge, Texture.FilterMode.Linear, Texture.Format.Hdr, true);
+        s_skybox = Cubemap.Create(skyboxTexture, new Vector2i(512, 512));
+        s_irradianceMap = Cubemap.CreateIrradiance(s_skybox, new Vector2i(32, 32));
 
         GL.Get().ClearColor(System.Drawing.Color.LightBlue);
     }
@@ -60,6 +63,8 @@ public static class Renderer
         framebuffer.Bind();
 
         UpdateUniformBuffers(camera);
+
+        s_irradianceMap.Bind(Texture.Unit.Texture0);
 
         // Render to framebuffer
         GL.Get().Enable(GLEnum.DepthTest);
@@ -115,7 +120,8 @@ public static class Renderer
     internal static void DrawMesh(VertexArrayObject vao, Matrix4x4 modelMatrix, ShaderInstance shaderInstance)
     {
         shaderInstance.SetMat4("u_modelMatrix", modelMatrix);
-        if (shaderInstance.GetShader().UsesNormalMatrix())
+
+        if (shaderInstance.GetShader().IsLit())
         {
             if (modelMatrix.GetDeterminant() != 0f)
             {

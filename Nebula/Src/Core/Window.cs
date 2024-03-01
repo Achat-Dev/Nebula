@@ -74,6 +74,7 @@ internal class Window : IDisposable
         // Temporary
         // PBR Flat
         ShaderInstance shaderInstance = new ShaderInstance(Shader.Create(Shader.DefaultType.PBRFlat));
+        shaderInstance.SetInt("u_irradianceMap", 0);
         shaderInstance.SetVec3("u_albedo", (Vector3)Colour.White);
         shaderInstance.SetFloat("u_metallic", 0.5f);
         shaderInstance.SetFloat("u_roughness", 0.5f);
@@ -88,12 +89,15 @@ internal class Window : IDisposable
         Texture albedoMap = Texture.Create("Art/Textures/Bricks_Albedo.jpg", Texture.WrapMode.Repeat, Texture.FilterMode.Linear, Texture.Format.Rgba);
         Texture normalMap = Texture.Create("Art/Textures/Bricks_NormalGL.jpg", Texture.WrapMode.Repeat, Texture.FilterMode.Linear, Texture.Format.Rgba);
         Texture roughnessMap = Texture.Create("Art/Textures/Bricks_Roughness.jpg", Texture.WrapMode.Repeat, Texture.FilterMode.Linear, Texture.Format.Rgba);
+        Texture ambientOcclusionMap = Texture.Create("Art/Textures/Bricks_AmbientOcclusion.jpg", Texture.WrapMode.Repeat, Texture.FilterMode.Linear, Texture.Format.Rgba);
 
         shaderInstance = new ShaderInstance(Shader.Create(Shader.DefaultType.PBRTextured));
-        shaderInstance.SetTexture("u_albedoMap", albedoMap, Texture.Unit.Texture0);
-        shaderInstance.SetTexture("u_normalMap", normalMap, Texture.Unit.Texture1);
-        shaderInstance.SetTexture("u_roughnessMap", roughnessMap, Texture.Unit.Texture3);
-        shaderInstance.SetInt("u_metallicMap", 2);
+        shaderInstance.SetInt("u_irradianceMap", 0);
+        shaderInstance.SetTexture("u_albedoMap", albedoMap, Texture.Unit.Texture1);
+        shaderInstance.SetTexture("u_normalMap", normalMap, Texture.Unit.Texture2);
+        shaderInstance.SetInt("u_metallicMap", 3);
+        shaderInstance.SetTexture("u_roughnessMap", roughnessMap, Texture.Unit.Texture4);
+        shaderInstance.SetTexture("u_ambientOcclusionMap", ambientOcclusionMap, Texture.Unit.Texture5);
 
         Entity pbrTexturedEntity = new Entity("PBR textured");
         pbrTexturedEntity.GetTransform().SetWorldPosition(new Vector3(1f, 0f, 0f));
@@ -114,7 +118,7 @@ internal class Window : IDisposable
             m_pointLightEntites[i] = new Entity();
             pointLights[i] = m_pointLightEntites[i].AddComponent<PointLightComponent>();
             pointLights[i].GetEntity().GetTransform().SetLocalScale(Vector3.One * 0.2f);
-            pointLights[i].SetRange(2f);
+            pointLights[i].SetRange(0f);
 
             modelRenderer = m_pointLightEntites[i].AddComponent<ModelRendererComponent>();
             modelRenderer.SetModel(Model.Load("Art/Models/Cube.obj"));
@@ -129,7 +133,7 @@ internal class Window : IDisposable
         flatShaderInstances[1].SetVec3("u_colour", (Vector3)Colour.Green);
         flatShaderInstances[2].SetVec3("u_colour", (Vector3)Colour.Blue);
 
-        Lighting.GetDirectionalLight().SetIntensity(1f);
+        Lighting.GetDirectionalLight().SetIntensity(0f);
     }
 
     private void OnUpdate(double deltaTime)

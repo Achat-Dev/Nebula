@@ -15,6 +15,7 @@ uniform sampler2D u_albedoMap;
 uniform sampler2D u_normalMap;
 uniform sampler2D u_metallicMap;
 uniform sampler2D u_roughnessMap;
+uniform sampler2D u_ambientOcclusionMap;
 
 // Possible optimisation:
 // | Calculate tbn matrix in vertex shader
@@ -54,6 +55,11 @@ float geometrySchlickGGX(float nDotV, float roughness)
 vec3 fresnelSchlick(float hDotV, vec3 f0)
 {
 	return f0 + (1.0 - f0) * pow(clamp(1.0 - hDotV, 0.0, 1.0), 5.0);
+}
+
+vec3 fresnelSchlickRoughness(float hDotV, vec3 f0, float roughness)
+{
+    return f0 + (max(vec3(1.0 - roughness), f0) - f0) * pow(clamp(1.0 - hDotV, 0.0, 1.0), 5.0);
 }
 
 vec3 calculateDirectionalLight(vec3 viewDirection, vec3 f0, vec3 albedo, vec3 normal, float metallic, float roughness)
@@ -115,6 +121,18 @@ vec3 calculatePointLights(vec3 viewDirection, vec3 f0, vec3 albedo, vec3 normal,
 	return colour;
 }
 
+vec3 calculateIBL(vec3 viewDirection, vec3 f0, vec3 albedo, vec3 normal, float metallic, float roughness)
+{
+	vec3 fresnel = fresnelSchlickRoughness(max(dot(normal, viewDirection), 0.0), f0, roughness);
+	vec3 kd = 1.0 - fresnel;
+	kd *= 1.0 - metallic;
+	vec3 irradiance = texture(u_irradianceMap, normal).rgb;
+	vec3 diffuse = albedo * irradiance;
+	float ambientOcclusion = texture(u_ambientOcclusionMap, io_uv).r;
+	vec3 ambient = (kd * diffuse) * ambientOcclusion;
+	return ambient;
+}
+
 void main()
 {
 	vec3 albedo = pow(texture(u_albedoMap, io_uv).rgb, vec3(2.2));
@@ -122,11 +140,13 @@ void main()
 	float metallic = texture(u_metallicMap, io_uv).r;
 	float roughness = texture(u_roughnessMap, io_uv).r;
 
+
 	vec3 viewDirection = normalize(u_cameraPosition - io_vertexPosition);
 	vec3 f0 = mix(vec3(0.04), albedo, metallic);
 
 	vec3 colour = calculateDirectionalLight(viewDirection, f0, albedo, normal, metallic, roughness);
 	colour += calculatePointLights(viewDirection, f0, albedo, normal, metallic, roughness);
+	colour += calculateIBL(viewDirection, f0, albedo, normal, metallic, roughness);
 
 	// HDR tonemapping
 	colour = colour / (colour + vec3(1.0));

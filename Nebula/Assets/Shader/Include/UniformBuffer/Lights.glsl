@@ -19,3 +19,5 @@ layout (std140, binding = 2) uniform ub_lights
 	uniform DirectionalLight u_directionalLight;
 	uniform PointLight u_pointLights[MAX_POINT_LIGHTS];
 };
+
+uniform samplerCube u_irradianceMap;

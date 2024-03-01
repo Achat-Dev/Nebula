@@ -28,12 +28,12 @@ public class Shader : ICacheable, IDisposable
     }
 
     private readonly uint r_handle;
-    private readonly bool r_useNormalMatrix;
+    private readonly bool r_isLit;
     private readonly Dictionary<string, int> r_uniformLocationCache = new Dictionary<string, int>();
 
-    private Shader(string vertexPath, string fragmentPath, bool useNormalMatrix)
+    private Shader(string vertexPath, string fragmentPath, bool isLit)
     {
-        r_useNormalMatrix = useNormalMatrix;
+        r_isLit = isLit;
 
         // Create shaders
         uint vertexShaderHandle = CreateGLShader(ShaderType.VertexShader, GetSourceWithIncludes(AssetLoader.LoadAsFileContent(vertexPath)));
@@ -67,7 +67,7 @@ public class Shader : ICacheable, IDisposable
         }
     }
 
-    public static Shader Create(string vertexPath, string fragmentPath, bool useNormalMatrix)
+    public static Shader Create(string vertexPath, string fragmentPath, bool isLit)
     {
         if (Cache.ShaderCache.GetValue((vertexPath, fragmentPath), out Shader shader))
         {
@@ -76,7 +76,7 @@ public class Shader : ICacheable, IDisposable
         }
 
         Logger.EngineDebug($"Creating shader from sources \"{vertexPath}\" and \"{fragmentPath}\"");
-        shader = new Shader(vertexPath, fragmentPath, useNormalMatrix);
+        shader = new Shader(vertexPath, fragmentPath, isLit);
         Cache.ShaderCache.CacheData((vertexPath, fragmentPath), shader);
         return shader;
     }
@@ -202,9 +202,9 @@ public class Shader : ICacheable, IDisposable
         return -1;
     }
 
-    internal bool UsesNormalMatrix()
+    internal bool IsLit()
     {
-        return r_useNormalMatrix;
+        return r_isLit;
     }
 
     public void Delete()

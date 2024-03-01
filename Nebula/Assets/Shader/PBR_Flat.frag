@@ -38,6 +38,11 @@ vec3 fresnelSchlick(float hDotV, vec3 f0)
 	return f0 + (1.0 - f0) * pow(clamp(1.0 - hDotV, 0.0, 1.0), 5.0);
 }
 
+vec3 fresnelSchlickRoughness(float hDotV, vec3 f0)
+{
+    return f0 + (max(vec3(1.0 - u_roughness), f0) - f0) * pow(clamp(1.0 - hDotV, 0.0, 1.0), 5.0);
+}
+
 vec3 calculateDirectionalLight(vec3 viewDirection, vec3 f0, vec3 normal)
 {
 	// Calculate Cook-Torrance BRDF
@@ -97,6 +102,17 @@ vec3 calculatePointLights(vec3 viewDirection, vec3 f0, vec3 normal)
 	return colour;
 }
 
+vec3 calculateIBL(vec3 viewDirection, vec3 f0, vec3 normal)
+{
+	vec3 fresnel = fresnelSchlickRoughness(max(dot(normal, viewDirection), 0.0), f0);
+	vec3 kd = 1.0 - fresnel;
+	kd *= 1.0 - u_metallic;
+	vec3 irradiance = texture(u_irradianceMap, normal).rgb;
+	vec3 diffuse = u_albedo * irradiance;
+	vec3 ambient = kd * diffuse;
+	return ambient;
+}
+
 void main()
 {
 	vec3 viewDirection = normalize(u_cameraPosition - io_vertexPosition);
@@ -105,6 +121,7 @@ void main()
 
 	vec3 colour = calculateDirectionalLight(viewDirection, f0, normal);
 	colour += calculatePointLights(viewDirection, f0, normal);
+	colour += calculateIBL(viewDirection, f0, normal);
 
 	// HDR tonemapping
 	colour = colour / (colour + vec3(1.0));

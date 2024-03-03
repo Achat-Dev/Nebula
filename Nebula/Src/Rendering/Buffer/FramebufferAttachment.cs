@@ -20,53 +20,53 @@ internal class FramebufferAttachment : IDisposable
     private readonly AttachmentType r_attachmentType;
     private readonly ReadWriteMode r_readWriteMode;
 
-    public FramebufferAttachment(Vector2i size, AttachmentType attachmentType, ReadWriteMode readWriteMode)
+    internal unsafe FramebufferAttachment(Vector2i size, AttachmentType attachmentType, ReadWriteMode readWriteMode)
     {
         r_attachmentType = attachmentType;
         r_readWriteMode = readWriteMode;
 
+        switch (attachmentType)
+        {
+            case AttachmentType.Colour:
+                m_handle = GL.Get().GenTexture();
+
+                GL.Get().BindTexture(TextureTarget.Texture2D, m_handle);
+                GL.Get().TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgb, (uint)size.X, (uint)size.Y, 0, PixelFormat.Rgb, PixelType.UnsignedByte, null);
+                GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)Texture.FilterMode.Linear);
+                GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)Texture.FilterMode.Linear);
+                GL.Get().BindTexture(TextureTarget.Texture2D, 0);
+
+                GL.Get().FramebufferTexture2D(FramebufferTarget.Framebuffer, Silk.NET.OpenGL.FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, m_handle, 0);
+                break;
+            case AttachmentType.Depth:
+                m_handle = GL.Get().GenRenderbuffer();
+
+                GL.Get().BindRenderbuffer(RenderbufferTarget.Renderbuffer, m_handle);
+                GL.Get().RenderbufferStorage(RenderbufferTarget.Renderbuffer, GLEnum.Depth24Stencil8, (uint)size.X, (uint)size.Y);
+                GL.Get().BindRenderbuffer(RenderbufferTarget.Renderbuffer, 0);
+
+                GL.Get().FramebufferRenderbuffer(FramebufferTarget.Framebuffer, Silk.NET.OpenGL.FramebufferAttachment.DepthStencilAttachment, RenderbufferTarget.Renderbuffer, m_handle);
+                break;
+        }
+
         Resize(size);
     }
 
-    internal void Resize(Vector2i size)
+    internal unsafe void Resize(Vector2i size)
     {
-        if (m_handle != 0)
-        {
-            IDisposable disposable = this;
-            disposable.Dispose();
-        }
-
         switch (r_attachmentType)
         {
             case AttachmentType.Colour:
-                CreateTextureAttachment(size);
+                GL.Get().BindTexture(TextureTarget.Texture2D, m_handle);
+                GL.Get().TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgb, (uint)size.X, (uint)size.Y, 0, PixelFormat.Rgb, PixelType.UnsignedByte, null);
+                GL.Get().BindTexture(TextureTarget.Texture2D, 0);
                 break;
             case AttachmentType.Depth:
-                CreateRenderbufferAttachment(size);
+                GL.Get().BindRenderbuffer(RenderbufferTarget.Renderbuffer, m_handle);
+                GL.Get().RenderbufferStorage(RenderbufferTarget.Renderbuffer, InternalFormat.Depth24Stencil8, (uint)size.X, (uint)size.Y);
+                GL.Get().BindRenderbuffer(RenderbufferTarget.Renderbuffer, 0);
                 break;
         }
-    }
-
-    private unsafe void CreateTextureAttachment(Vector2i size)
-    {
-        m_handle = GL.Get().GenTexture();
-        GL.Get().BindTexture(TextureTarget.Texture2D, m_handle);
-        GL.Get().TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgb, (uint)size.X, (uint)size.Y, 0, PixelFormat.Rgb, PixelType.UnsignedByte, null);
-        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)Texture.FilterMode.Linear);
-        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)Texture.FilterMode.Linear);
-        GL.Get().BindTexture(TextureTarget.Texture2D, 0);
-
-        GL.Get().FramebufferTexture2D(FramebufferTarget.Framebuffer, Silk.NET.OpenGL.FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, m_handle, 0);
-    }
-
-    private unsafe void CreateRenderbufferAttachment(Vector2i size)
-    {
-        m_handle = GL.Get().GenRenderbuffer();
-        GL.Get().BindRenderbuffer(RenderbufferTarget.Renderbuffer, m_handle);
-        GL.Get().RenderbufferStorage(RenderbufferTarget.Renderbuffer, InternalFormat.Depth24Stencil8, (uint)size.X, (uint)size.Y);
-        GL.Get().BindRenderbuffer(RenderbufferTarget.Renderbuffer, 0);
-
-        GL.Get().FramebufferRenderbuffer(FramebufferTarget.Framebuffer, Silk.NET.OpenGL.FramebufferAttachment.DepthStencilAttachment, RenderbufferTarget.Renderbuffer, m_handle);
     }
 
     public void Bind(Texture.Unit textureUnit)

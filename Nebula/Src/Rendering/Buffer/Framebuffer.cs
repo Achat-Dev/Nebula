@@ -4,16 +4,24 @@ namespace Nebula.Rendering;
 
 internal class Framebuffer : IDisposable
 {
-    private uint m_handle;
+    private readonly uint r_handle;
     private readonly FramebufferAttachment[] r_attachments;
 
-    public Framebuffer(params FramebufferAttachment[] attachments)
-        : this(Game.GetWindowSize(), attachments) { }
+    public Framebuffer(params FramebufferAttachmentConfig[] attachmentConfigs)
+        : this(Game.GetWindowSize(), attachmentConfigs) { }
 
-    public Framebuffer(Vector2i size, params FramebufferAttachment[] attachments)
+    public Framebuffer(Vector2i size, params FramebufferAttachmentConfig[] attachmentConfigs)
     {
-        r_attachments = attachments;
-        Resize(size);
+        r_handle = GL.Get().GenFramebuffer();
+        Bind();
+
+        r_attachments = new FramebufferAttachment[attachmentConfigs.Length];
+
+        for (int i = 0; i < attachmentConfigs.Length; i++)
+        {
+            FramebufferAttachment attachment = new FramebufferAttachment(size, attachmentConfigs[i].AttachmentType, attachmentConfigs[i].ReadWriteMode);
+            r_attachments[i] = attachment;
+        }
     }
 
     internal unsafe void Resize(Vector2i size)
@@ -24,13 +32,6 @@ internal class Framebuffer : IDisposable
             return;
         }
 
-        if (m_handle != 0)
-        {
-            IDisposable disposable = this;
-            disposable.Dispose();
-        }
-
-        m_handle = GL.Get().GenFramebuffer();
         Bind();
 
         for (int i = 0; i < r_attachments.Length; i++)
@@ -42,13 +43,11 @@ internal class Framebuffer : IDisposable
         {
             Logger.EngineError("Failed to create framebuffer, framebuffer is incomplete");
         }
-
-        Unbind();
     }
 
     internal void Bind()
     {
-        GL.Get().BindFramebuffer(FramebufferTarget.Framebuffer, m_handle);
+        GL.Get().BindFramebuffer(FramebufferTarget.Framebuffer, r_handle);
     }
 
     internal void Unbind()
@@ -77,6 +76,6 @@ internal class Framebuffer : IDisposable
             disposable = r_attachments[i];
             disposable.Dispose();
         }
-        GL.Get().DeleteFramebuffer(m_handle);
+        GL.Get().DeleteFramebuffer(r_handle);
     }
 }

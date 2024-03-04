@@ -50,9 +50,9 @@ public static class Renderer
             "Art/Textures/Cubemap_Front.jpg",
             "Art/Textures/Cubemap_Back.jpg");*/
         Texture skyboxTexture = Texture.Create("Art/Textures/Skybox_v2.hdr", Texture.WrapMode.ClampToEdge, Texture.FilterMode.Linear, Texture.Format.Hdr, true);
-        s_skybox = Cubemap.Create(skyboxTexture, new Vector2i(512, 512));
-        s_irradianceMap = Cubemap.CreateIrradiance(s_skybox, new Vector2i(32, 32));
-        s_prefilteredMap = Cubemap.CreatePrefiltered(s_skybox, new Vector2i(128, 128));
+        s_skybox = Cubemap.Create(skyboxTexture, Cubemap.CubemapType.Skybox, new Vector2i(512, 512));
+        s_irradianceMap = Cubemap.Create(s_skybox, Cubemap.CubemapType.Irradiance, new Vector2i(32, 32));
+        s_prefilteredMap = Cubemap.Create(s_skybox, Cubemap.CubemapType.Prefiltered, new Vector2i(128, 128));
     }
 
     public static void SetClearColour(Colour colour)

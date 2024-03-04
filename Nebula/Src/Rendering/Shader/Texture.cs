@@ -3,7 +3,7 @@ using StbImageSharp;
 
 namespace Nebula.Rendering;
 
-public class Texture : ICacheable, IDisposable
+public class Texture : ICacheable, IDisposable, ITextureBindable
 {
     public enum WrapMode
     {
@@ -16,6 +16,7 @@ public class Texture : ICacheable, IDisposable
     public enum FilterMode
     {
         Linear = 9729,
+        LinearMipmapLinear = 9987,
         Nearest = 9728,
     }
 
@@ -155,7 +156,7 @@ public class Texture : ICacheable, IDisposable
         GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)filterMode);
     }
 
-    internal void Bind(Unit textureUnit)
+    public void Bind(Unit textureUnit)
     {
         GL.Get().ActiveTexture((TextureUnit)textureUnit);
         GL.Get().BindTexture(TextureTarget.Texture2D, r_handle);

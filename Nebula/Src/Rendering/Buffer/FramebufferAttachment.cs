@@ -2,7 +2,7 @@
 
 namespace Nebula.Rendering;
 
-internal class FramebufferAttachment : IDisposable
+internal class FramebufferAttachment : IDisposable, ITextureBindable
 {
     public enum AttachmentType
     {

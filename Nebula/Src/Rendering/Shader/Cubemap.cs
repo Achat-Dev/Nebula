@@ -3,8 +3,15 @@ using StbImageSharp;
 
 namespace Nebula.Rendering;
 
-internal class Cubemap : ICacheable, IDisposable
+internal class Cubemap : ICacheable, IDisposable, ITextureBindable
 {
+    public enum CubemapType
+    {
+        Skybox,
+        Irradiance,
+        Prefiltered,
+    }
+
     private readonly uint r_handle;
 
     private unsafe Cubemap(params string[] paths)
@@ -29,196 +36,60 @@ internal class Cubemap : ICacheable, IDisposable
         GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
     }
 
-    private unsafe Cubemap(Texture hdrTexture, Vector2i faceSize)
+    private Cubemap(ITextureBindable bindable, CubemapType cubemapType, Vector2i faceSize)
     {
         r_handle = GL.Get().GenTexture();
         Bind(Texture.Unit.Texture0);
 
-        for (int i = 0; i < 6; i++)
-        {
-            GL.Get().TexImage2D(TextureTarget.TextureCubeMapPositiveX + i, 0, InternalFormat.Rgb16f, (uint)faceSize.X, (uint)faceSize.Y, 0, PixelFormat.Rgb, PixelType.Float, null);
-        }
+        Framebuffer framebuffer = null;
+        Shader mappingShader = null;
+        VertexArrayObject vao = null;
+        Matrix4x4[] viewMatrices = null;
 
-        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
-        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
-        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+        switch (cubemapType)
+        {
+            case CubemapType.Skybox:
+                CreateFaceTextures(faceSize, Texture.FilterMode.Linear, Texture.FilterMode.Linear);
+                SetupCapturing(faceSize, "Shader/EquirectangularToCubemap.frag", out framebuffer, out mappingShader, out vao, out viewMatrices);
+                break;
+            case CubemapType.Irradiance:
+                CreateFaceTextures(faceSize, Texture.FilterMode.Linear, Texture.FilterMode.Linear);
+                SetupCapturing(faceSize, "Shader/IrradianceConvolution.frag", out framebuffer, out mappingShader, out vao, out viewMatrices);
+                break;
+            case CubemapType.Prefiltered:
+                CreateFaceTextures(faceSize, Texture.FilterMode.LinearMipmapLinear, Texture.FilterMode.Linear);
+                GL.Get().GenerateMipmap(TextureTarget.TextureCubeMap);
+                SetupCapturing(faceSize, "Shader/Prefilter.frag", out framebuffer, out mappingShader, out vao, out viewMatrices);
+                break;
+        }
 
         GL.Get().Viewport(faceSize);
+        bindable.Bind(Texture.Unit.Texture0);
 
-        FramebufferAttachmentConfig depthAttachmentConfig = new FramebufferAttachmentConfig(FramebufferAttachment.AttachmentType.Depth, FramebufferAttachment.ReadWriteMode.Writeonly);
-        Framebuffer framebuffer = new Framebuffer(faceSize, depthAttachmentConfig);
-        framebuffer.Bind();
-
-        Matrix4x4 captureProjection = Matrix4x4.CreatePerspectiveFieldOfView(90f, 1f, 0.1f, 100f);
-        Matrix4x4[] captureViews =
+        if (cubemapType == CubemapType.Prefiltered)
         {
-            Matrix4x4.CreateLookAt(Vector3.Zero, Vector3.Right, -Vector3.Up),
-            Matrix4x4.CreateLookAt(Vector3.Zero, -Vector3.Right, -Vector3.Up),
-            Matrix4x4.CreateLookAt(Vector3.Zero, Vector3.Up, Vector3.Forward),
-            Matrix4x4.CreateLookAt(Vector3.Zero, -Vector3.Up, -Vector3.Forward),
-            Matrix4x4.CreateLookAt(Vector3.Zero, Vector3.Forward, -Vector3.Up),
-            Matrix4x4.CreateLookAt(Vector3.Zero, -Vector3.Forward, -Vector3.Up),
-        };
-
-        // Don't dispose this as this is the vao from the cached cube model
-        // | Disposing this will make the cube model unable to render
-        VertexArrayObject vao = Model.Load("Art/Models/Cube.obj", VertexFlags.Position).GetMeshes()[0].GetVao();
-
-        hdrTexture.Bind(Texture.Unit.Texture0);
-        Shader mappingShader = Shader.Create("Shader/EquirectangularToCubemap.vert", "Shader/EquirectangularToCubemap.frag", false);
-        mappingShader.Use();
-        mappingShader.SetInt(mappingShader.GetCachedUniformLocation("u_equirectangularMap"), 0);
-        mappingShader.SetMat4(mappingShader.GetCachedUniformLocation("u_projection"), captureProjection);
-
-        for (int i = 0; i < 6; i++)
-        {
-            mappingShader.SetMat4(mappingShader.GetCachedUniformLocation("u_view"), captureViews[i]);
-            GL.Get().FramebufferTexture2D(FramebufferTarget.Framebuffer, Silk.NET.OpenGL.FramebufferAttachment.ColorAttachment0, TextureTarget.TextureCubeMapPositiveX + i, r_handle, 0);
-            GL.Get().Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            vao.Draw();
-        }
-
-        framebuffer.Unbind();
-        IDisposable disposable = framebuffer;
-        disposable.Dispose();
-
-        hdrTexture.Delete();
-
-        GL.Get().Viewport(Game.GetWindowSize());
-    }
-
-    private unsafe Cubemap(Cubemap cubemap, Vector2i faceSize)
-    {
-        r_handle = GL.Get().GenTexture();
-        Bind(Texture.Unit.Texture0);
-
-        for (int i = 0; i < 6; i++)
-        {
-            GL.Get().TexImage2D(TextureTarget.TextureCubeMapPositiveX + i, 0, InternalFormat.Rgb16f, (uint)faceSize.X, (uint)faceSize.Y, 0, PixelFormat.Rgb, PixelType.Float, null);
-        }
-
-        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
-        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
-        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-
-        GL.Get().Viewport(faceSize);
-
-        FramebufferAttachmentConfig depthAttachmentConfig = new FramebufferAttachmentConfig(FramebufferAttachment.AttachmentType.Depth, FramebufferAttachment.ReadWriteMode.Writeonly);
-        Framebuffer framebuffer = new Framebuffer(faceSize, depthAttachmentConfig);
-        framebuffer.Bind();
-
-        Matrix4x4 captureProjection = Matrix4x4.CreatePerspectiveFieldOfView(90f, 1f, 0.1f, 100f);
-        Matrix4x4[] captureViews =
-        {
-            Matrix4x4.CreateLookAt(Vector3.Zero, Vector3.Right, -Vector3.Up),
-            Matrix4x4.CreateLookAt(Vector3.Zero, -Vector3.Right, -Vector3.Up),
-            Matrix4x4.CreateLookAt(Vector3.Zero, Vector3.Up, Vector3.Forward),
-            Matrix4x4.CreateLookAt(Vector3.Zero, -Vector3.Up, -Vector3.Forward),
-            Matrix4x4.CreateLookAt(Vector3.Zero, Vector3.Forward, -Vector3.Up),
-            Matrix4x4.CreateLookAt(Vector3.Zero, -Vector3.Forward, -Vector3.Up),
-        };
-
-        // Don't dispose this as this is the vao from the cached cube model
-        // | Disposing this will make the cube model unable to render
-        VertexArrayObject vao = Model.Load("Art/Models/Cube.obj", VertexFlags.Position).GetMeshes()[0].GetVao();
-
-        cubemap.Bind(Texture.Unit.Texture0);
-        Shader mappingShader = Shader.Create("Shader/EquirectangularToCubemap.vert", "Shader/IrradianceConvolution.frag", false);
-        mappingShader.Use();
-        mappingShader.SetInt(mappingShader.GetCachedUniformLocation("u_environmentMap"), 0);
-        mappingShader.SetMat4(mappingShader.GetCachedUniformLocation("u_projection"), captureProjection);
-
-        for (int i = 0; i < 6; i++)
-        {
-            mappingShader.SetMat4(mappingShader.GetCachedUniformLocation("u_view"), captureViews[i]);
-            GL.Get().FramebufferTexture2D(FramebufferTarget.Framebuffer, Silk.NET.OpenGL.FramebufferAttachment.ColorAttachment0, TextureTarget.TextureCubeMapPositiveX + i, r_handle, 0);
-            GL.Get().Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            vao.Draw();
-        }
-
-        framebuffer.Unbind();
-        IDisposable disposable = framebuffer;
-        disposable.Dispose();
-
-        GL.Get().Viewport(Game.GetWindowSize());
-    }
-
-    private unsafe Cubemap(Cubemap cubemap, Vector2i faceSize, bool isPrefiltered)
-    {
-        r_handle = GL.Get().GenTexture();
-        Bind(Texture.Unit.Texture0);
-
-        for (int i = 0; i < 6; i++)
-        {
-            GL.Get().TexImage2D(TextureTarget.TextureCubeMapPositiveX + i, 0, InternalFormat.Rgb16f, (uint)faceSize.X, (uint)faceSize.Y, 0, PixelFormat.Rgb, PixelType.Float, null);
-        }
-
-        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
-        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
-        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
-        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-
-        GL.Get().GenerateMipmap(TextureTarget.TextureCubeMap);
-
-        GL.Get().Viewport(faceSize);
-
-        FramebufferAttachmentConfig depthAttachmentConfig = new FramebufferAttachmentConfig(FramebufferAttachment.AttachmentType.Depth, FramebufferAttachment.ReadWriteMode.Writeonly);
-        Framebuffer framebuffer = new Framebuffer(faceSize, depthAttachmentConfig);
-        framebuffer.Bind();
-
-        Matrix4x4 captureProjection = Matrix4x4.CreatePerspectiveFieldOfView(90f, 1f, 0.1f, 100f);
-        Matrix4x4[] captureViews =
-        {
-            Matrix4x4.CreateLookAt(Vector3.Zero, Vector3.Right, -Vector3.Up),
-            Matrix4x4.CreateLookAt(Vector3.Zero, -Vector3.Right, -Vector3.Up),
-            Matrix4x4.CreateLookAt(Vector3.Zero, Vector3.Up, Vector3.Forward),
-            Matrix4x4.CreateLookAt(Vector3.Zero, -Vector3.Up, -Vector3.Forward),
-            Matrix4x4.CreateLookAt(Vector3.Zero, Vector3.Forward, -Vector3.Up),
-            Matrix4x4.CreateLookAt(Vector3.Zero, -Vector3.Forward, -Vector3.Up),
-        };
-
-        // Don't dispose this as this is the vao from the cached cube model
-        // | Disposing this will make the cube model unable to render
-        VertexArrayObject vao = Model.Load("Art/Models/Cube.obj", VertexFlags.Position).GetMeshes()[0].GetVao();
-
-        cubemap.Bind(Texture.Unit.Texture0);
-        Shader mappingShader = Shader.Create("Shader/EquirectangularToCubemap.vert", "Shader/Prefilter.frag", false);
-        mappingShader.Use();
-        mappingShader.SetInt(mappingShader.GetCachedUniformLocation("u_environmentMap"), 0);
-        mappingShader.SetMat4(mappingShader.GetCachedUniformLocation("u_projection"), captureProjection);
-
-        int maxMipLevels = 5;
-        for (int mip = 0; mip < maxMipLevels; mip++)
-        {
-            int mipWidth = (int)(faceSize.X * MathF.Pow(0.5f, mip));
-            int mipHeight = (int)(faceSize.Y * MathF.Pow(0.5f, mip));
-            Vector2i mipSize = new Vector2i(mipWidth, mipHeight);
-
-            framebuffer.Resize(mipSize);
-            GL.Get().Viewport(mipSize);
-
-            float roughness = (float)mip / (float)(maxMipLevels - 1);
-            mappingShader.SetFloat(mappingShader.GetCachedUniformLocation("u_roughness"), roughness);
-
-            for (int i = 0; i < 6; i++)
+            int maxMipLevels = 5;
+            for (int mip = 0; mip < maxMipLevels; mip++)
             {
-                mappingShader.SetMat4(mappingShader.GetCachedUniformLocation("u_view"), captureViews[i]);
-                GL.Get().FramebufferTexture2D(FramebufferTarget.Framebuffer, Silk.NET.OpenGL.FramebufferAttachment.ColorAttachment0, TextureTarget.TextureCubeMapPositiveX + i, r_handle, mip);
-                GL.Get().Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-                vao.Draw();
+                int mipWidth = (int)(faceSize.X * MathF.Pow(0.5f, mip));
+                int mipHeight = (int)(faceSize.Y * MathF.Pow(0.5f, mip));
+                Vector2i mipSize = new Vector2i(mipWidth, mipHeight);
+
+                framebuffer.Resize(mipSize);
+                GL.Get().Viewport(mipSize);
+
+                float roughness = (float)mip / (float)(maxMipLevels - 1);
+                mappingShader.SetFloat(mappingShader.GetCachedUniformLocation("u_roughness"), roughness);
+
+                CaptureFaces(mappingShader, vao, mip, viewMatrices);
             }
         }
+        else
+        {
+            CaptureFaces(mappingShader, vao, 0, viewMatrices);
+        }
 
-        framebuffer.Unbind();
-        IDisposable disposable = framebuffer;
-        disposable.Dispose();
-
-        GL.Get().Viewport(Game.GetWindowSize());
+        CleanupCapture(framebuffer);
     }
 
     public static Cubemap Create(string pathRight, string pathLeft, string pathTop, string pathBottom, string pathFront, string pathBack)
@@ -237,50 +108,71 @@ internal class Cubemap : ICacheable, IDisposable
         return cubemap;
     }
 
-    public static Cubemap Create(Texture hdrTexture, Vector2i faceSize)
+    public static Cubemap Create(ITextureBindable textureBindable, CubemapType cubemapType, Vector2i faceSize)
     {
-        uint handle = hdrTexture.GetHandle();
-
-        if (Cache.CubemapCache.GetValue(handle, out Cubemap cubemap))
-        {
-            Logger.EngineVerbose($"Cubemap from texture with handle {handle} already exists, returning cached instance");
-            return cubemap;
-        }
-        Logger.EngineDebug($"Creating cubemap from texture with handle {handle}");
-        cubemap = new Cubemap(hdrTexture, faceSize);
-        Cache.CubemapCache.CacheData(handle, cubemap);
-        return cubemap;
+        return new Cubemap(textureBindable, cubemapType, faceSize);
     }
 
-    public static Cubemap CreateIrradiance(Cubemap cubemap, Vector2i faceSize)
+    private unsafe void CreateFaceTextures(Vector2i faceSize, Texture.FilterMode minFilterMode, Texture.FilterMode maxFilterMode)
     {
-        /*if (Cache.CubemapCache.GetValue(cubemap.r_handle, out Cubemap result))
+        for (int i = 0; i < 6; i++)
         {
-            Logger.EngineVerbose($"Irradiance cubemap from cubemap with handle {cubemap.r_handle} already exists, returning cached instance");
-            return result;
+            GL.Get().TexImage2D(TextureTarget.TextureCubeMapPositiveX + i, 0, InternalFormat.Rgb16f, (uint)faceSize.X, (uint)faceSize.Y, 0, PixelFormat.Rgb, PixelType.Float, null);
         }
-        Logger.EngineDebug($"Creating irradiance cubemap from cubemap with handle {cubemap.r_handle}");
-        result = new Cubemap(cubemap, faceSize);
-        Cache.CubemapCache.CacheData(cubemap.r_handle, cubemap);
-        return result;*/
-        return new Cubemap(cubemap, faceSize);
+
+        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
+        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter, (int)minFilterMode);
+        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, (int)maxFilterMode);
     }
 
-    public static Cubemap CreatePrefiltered(Cubemap cubemap, Vector2i faceSize)
+    private void SetupCapturing(Vector2i faceSize, string fragmentPath, out Framebuffer framebuffer, out Shader mappingShader, out VertexArrayObject vao, out Matrix4x4[] viewMatrices)
     {
-        /*if (Cache.CubemapCache.GetValue(cubemap.r_handle, out Cubemap result))
-        {
-            Logger.EngineVerbose($"Prefiltered cubemap from cubemap with handle {cubemap.r_handle} already exists, returning cached instance");
-            return result;
-        }
-        Logger.EngineDebug($"Creating prefiltered cubemap from cubemap with handle {cubemap.r_handle}");
-        result = new Cubemap(cubemap, faceSize, true);
-        Cache.CubemapCache.CacheData(cubemap.r_handle, cubemap);
-        return result;*/
-        return new Cubemap(cubemap, faceSize, true);
+        FramebufferAttachmentConfig depthAttachmentConfig = new FramebufferAttachmentConfig(FramebufferAttachment.AttachmentType.Depth, FramebufferAttachment.ReadWriteMode.Writeonly);
+        framebuffer = new Framebuffer(faceSize, depthAttachmentConfig);
+        framebuffer.Bind();
+
+        mappingShader = Shader.Create("Shader/EquirectangularToCubemap.vert", fragmentPath, false);
+        mappingShader.Use();
+        mappingShader.SetInt(mappingShader.GetCachedUniformLocation("u_environmentMap"), 0);
+        mappingShader.SetMat4(mappingShader.GetCachedUniformLocation("u_projection"), Matrix4x4.CreatePerspectiveFieldOfView(90f, 1f, 0.1f, 100f));
+
+        // Don't dispose this as this is the vao from the cached cube model
+        // | Disposing this will make the cube model unable to render
+        vao = Model.Load("Art/Models/Cube.obj", VertexFlags.Position).GetMeshes()[0].GetVao();
+
+        viewMatrices =
+        [
+            Matrix4x4.CreateLookAt(Vector3.Zero, Vector3.Right, -Vector3.Up),
+            Matrix4x4.CreateLookAt(Vector3.Zero, -Vector3.Right, -Vector3.Up),
+            Matrix4x4.CreateLookAt(Vector3.Zero, Vector3.Up, Vector3.Forward),
+            Matrix4x4.CreateLookAt(Vector3.Zero, -Vector3.Up, -Vector3.Forward),
+            Matrix4x4.CreateLookAt(Vector3.Zero, Vector3.Forward, -Vector3.Up),
+            Matrix4x4.CreateLookAt(Vector3.Zero, -Vector3.Forward, -Vector3.Up),
+        ];
     }
 
-    internal void Bind(Texture.Unit textureUnit)
+    private void CaptureFaces(Shader mappingShader, VertexArrayObject vao, int level, Matrix4x4[] viewMatrices)
+    {
+        for (int i = 0; i < 6; i++)
+        {
+            mappingShader.SetMat4(mappingShader.GetCachedUniformLocation("u_view"), viewMatrices[i]);
+            GL.Get().FramebufferTexture2D(FramebufferTarget.Framebuffer, Silk.NET.OpenGL.FramebufferAttachment.ColorAttachment0, TextureTarget.TextureCubeMapPositiveX + i, r_handle, level);
+            GL.Get().Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            vao.Draw();
+        }
+    }
+
+    private void CleanupCapture(Framebuffer framebuffer)
+    {
+        framebuffer.Unbind();
+        IDisposable disposable = framebuffer;
+        disposable.Dispose();
+        GL.Get().Viewport(Game.GetWindowSize());
+    }
+
+    public void Bind(Texture.Unit textureUnit)
     {
         GL.Get().ActiveTexture((TextureUnit)textureUnit);
         GL.Get().BindTexture(TextureTarget.TextureCubeMap, r_handle);

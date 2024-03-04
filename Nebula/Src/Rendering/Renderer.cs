@@ -6,6 +6,7 @@ public static class Renderer
 {
     private static Cubemap s_skybox;
     private static Cubemap s_irradianceMap;
+    private static Cubemap s_prefilteredMap;
     private static Shader s_skyboxShader;
     private static Shader s_screenShader;
     private static VertexArrayObject s_skyboxVao;
@@ -15,6 +16,9 @@ public static class Renderer
     internal static void Init()
     {
         Logger.EngineInfo("Initialising renderer");
+
+        GL.Get().ClearColor(System.Drawing.Color.LightBlue);
+        GL.Get().Enable(EnableCap.TextureCubeMapSeamless);
 
         s_screenShader = Shader.Create("Shader/Output.vert", "Shader/Output.frag", false);
 
@@ -48,8 +52,7 @@ public static class Renderer
         Texture skyboxTexture = Texture.Create("Art/Textures/Skybox_v2.hdr", Texture.WrapMode.ClampToEdge, Texture.FilterMode.Linear, Texture.Format.Hdr, true);
         s_skybox = Cubemap.Create(skyboxTexture, new Vector2i(512, 512));
         s_irradianceMap = Cubemap.CreateIrradiance(s_skybox, new Vector2i(32, 32));
-
-        GL.Get().ClearColor(System.Drawing.Color.LightBlue);
+        s_prefilteredMap = Cubemap.CreatePrefiltered(s_skybox, new Vector2i(128, 128));
     }
 
     public static void SetClearColour(Colour colour)
@@ -83,7 +86,7 @@ public static class Renderer
         viewProjectionMatrix.M43 = 0;
         viewProjectionMatrix.M44 = 0;
 
-        s_skybox.Bind(Texture.Unit.Texture0);
+        s_prefilteredMap.Bind(Texture.Unit.Texture0);
         s_skyboxShader.Use();
         s_skyboxShader.SetMat4(s_skyboxShader.GetCachedUniformLocation("u_viewProjection"), viewProjectionMatrix);
         s_skyboxVao.Draw();

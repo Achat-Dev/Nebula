@@ -10,12 +10,12 @@ uniform samplerCube u_environmentMap;
 
 void main()
 {
-	vec3 position = normalize(io_position);
+	vec3 normal = normalize(io_position);
 	vec3 irradiance = vec3(0.0);
 
 	vec3 up = vec3(0.0, 1.0, 0.0);
-	vec3 right = normalize(cross(up, position));
-	up = normalize(cross(position, right));
+	vec3 right = normalize(cross(up, normal));
+	up = normalize(cross(normal, right));
 
 	float sampleDelta = 0.025;
 	float samples = 0.0;
@@ -25,9 +25,9 @@ void main()
 		for (float theta = 0.0; theta < 0.5 * PI; theta += sampleDelta)
 		{
 			vec3 sampleTangent = vec3(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta));
-			vec3 uv = sampleTangent.x * right + sampleTangent.y * up + sampleTangent.z * position;
+			vec3 samplePosition = sampleTangent.x * right + sampleTangent.y * up + sampleTangent.z * normal;
 
-			irradiance += texture(u_environmentMap, uv).rgb * cos(theta) * sin(theta);
+			irradiance += texture(u_environmentMap, samplePosition).rgb * cos(theta) * sin(theta);
 
 			samples++;
 		}

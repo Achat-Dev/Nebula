@@ -108,6 +108,7 @@ internal class Cubemap : ICacheable, IDisposable, ITextureBindable
         return cubemap;
     }
 
+    // Todo: Add caching
     public static Cubemap Create(ITextureBindable textureBindable, CubemapType cubemapType, Vector2i faceSize)
     {
         return new Cubemap(textureBindable, cubemapType, faceSize);

@@ -88,18 +88,23 @@ internal class Window : IDisposable
         modelRenderer.SetShaderInstance(shaderInstance);
 
         // PBR Textured
-        Texture albedoMap = Texture.Create("Art/Textures/Bricks_Albedo.jpg", Texture.WrapMode.Repeat, Texture.FilterMode.Linear, Texture.Format.Rgba);
-        Texture normalMap = Texture.Create("Art/Textures/Bricks_NormalGL.jpg", Texture.WrapMode.Repeat, Texture.FilterMode.Linear, Texture.Format.Rgba);
-        Texture roughnessMap = Texture.Create("Art/Textures/Bricks_Roughness.jpg", Texture.WrapMode.Repeat, Texture.FilterMode.Linear, Texture.Format.Rgba);
-        Texture ambientOcclusionMap = Texture.Create("Art/Textures/Bricks_AmbientOcclusion.jpg", Texture.WrapMode.Repeat, Texture.FilterMode.Linear, Texture.Format.Rgba);
+        Texture albedoMap = Texture.Create("Art/Textures/Metal_Albedo.jpg", Texture.WrapMode.Repeat, Texture.FilterMode.Linear, Texture.Format.Rgba);
+        Texture normalMap = Texture.Create("Art/Textures/Metal_NormalGL.jpg", Texture.WrapMode.Repeat, Texture.FilterMode.Linear, Texture.Format.Rgba);
+        Texture metallicMap = Texture.Create("Art/Textures/Metal_Metallic.jpg", Texture.WrapMode.Repeat, Texture.FilterMode.Linear, Texture.Format.Rgba);
+        Texture roughnessMap = Texture.Create("Art/Textures/Metal_Roughness.jpg", Texture.WrapMode.Repeat, Texture.FilterMode.Linear, Texture.Format.Rgba);
+        //Texture ambientOcclusionMap = Texture.Create("Art/Textures/Bricks_AmbientOcclusion.jpg", Texture.WrapMode.Repeat, Texture.FilterMode.Linear, Texture.Format.Rgba);
 
         shaderInstance = new ShaderInstance(Shader.Create(Shader.DefaultType.PBRTextured));
         shaderInstance.SetInt("u_irradianceMap", 0);
+        shaderInstance.SetInt("u_prefilteredMap", 1);
+        shaderInstance.SetInt("u_brdfLut", 2);
         shaderInstance.SetTexture("u_albedoMap", albedoMap, Texture.Unit.Texture3);
         shaderInstance.SetTexture("u_normalMap", normalMap, Texture.Unit.Texture4);
-        shaderInstance.SetInt("u_metallicMap", 5);
+        //shaderInstance.SetInt("u_metallicMap", 5);
+        shaderInstance.SetTexture("u_metallicMap", metallicMap, Texture.Unit.Texture5);
         shaderInstance.SetTexture("u_roughnessMap", roughnessMap, Texture.Unit.Texture6);
-        shaderInstance.SetTexture("u_ambientOcclusionMap", ambientOcclusionMap, Texture.Unit.Texture7);
+        //shaderInstance.SetTexture("u_ambientOcclusionMap", ambientOcclusionMap, Texture.Unit.Texture7);
+        //shaderInstance.SetInt("u_ambientOcclusionMap", 7);
 
         Entity pbrTexturedEntity = new Entity("PBR textured");
         pbrTexturedEntity.GetTransform().SetWorldPosition(new Vector3(1f, 0f, 0f));

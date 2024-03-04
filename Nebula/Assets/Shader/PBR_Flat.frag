@@ -94,7 +94,6 @@ vec3 calculateIBL(vec3 viewDirection, vec3 f0, vec3 normal)
 	vec3 specular = prefiltered * (fresnel * brdf.x + brdf.y);
 
 	return kd * diffuse + specular;
-	//return diffuse;
 }
 
 void main()

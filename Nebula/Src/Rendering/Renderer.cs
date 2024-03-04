@@ -134,5 +134,6 @@ public static class Renderer
     internal static void Dispose()
     {
         Logger.EngineInfo("Disposing renderer");
+        s_skybox.Dispose();
     }
 }

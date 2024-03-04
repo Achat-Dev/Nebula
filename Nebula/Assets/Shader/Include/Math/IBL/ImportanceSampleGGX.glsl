@@ -9,15 +9,15 @@
 	halfVector.x = cos(phi) * sinTheta;
 	halfVector.y = sin(phi) * sinTheta;
 	
-    vec3 up;
-    if (abs(normal.z) < 0.999)
-    {
-        up = vec3(0.0, 0.0, 1.0);
-    }
-    else
-    {
-        up = vec3(1.0, 0.0, 0.0);
-    }
+	vec3 up;
+	if (abs(normal.z) < 0.999)
+	{
+		up = vec3(0.0, 0.0, 1.0);
+	}
+	else
+	{
+		up = vec3(1.0, 0.0, 0.0);
+	}
 	vec3 tangent = normalize(cross(up, normal));
 	vec3 bitangent = cross(normal, tangent);
 	

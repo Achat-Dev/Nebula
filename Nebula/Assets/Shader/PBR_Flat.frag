@@ -17,6 +17,7 @@ uniform float u_roughness;
 #include Math/PBR/GeometrySchlickGGXU.glsl
 #include Math/PBR/FresnelSchlick.glsl
 #include Math/PBR/FresnelSchlickRoughnessU.glsl
+#include Math/PBR/MaxReflectionLod.glsl
 
 vec3 calculateDirectionalLight(vec3 viewDirection, vec3 f0, vec3 normal)
 {
@@ -79,13 +80,21 @@ vec3 calculatePointLights(vec3 viewDirection, vec3 f0, vec3 normal)
 
 vec3 calculateIBL(vec3 viewDirection, vec3 f0, vec3 normal)
 {
-	vec3 fresnel = fresnelSchlickRoughness(max(dot(normal, viewDirection), 0.0), f0);
+	float nDotV = max(dot(normal, viewDirection), 0.0);
+
+	vec3 fresnel = fresnelSchlickRoughness(nDotV, f0);
 	vec3 kd = 1.0 - fresnel;
 	kd *= 1.0 - u_metallic;
+
 	vec3 irradiance = texture(u_irradianceMap, normal).rgb;
 	vec3 diffuse = u_albedo * irradiance;
-	vec3 ambient = kd * diffuse;
-	return ambient;
+
+	vec3 prefiltered = textureLod(u_prefilteredMap, reflect(-viewDirection, normal), u_roughness * MAX_REFLECTION_LOD).rgb;
+	vec2 brdf = texture(u_brdfLut, vec2(nDotV, u_roughness)).rg;
+	vec3 specular = prefiltered * (fresnel * brdf.x + brdf.y);
+
+	return kd * diffuse + specular;
+	//return diffuse;
 }
 
 void main()

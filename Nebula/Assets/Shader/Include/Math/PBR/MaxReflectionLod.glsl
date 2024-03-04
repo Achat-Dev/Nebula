@@ -1,0 +1,1 @@
+﻿const float MAX_REFLECTION_LOD = 4.0;

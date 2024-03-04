@@ -4,13 +4,11 @@ namespace Nebula.Rendering;
 
 public static class Renderer
 {
-    private static Cubemap s_skybox;
-    private static Cubemap s_irradianceMap;
-    private static Cubemap s_prefilteredMap;
     private static Shader s_skyboxShader;
     private static Shader s_screenShader;
+    private static Skybox s_skybox;
     private static VertexArrayObject s_skyboxVao;
-    private static RawVertexArrayObject s_screenRvao;
+    private static VertexArrayObject s_screenVao;
     private static HashSet<ModelRendererComponent> s_modelRenderers = new HashSet<ModelRendererComponent>();
 
     internal static void Init()
@@ -20,39 +18,16 @@ public static class Renderer
         GL.Get().ClearColor(System.Drawing.Color.LightBlue);
         GL.Get().Enable(EnableCap.TextureCubeMapSeamless);
 
+        s_skyboxShader = Shader.Create("Shader/Skybox.vert", "Shader/Skybox.frag", false);
         s_screenShader = Shader.Create("Shader/Output.vert", "Shader/Output.frag", false);
 
-        float[] screenVertices =
-        {
-            // Position     // UV
-            -1f,  1f,       0f, 1f,
-            -1f, -1f,       0f, 0f,
-             1f, -1f,       1f, 0f,
-
-            -1f,  1f,       0f, 1f,
-             1f, -1f,       1f, 0f,
-             1f,  1f,       1f, 1f,
-        };
-
-        BufferObject<float> screenVbo = new BufferObject<float>(screenVertices, BufferTargetARB.ArrayBuffer);
-        BufferLayout bufferLayout = new BufferLayout(BufferElement.Vec2, BufferElement.Vec2);
-        s_screenRvao = new RawVertexArrayObject(screenVbo, bufferLayout);
-
-        // This doesn't have to be disposed because this is the vao of the cube model
-        // | The vao is disposed automatically when the cache is disposed
+        // These don't have to be disposed because they are the vaos of the cube and plane model
+        // | The vaos are disposed automatically when the cache is disposed
         s_skyboxVao = Model.Load("Art/Models/Cube.obj", VertexFlags.Position).GetMeshes()[0].GetVao();
+        s_screenVao = Model.Load("Art/Models/Plane.obj", VertexFlags.Position | VertexFlags.UV).GetMeshes()[0].GetVao();
 
-        s_skyboxShader = Shader.Create("Shader/Skybox.vert", "Shader/Skybox.frag", false);
-        /*s_skybox = Cubemap.Create("Art/Textures/Cubemap_Right.jpg",
-            "Art/Textures/Cubemap_Left.jpg",
-            "Art/Textures/Cubemap_Top.jpg",
-            "Art/Textures/Cubemap_Bottom.jpg",
-            "Art/Textures/Cubemap_Front.jpg",
-            "Art/Textures/Cubemap_Back.jpg");*/
         Texture skyboxTexture = Texture.Create("Art/Textures/Skybox_v2.hdr", Texture.WrapMode.ClampToEdge, Texture.FilterMode.Linear, Texture.Format.Hdr, true);
-        s_skybox = Cubemap.Create(skyboxTexture, Cubemap.CubemapType.Skybox, new Vector2i(512, 512));
-        s_irradianceMap = Cubemap.Create(s_skybox, Cubemap.CubemapType.Irradiance, new Vector2i(32, 32));
-        s_prefilteredMap = Cubemap.Create(s_skybox, Cubemap.CubemapType.Prefiltered, new Vector2i(128, 128));
+        s_skybox = new Skybox(skyboxTexture);
     }
 
     public static void SetClearColour(Colour colour)
@@ -67,7 +42,10 @@ public static class Renderer
 
         UpdateUniformBuffers(camera);
 
-        s_irradianceMap.Bind(Texture.Unit.Texture0);
+        s_skybox.GetIrradianceMap().Bind(Texture.Unit.Texture0);
+        s_skybox.GetPrefilteredMap().Bind(Texture.Unit.Texture1);
+        GL.Get().ActiveTexture(TextureUnit.Texture2);
+        GL.Get().BindTexture(TextureTarget.Texture2D, s_skybox.GetBrdfLutHandle());
 
         // Render to framebuffer
         GL.Get().Enable(GLEnum.DepthTest);
@@ -86,7 +64,7 @@ public static class Renderer
         viewProjectionMatrix.M43 = 0;
         viewProjectionMatrix.M44 = 0;
 
-        s_prefilteredMap.Bind(Texture.Unit.Texture0);
+        s_skybox.GetEnvironmentMap().Bind(Texture.Unit.Texture0);
         s_skyboxShader.Use();
         s_skyboxShader.SetMat4(s_skyboxShader.GetCachedUniformLocation("u_viewProjection"), viewProjectionMatrix);
         s_skyboxVao.Draw();
@@ -100,7 +78,7 @@ public static class Renderer
         GL.Get().Clear(ClearBufferMask.ColorBufferBit);
 
         framebuffer.GetAttachment(FramebufferAttachment.AttachmentType.Colour).Bind(Texture.Unit.Texture0);
-        s_screenRvao.Draw();
+        s_screenVao.Draw();
     }
 
     private static void UpdateUniformBuffers(CameraComponent camera)
@@ -156,6 +134,5 @@ public static class Renderer
     internal static void Dispose()
     {
         Logger.EngineInfo("Disposing renderer");
-        s_screenRvao.Dispose();
     }
 }

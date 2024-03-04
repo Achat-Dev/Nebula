@@ -75,9 +75,11 @@ internal class Window : IDisposable
         // PBR Flat
         ShaderInstance shaderInstance = new ShaderInstance(Shader.Create(Shader.DefaultType.PBRFlat));
         shaderInstance.SetInt("u_irradianceMap", 0);
+        shaderInstance.SetInt("u_prefilteredMap", 1);
+        shaderInstance.SetInt("u_brdfLut", 2);
         shaderInstance.SetVec3("u_albedo", (Vector3)Colour.White);
-        shaderInstance.SetFloat("u_metallic", 0.5f);
-        shaderInstance.SetFloat("u_roughness", 0.5f);
+        shaderInstance.SetFloat("u_metallic", 0.1f);
+        shaderInstance.SetFloat("u_roughness", 0.1f);
 
         Entity pbrFlatEntity = new Entity("PBR flat");
         pbrFlatEntity.GetTransform().SetWorldPosition(new Vector3(-1f, 0f, 0f));
@@ -93,11 +95,11 @@ internal class Window : IDisposable
 
         shaderInstance = new ShaderInstance(Shader.Create(Shader.DefaultType.PBRTextured));
         shaderInstance.SetInt("u_irradianceMap", 0);
-        shaderInstance.SetTexture("u_albedoMap", albedoMap, Texture.Unit.Texture1);
-        shaderInstance.SetTexture("u_normalMap", normalMap, Texture.Unit.Texture2);
-        shaderInstance.SetInt("u_metallicMap", 3);
-        shaderInstance.SetTexture("u_roughnessMap", roughnessMap, Texture.Unit.Texture4);
-        shaderInstance.SetTexture("u_ambientOcclusionMap", ambientOcclusionMap, Texture.Unit.Texture5);
+        shaderInstance.SetTexture("u_albedoMap", albedoMap, Texture.Unit.Texture3);
+        shaderInstance.SetTexture("u_normalMap", normalMap, Texture.Unit.Texture4);
+        shaderInstance.SetInt("u_metallicMap", 5);
+        shaderInstance.SetTexture("u_roughnessMap", roughnessMap, Texture.Unit.Texture6);
+        shaderInstance.SetTexture("u_ambientOcclusionMap", ambientOcclusionMap, Texture.Unit.Texture7);
 
         Entity pbrTexturedEntity = new Entity("PBR textured");
         pbrTexturedEntity.GetTransform().SetWorldPosition(new Vector3(1f, 0f, 0f));
@@ -133,7 +135,7 @@ internal class Window : IDisposable
         flatShaderInstances[1].SetVec3("u_colour", (Vector3)Colour.Green);
         flatShaderInstances[2].SetVec3("u_colour", (Vector3)Colour.Blue);
 
-        Lighting.GetDirectionalLight().SetIntensity(0f);
+        Lighting.GetDirectionalLight().SetIntensity(1f);
     }
 
     private void OnUpdate(double deltaTime)

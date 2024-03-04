@@ -1,0 +1,1 @@
+﻿const uint SAMPLE_COUNT = 1024u;

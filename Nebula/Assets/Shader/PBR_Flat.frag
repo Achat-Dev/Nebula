@@ -1,8 +1,7 @@
 ﻿#version 460 core
 
-#include Shader/Include/UniformBuffer/Lights.glsl
-#include Shader/Include/UniformBuffer/Camera.glsl
-#include Shader/Include/Math/Pi.glsl
+#include UniformBuffer/Lights.glsl
+#include UniformBuffer/Camera.glsl
 
 out vec4 o_colour;
 
@@ -13,35 +12,11 @@ uniform vec3 u_albedo;
 uniform float u_metallic;
 uniform float u_roughness;
 
-float distributionGGX(float nDotH)
-{
-	float roughness4 = pow(u_roughness, 4.0);
-	float nDotH2 = nDotH * nDotH;
-
-	float denom = (nDotH2 * (roughness4 - 1.0) + 1.0);
-	denom = PI * denom * denom;
-	
-	return roughness4 / denom;
-}
-
-float geometrySchlickGGX(float nDotV)
-{
-	float r = u_roughness + 1.0;
-	float k = (r * r) / 8.0;
-	float denom = nDotV * (1.0 - k) + k;
-
-	return nDotV / denom;
-}
-
-vec3 fresnelSchlick(float hDotV, vec3 f0)
-{
-	return f0 + (1.0 - f0) * pow(clamp(1.0 - hDotV, 0.0, 1.0), 5.0);
-}
-
-vec3 fresnelSchlickRoughness(float hDotV, vec3 f0)
-{
-    return f0 + (max(vec3(1.0 - u_roughness), f0) - f0) * pow(clamp(1.0 - hDotV, 0.0, 1.0), 5.0);
-}
+#include Math/Pi.glsl
+#include Math/PBR/DistributionGGXU.glsl
+#include Math/PBR/GeometrySchlickGGXU.glsl
+#include Math/PBR/FresnelSchlick.glsl
+#include Math/PBR/FresnelSchlickRoughnessU.glsl
 
 vec3 calculateDirectionalLight(vec3 viewDirection, vec3 f0, vec3 normal)
 {

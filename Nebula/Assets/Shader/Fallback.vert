@@ -2,7 +2,7 @@
 
 layout (location = 0) in vec3 i_position;
 
-#include SHader/Include/UniformBuffer/Matrices.glsl
+#include UniformBuffer/Matrices.glsl
 
 uniform mat4 u_modelMatrix;
 

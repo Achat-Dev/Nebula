@@ -1,12 +1,12 @@
 ﻿#version 460 core
 
-#include Shader/Include/Math/Pi.glsl
-
 in vec3 io_position;
 
 out vec4 o_colour;
 
 uniform samplerCube u_environmentMap;
+
+#include Math/Pi.glsl
 
 void main()
 {

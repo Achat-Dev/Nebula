@@ -1,8 +1,7 @@
 ﻿#version 460 core
 
-#include Shader/Include/UniformBuffer/Lights.glsl
-#include Shader/Include/UniformBuffer/Camera.glsl
-#include Shader/Include/Math/Pi.glsl
+#include UniformBuffer/Lights.glsl
+#include UniformBuffer/Camera.glsl
 
 out vec4 o_colour;
 
@@ -17,6 +16,12 @@ uniform sampler2D u_metallicMap;
 uniform sampler2D u_roughnessMap;
 uniform sampler2D u_ambientOcclusionMap;
 
+#include Math/Pi.glsl
+#include Math/PBR/DistributionGGX.glsl
+#include Math/PBR/GeometrySchlickGGX.glsl
+#include Math/PBR/FresnelSchlick.glsl
+#include Math/PBR/FresnelSchlickRoughness.glsl
+
 // Possible optimisation:
 // | Calculate tbn matrix in vertex shader
 // | Yields slighty different results (only visible if you really try to see them), but should be faster
@@ -30,36 +35,6 @@ vec3 getNormalFromMap()
 	mat3 tbn = mat3(tangent, bitangent, normal);
 
 	return normalize(tbn * tangentNormal);
-}
-
-float distributionGGX(float nDotH, float roughness)
-{
-	float roughness4 = pow(roughness, 4.0);
-	float nDotH2 = nDotH * nDotH;
-
-	float denom = (nDotH2 * (roughness4 - 1.0) + 1.0);
-	denom = PI * denom * denom;
-	
-	return roughness4 / denom;
-}
-
-float geometrySchlickGGX(float nDotV, float roughness)
-{
-	float r = roughness + 1.0;
-	float k = (r * r) / 8.0;
-	float denom = nDotV * (1.0 - k) + k;
-
-	return nDotV / denom;
-}
-
-vec3 fresnelSchlick(float hDotV, vec3 f0)
-{
-	return f0 + (1.0 - f0) * pow(clamp(1.0 - hDotV, 0.0, 1.0), 5.0);
-}
-
-vec3 fresnelSchlickRoughness(float hDotV, vec3 f0, float roughness)
-{
-    return f0 + (max(vec3(1.0 - roughness), f0) - f0) * pow(clamp(1.0 - hDotV, 0.0, 1.0), 5.0);
 }
 
 vec3 calculateDirectionalLight(vec3 viewDirection, vec3 f0, vec3 albedo, vec3 normal, float metallic, float roughness)

@@ -3,7 +3,7 @@
 layout (location = 0) in vec3 i_position;
 layout (location = 1) in vec3 i_normal;
 
-#include Shader/Include/UniformBuffer/Matrices.glsl
+#include UniformBuffer/Matrices.glsl
 
 out vec3 io_vertexPosition;
 out vec3 io_normal;

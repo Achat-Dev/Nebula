@@ -36,8 +36,8 @@ public class Shader : ICacheable, IDisposable
         r_isLit = isLit;
 
         // Create shaders
-        uint vertexShaderHandle = CreateGLShader(ShaderType.VertexShader, GetSourceWithIncludes(AssetLoader.LoadAsFileContent(vertexPath)));
-        uint fragmentShaderHandle = CreateGLShader(ShaderType.FragmentShader, GetSourceWithIncludes(AssetLoader.LoadAsFileContent(fragmentPath)));
+        uint vertexShaderHandle = CreateGLShader(ShaderType.VertexShader, GetSourceWithIncludes(AssetLoader.LoadAsFileContent(vertexPath), new HashSet<string>()));
+        uint fragmentShaderHandle = CreateGLShader(ShaderType.FragmentShader, GetSourceWithIncludes(AssetLoader.LoadAsFileContent(fragmentPath), new HashSet<string>()));
 
         // Link shaders
         r_handle = GL.Get().CreateProgram();
@@ -111,13 +111,13 @@ public class Shader : ICacheable, IDisposable
         return handle;
     }
 
-    private string GetSourceWithIncludes(string source)
+    private string GetSourceWithIncludes(string source, HashSet<string> includedShaders)
     {
         string include = "#include";
 
         if (source.Contains(include))
         {
-            StringBuilder stringBuilder = new StringBuilder(source);
+            StringBuilder stringBuilder = new StringBuilder();
             string[] lines = source.Split(Environment.NewLine);
 
             for (int i = 0; i < lines.Length; i++)
@@ -125,8 +125,16 @@ public class Shader : ICacheable, IDisposable
                 if (lines[i].StartsWith(include))
                 {
                     string path = lines[i].Substring(include.Length + 1).TrimEnd();
-                    string includeSource = GetSourceWithIncludes(AssetLoader.LoadAsFileContent(path));
-                    stringBuilder.Replace(lines[i], includeSource);
+                    if (!includedShaders.Contains(path))
+                    {
+                        includedShaders.Add(path);
+                        string includeSource = GetSourceWithIncludes(AssetLoader.LoadAsFileContent("Shader/Include/" + path), includedShaders);
+                        stringBuilder.AppendLine(includeSource);
+                    }
+                }
+                else
+                {
+                    stringBuilder.AppendLine(lines[i]);
                 }
             }
 

@@ -94,24 +94,34 @@ internal class Cubemap : ICacheable, IDisposable, ITextureBindable
 
     public static Cubemap Create(string pathRight, string pathLeft, string pathTop, string pathBottom, string pathFront, string pathBack)
     {
-        // Caching of cubemaps only uses pathRight as the key right now
-        // | The assumption is that the individual images of cubemaps aren't being mixed
-        // | But if they are mixed this can lead to retrieving the wrong cubemap from cache
-        if (Cache.CubemapCache.GetValue(pathRight, out Cubemap cubemap))
+        int hash = HashCode.Combine(pathRight, pathLeft, pathTop, pathBottom, pathFront, pathBack);
+
+        if (Cache.CubemapCache.TryGetValue(hash, out Cubemap cubemap))
         {
-            Logger.EngineVerbose($"Cubemap from path \"{pathRight}\", ... already exists, returning cached instance");
+            Logger.EngineVerbose($"Cubemap with hash \"{hash}\" already exists, returning cached instance");
             return cubemap;
         }
-        Logger.EngineDebug($"Creating cubemap from path \"{pathRight}\", ...");
+
+        Logger.EngineDebug($"Creating cubemap from path \"{pathRight}\", \"{pathLeft}\", \"{pathTop}\", \"{pathBottom}\", \"{pathFront}\", \"{pathBack}\"");
         cubemap = new Cubemap(pathRight, pathLeft, pathTop, pathBottom, pathFront, pathBack);
-        Cache.CubemapCache.CacheData(pathRight, cubemap);
+        Cache.CubemapCache.CacheData(hash, cubemap);
         return cubemap;
     }
 
-    // Todo: Add caching
     public static Cubemap Create(ITextureBindable textureBindable, CubemapType cubemapType, Vector2i faceSize)
     {
-        return new Cubemap(textureBindable, cubemapType, faceSize);
+        int hash = HashCode.Combine(textureBindable, cubemapType, faceSize);
+
+        if (Cache.CubemapCache.TryGetValue(hash, out Cubemap cubemap))
+        {
+            Logger.EngineVerbose($"Cubemap with hash \"{hash}\" already exists, returning cached instance");
+            return cubemap;
+        }
+
+        Logger.EngineDebug($"Creating cubemap from texture \"{textureBindable}\" with a cubemap type of {cubemapType} and a face size of {faceSize}");
+        cubemap = new Cubemap(textureBindable, cubemapType, faceSize);
+        Cache.CubemapCache.CacheData(hash, cubemap);
+        return cubemap;
     }
 
     private unsafe void CreateFaceTextures(Vector2i faceSize, Texture.FilterMode minFilterMode, Texture.FilterMode maxFilterMode)
@@ -181,14 +191,14 @@ internal class Cubemap : ICacheable, IDisposable, ITextureBindable
 
     public void Delete()
     {
-        object key = Cache.CubemapCache.GetKey(this);
-
-        Logger.EngineDebug($"Deleting cubemap loaded from path / from texture with handle \"{key}\"");
+        if (Cache.CubemapCache.TryGetKey(this, out int key))
+        {
+            Logger.EngineDebug($"Deleting cubemap with hash \"{key}\"");
+            Cache.CubemapCache.RemoveData(key);
+        }
 
         IDisposable disposable = this;
         disposable.Dispose();
-
-        Cache.CubemapCache.RemoveData(key);
     }
 
     void IDisposable.Dispose()

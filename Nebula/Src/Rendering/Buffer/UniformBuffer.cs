@@ -24,7 +24,7 @@ public class UniformBuffer : ICacheable, IDisposable
 
     public static UniformBuffer Create(int location, params UniformBufferLayout[] bufferLayouts)
     {
-        if (Cache.UniformBufferCache.GetValue(location, out _))
+        if (Cache.UniformBufferCache.TryGetValue(location, out _))
         {
             Logger.EngineError($"Couldn't create uniform buffer at location {location} because it already exists.\nEngine reserved uniform locations are 0, 1 and 2.\nReturning null");
             return null;
@@ -55,7 +55,7 @@ public class UniformBuffer : ICacheable, IDisposable
 
     public static UniformBuffer GetAtLocation(int location)
     {
-        if (Cache.UniformBufferCache.GetValue(location, out UniformBuffer uniformBuffer))
+        if (Cache.UniformBufferCache.TryGetValue(location, out UniformBuffer uniformBuffer))
         {
             return uniformBuffer;
         }
@@ -104,13 +104,14 @@ public class UniformBuffer : ICacheable, IDisposable
 
     public void Delete()
     {
-        int key = Cache.UniformBufferCache.GetKey(this);
+        if (Cache.UniformBufferCache.TryGetKey(this, out int key))
+        {
+            Logger.EngineDebug($"Deleting uniform buffer at location {key}");
+            Cache.UniformBufferCache.RemoveData(key);
+        }
 
-        Logger.EngineDebug($"Deleting uniform buffer at location {key}");
         IDisposable disposable = this;
         disposable.Dispose();
-
-        Cache.UniformBufferCache.RemoveData(key);
     }
 
     void IDisposable.Dispose()

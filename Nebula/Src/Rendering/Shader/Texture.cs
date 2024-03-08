@@ -169,14 +169,14 @@ public class Texture : ICacheable, IDisposable, ITextureBindable
 
     public void Delete()
     {
-        string key = Cache.TextureCache.GetKey(this);
-
-        Logger.EngineDebug($"Deleting texture loaded from path \"{key}\"");
+        if (Cache.TextureCache.TryGetKey(this, out string key))
+        {
+            Logger.EngineDebug($"Deleting texture loaded from path \"{key}\"");
+            Cache.TextureCache.RemoveData(key);
+        }
 
         IDisposable disposable = this;
         disposable.Dispose();
-
-        Cache.TextureCache.RemoveData(key);
     }
 
     void IDisposable.Dispose()

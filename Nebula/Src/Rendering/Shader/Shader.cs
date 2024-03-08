@@ -69,7 +69,7 @@ public class Shader : ICacheable, IDisposable
 
     public static Shader Create(string vertexPath, string fragmentPath, bool isLit)
     {
-        if (Cache.ShaderCache.GetValue((vertexPath, fragmentPath), out Shader shader))
+        if (Cache.ShaderCache.TryGetValue((vertexPath, fragmentPath), out Shader shader))
         {
             Logger.EngineVerbose($"Shader from sources \"{vertexPath}\" and \"{fragmentPath}\" already exists, returning cached instance");
             return shader;
@@ -217,14 +217,14 @@ public class Shader : ICacheable, IDisposable
 
     public void Delete()
     {
-        (string, string) key = Cache.ShaderCache.GetKey(this);
-
-        Logger.EngineDebug($"Deleting shader with sources \"{key.Item1}\" and \"{key.Item2}\"");
+        if (Cache.ShaderCache.TryGetKey(this, out (string, string) key))
+        {
+            Logger.EngineDebug($"Deleting shader with sources \"{key.Item1}\" and \"{key.Item2}\"");
+            Cache.ShaderCache.RemoveData(key);
+        }
 
         IDisposable disposable = this;
         disposable.Dispose();
-
-        Cache.ShaderCache.RemoveData(key);
     }
 
     void IDisposable.Dispose()

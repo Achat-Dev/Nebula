@@ -23,7 +23,7 @@ public class Model : ICacheable, IDisposable
 
     public static unsafe Model Load(string path, VertexFlags vertexFlags)
     {
-        if (Cache.ModelCache.GetValue(path, out Model model))
+        if (Cache.ModelCache.TryGetValue(path, out Model model))
         {
             Logger.EngineVerbose($"Model at path \"{path}\" is already loaded, returning cached instance");
             return model;
@@ -77,14 +77,14 @@ public class Model : ICacheable, IDisposable
 
     public void Delete()
     {
-        string key = Cache.ModelCache.GetKey(this);
-
-        Logger.EngineDebug($"Deleting model loaded from path \"{key}\"");
+        if (Cache.ModelCache.TryGetKey(this, out string key))
+        {
+            Logger.EngineDebug($"Deleting model loaded from path \"{key}\"");
+            Cache.ModelCache.RemoveData(key);
+        }
 
         IDisposable disposable = this;
         disposable.Dispose();
-
-        Cache.ModelCache.RemoveData(key);
     }
 
     void IDisposable.Dispose()

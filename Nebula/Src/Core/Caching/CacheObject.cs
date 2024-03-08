@@ -6,21 +6,23 @@ internal struct CacheObject<T, U> : IDisposable where U : class, ICacheable, IDi
 
     public CacheObject() { }
 
-    public bool GetValue(T key, out U value)
+    public bool TryGetValue(T key, out U value)
     {
         return s_cache.TryGetValue(key, out value);
     }
 
-    public T GetKey(U value)
+    public bool TryGetKey(U value, out T key)
     {
         foreach (var item in s_cache)
         {
             if (item.Value == value)
             {
-                return item.Key;
+                key = item.Key;
+                return true;
             }
         }
-        return default(T);
+        key = default(T);
+        return false;
     }
 
     public void CacheData(T key, U value)

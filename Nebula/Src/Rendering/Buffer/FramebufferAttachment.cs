@@ -12,40 +12,38 @@ internal class FramebufferAttachment : IDisposable, ITextureBindable
 
     public enum ReadWriteMode
     {
-        Writeonly,
         Readable,
+        Writeonly,
     }
 
-    private uint m_handle;
-    private readonly AttachmentType r_attachmentType;
-    private readonly ReadWriteMode r_readWriteMode;
+    private readonly uint r_handle;
+    private readonly FramebufferAttachmentConfig r_config;
 
-    internal unsafe FramebufferAttachment(Vector2i size, AttachmentType attachmentType, ReadWriteMode readWriteMode)
+    internal unsafe FramebufferAttachment(FramebufferAttachmentConfig config, Vector2i size)
     {
-        r_attachmentType = attachmentType;
-        r_readWriteMode = readWriteMode;
+        r_config = config;
 
-        switch (attachmentType)
+        switch (r_config.ReadWriteMode)
         {
-            case AttachmentType.Colour:
-                m_handle = GL.Get().GenTexture();
+            case ReadWriteMode.Readable:
+                r_handle = GL.Get().GenTexture();
 
-                GL.Get().BindTexture(TextureTarget.Texture2D, m_handle);
-                GL.Get().TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgb, (uint)size.X, (uint)size.Y, 0, PixelFormat.Rgb, PixelType.UnsignedByte, null);
+                GL.Get().BindTexture(TextureTarget.Texture2D, r_handle);
+                GL.Get().TexImage2D(TextureTarget.Texture2D, 0, config.InternalFormat, (uint)size.X, (uint)size.Y, 0, config.PixelFormat, config.PixelType, null);
                 GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)Texture.FilterMode.Linear);
                 GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)Texture.FilterMode.Linear);
                 GL.Get().BindTexture(TextureTarget.Texture2D, 0);
 
-                GL.Get().FramebufferTexture2D(FramebufferTarget.Framebuffer, Silk.NET.OpenGL.FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, m_handle, 0);
+                GL.Get().FramebufferTexture2D(FramebufferTarget.Framebuffer, config.Attachment, TextureTarget.Texture2D, r_handle, 0);
                 break;
-            case AttachmentType.Depth:
-                m_handle = GL.Get().GenRenderbuffer();
+            case ReadWriteMode.Writeonly:
+                r_handle = GL.Get().GenRenderbuffer();
 
-                GL.Get().BindRenderbuffer(RenderbufferTarget.Renderbuffer, m_handle);
-                GL.Get().RenderbufferStorage(RenderbufferTarget.Renderbuffer, GLEnum.Depth24Stencil8, (uint)size.X, (uint)size.Y);
+                GL.Get().BindRenderbuffer(RenderbufferTarget.Renderbuffer, r_handle);
+                GL.Get().RenderbufferStorage(RenderbufferTarget.Renderbuffer, config.InternalFormat, (uint)size.X, (uint)size.Y);
                 GL.Get().BindRenderbuffer(RenderbufferTarget.Renderbuffer, 0);
 
-                GL.Get().FramebufferRenderbuffer(FramebufferTarget.Framebuffer, Silk.NET.OpenGL.FramebufferAttachment.DepthStencilAttachment, RenderbufferTarget.Renderbuffer, m_handle);
+                GL.Get().FramebufferRenderbuffer(FramebufferTarget.Framebuffer, config.Attachment, RenderbufferTarget.Renderbuffer, r_handle);
                 break;
         }
 
@@ -54,16 +52,16 @@ internal class FramebufferAttachment : IDisposable, ITextureBindable
 
     internal unsafe void Resize(Vector2i size)
     {
-        switch (r_attachmentType)
+        switch (r_config.ReadWriteMode)
         {
-            case AttachmentType.Colour:
-                GL.Get().BindTexture(TextureTarget.Texture2D, m_handle);
-                GL.Get().TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgb, (uint)size.X, (uint)size.Y, 0, PixelFormat.Rgb, PixelType.UnsignedByte, null);
+            case ReadWriteMode.Readable:
+                GL.Get().BindTexture(TextureTarget.Texture2D, r_handle);
+                GL.Get().TexImage2D(TextureTarget.Texture2D, 0, r_config.InternalFormat, (uint)size.X, (uint)size.Y, 0, r_config.PixelFormat, r_config.PixelType, null);
                 GL.Get().BindTexture(TextureTarget.Texture2D, 0);
                 break;
-            case AttachmentType.Depth:
-                GL.Get().BindRenderbuffer(RenderbufferTarget.Renderbuffer, m_handle);
-                GL.Get().RenderbufferStorage(RenderbufferTarget.Renderbuffer, InternalFormat.Depth24Stencil8, (uint)size.X, (uint)size.Y);
+            case ReadWriteMode.Writeonly:
+                GL.Get().BindRenderbuffer(RenderbufferTarget.Renderbuffer, r_handle);
+                GL.Get().RenderbufferStorage(RenderbufferTarget.Renderbuffer, r_config.InternalFormat, (uint)size.X, (uint)size.Y);
                 GL.Get().BindRenderbuffer(RenderbufferTarget.Renderbuffer, 0);
                 break;
         }
@@ -71,39 +69,39 @@ internal class FramebufferAttachment : IDisposable, ITextureBindable
 
     public void Bind(Texture.Unit textureUnit)
     {
-        if (r_readWriteMode == ReadWriteMode.Writeonly)
+        if (r_config.ReadWriteMode == ReadWriteMode.Writeonly)
         {
             Logger.EngineError("Trying to bind a writeonly framebuffer attachment");
             return;
         }
         GL.Get().ActiveTexture((TextureUnit)textureUnit);
-        GL.Get().BindTexture(TextureTarget.Texture2D, m_handle);
+        GL.Get().BindTexture(TextureTarget.Texture2D, r_handle);
     }
 
     public uint GetHandle()
     {
-        if (r_readWriteMode == ReadWriteMode.Writeonly)
+        if (r_config.ReadWriteMode == ReadWriteMode.Writeonly)
         {
             Logger.EngineError("Trying to access a writeonly framebuffer attachment");
             return 0;
         }
-        return m_handle;
+        return r_handle;
     }
 
     internal AttachmentType GetAttachmentType()
     {
-        return r_attachmentType;
+        return r_config.AttachmentType;
     }
 
     void IDisposable.Dispose()
     {
-        switch (r_attachmentType)
+        switch (r_config.AttachmentType)
         {
             case AttachmentType.Colour:
-                GL.Get().DeleteTexture(m_handle);
+                GL.Get().DeleteTexture(r_handle);
                 break;
             case AttachmentType.Depth:
-                GL.Get().DeleteRenderbuffer(m_handle);
+                GL.Get().DeleteRenderbuffer(r_handle);
                 break;
         }
     }

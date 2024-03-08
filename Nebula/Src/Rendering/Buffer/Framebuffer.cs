@@ -5,7 +5,7 @@ namespace Nebula.Rendering;
 internal class Framebuffer : IDisposable
 {
     private readonly uint r_handle;
-    private readonly FramebufferAttachment[] r_attachments;
+    private FramebufferAttachment[] m_attachments;
 
     public Framebuffer(params FramebufferAttachmentConfig[] attachmentConfigs)
         : this(Game.GetWindowSize(), attachmentConfigs) { }
@@ -15,12 +15,12 @@ internal class Framebuffer : IDisposable
         r_handle = GL.Get().GenFramebuffer();
         Bind();
 
-        r_attachments = new FramebufferAttachment[attachmentConfigs.Length];
+        m_attachments = new FramebufferAttachment[attachmentConfigs.Length];
 
         for (int i = 0; i < attachmentConfigs.Length; i++)
         {
-            FramebufferAttachment attachment = new FramebufferAttachment(size, attachmentConfigs[i].AttachmentType, attachmentConfigs[i].ReadWriteMode);
-            r_attachments[i] = attachment;
+            FramebufferAttachment attachment = new FramebufferAttachment(attachmentConfigs[i], size);
+            m_attachments[i] = attachment;
         }
     }
 
@@ -34,9 +34,9 @@ internal class Framebuffer : IDisposable
 
         Bind();
 
-        for (int i = 0; i < r_attachments.Length; i++)
+        for (int i = 0; i < m_attachments.Length; i++)
         {
-            r_attachments[i].Resize(size);
+            m_attachments[i].Resize(size);
         }
 
         if (GL.Get().CheckFramebufferStatus(FramebufferTarget.Framebuffer) != GLEnum.FramebufferComplete)
@@ -57,11 +57,11 @@ internal class Framebuffer : IDisposable
 
     public FramebufferAttachment GetAttachment(FramebufferAttachment.AttachmentType attachmentType)
     {
-        for (int i = 0; i < r_attachments.Length; i++)
+        for (int i = 0; i < m_attachments.Length; i++)
         {
-            if (r_attachments[i].GetAttachmentType() == attachmentType)
+            if (m_attachments[i].GetAttachmentType() == attachmentType)
             {
-                return r_attachments[i];
+                return m_attachments[i];
             }
         }
         Logger.EngineError($"Framebuffer doesn't have an attachment of type {attachmentType}");
@@ -71,11 +71,12 @@ internal class Framebuffer : IDisposable
     void IDisposable.Dispose()
     {
         IDisposable disposable;
-        for (int i = 0; i < r_attachments.Length; i++)
+        for (int i = 0; i < m_attachments.Length; i++)
         {
-            disposable = r_attachments[i];
+            disposable = m_attachments[i];
             disposable.Dispose();
         }
+        m_attachments = null;
         GL.Get().DeleteFramebuffer(r_handle);
     }
 }

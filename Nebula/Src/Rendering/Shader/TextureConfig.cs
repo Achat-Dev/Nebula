@@ -35,16 +35,6 @@ public struct TextureConfig
         MaxMipMapLevel = maxMipMapLevel;
     }
 
-    public int GetWrapMode()
-    {
-        return (int)WrapMode;
-    }
-
-    public int GetFilterMode()
-    {
-        return (int)FilterMode;
-    }
-
     public Silk.NET.OpenGL.InternalFormat GetInternalFormat()
     {
         switch (Format)

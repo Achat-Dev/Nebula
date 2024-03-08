@@ -97,11 +97,11 @@ public class Texture : ICacheable, IDisposable, ITextureBindable
             }
         }
 
-        int wrapMode = config.GetWrapMode();
+        int wrapMode = (int)config.WrapMode;
         GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, wrapMode);
         GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, wrapMode);
 
-        int filterMode = config.GetFilterMode();
+        int filterMode = (int)config.FilterMode;
         GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, filterMode);
         GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, filterMode);
 
@@ -120,11 +120,11 @@ public class Texture : ICacheable, IDisposable, ITextureBindable
 
         GL.Get().TexImage2D(TextureTarget.Texture2D, 0, config.GetInternalFormat(), (uint)size.X, (uint)size.Y, 0, config.GetPixelFormat(), config.GetPixelType(), null);
 
-        int wrapMode = config.GetWrapMode();
+        int wrapMode = (int)config.WrapMode;
         GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, wrapMode);
         GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, wrapMode);
 
-        int filterMode = config.GetFilterMode();
+        int filterMode = (int)config.FilterMode;
         GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, filterMode);
         GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, filterMode);
 

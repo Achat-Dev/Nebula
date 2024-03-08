@@ -1,6 +1,6 @@
 ﻿namespace Nebula;
 
-internal struct CacheObject<T, U> : IDisposable where U : class, ICacheable, IDisposable
+internal struct CacheObject<T, U> : IDisposable where U : ICacheable, IDisposable
 {
     private readonly Dictionary<T, U> s_cache = new Dictionary<T, U>();
 
@@ -15,7 +15,7 @@ internal struct CacheObject<T, U> : IDisposable where U : class, ICacheable, IDi
     {
         foreach (var item in s_cache)
         {
-            if (item.Value == value)
+            if (EqualityComparer<U>.Default.Equals(item.Value, value))
             {
                 key = item.Key;
                 return true;

@@ -94,5 +94,6 @@ public class Model : ICacheable, IDisposable
             r_meshes[i].Dispose();
         }
         r_meshes.Clear();
+        r_meshes.TrimExcess();
     }
 }

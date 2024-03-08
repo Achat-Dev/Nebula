@@ -40,6 +40,7 @@ public class Scene
         if (s_active != null)
         {
             s_active.r_entities.Clear();
+            s_active.r_entities.TrimExcess();
             s_active.r_entityRemovalStack.Clear();
         }
         Scene scene = new Scene();

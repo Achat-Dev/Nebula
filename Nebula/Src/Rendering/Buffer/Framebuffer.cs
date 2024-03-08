@@ -4,8 +4,9 @@ namespace Nebula.Rendering;
 
 internal class Framebuffer : IDisposable
 {
-    private readonly uint r_handle;
     private FramebufferAttachment[] m_attachments;
+
+    private readonly uint r_handle;
 
     public Framebuffer(params FramebufferAttachmentConfig[] attachmentConfigs)
         : this(Game.GetWindowSize(), attachmentConfigs) { }

@@ -56,7 +56,9 @@ public class Entity
             r_components[i].OnDestroy();
         }
         r_components.Clear();
+        r_components.TrimExcess();
         r_updateableComponents.Clear();
+        r_updateableComponents.TrimExcess();
         r_componentRemovalStack.Clear();
     }
 

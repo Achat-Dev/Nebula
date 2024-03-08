@@ -26,7 +26,10 @@ public static class Renderer
         s_skyboxVao = Model.Load("Art/Models/Cube.obj", VertexFlags.Position).GetMeshes()[0].GetVao();
         s_screenVao = Model.Load("Art/Models/Plane.obj", VertexFlags.Position | VertexFlags.UV).GetMeshes()[0].GetVao();
 
-        Texture skyboxTexture = Texture.Create("Art/Textures/Skybox_v2.hdr", Texture.WrapMode.ClampToEdge, Texture.FilterMode.Linear, Texture.Format.Hdr, true);
+        TextureConfig skyboxConfig = TextureConfig.DefaultHdr;
+        skyboxConfig.WrapMode = Texture.WrapMode.ClampToEdge;
+        skyboxConfig.GenerateMipMaps = false;
+        Texture skyboxTexture = Texture.Create("Art/Textures/Skybox_v2.hdr", skyboxConfig, true);
         s_skybox = new Skybox(skyboxTexture);
     }
 
@@ -44,8 +47,7 @@ public static class Renderer
 
         s_skybox.GetIrradianceMap().Bind(Texture.Unit.Texture0);
         s_skybox.GetPrefilteredMap().Bind(Texture.Unit.Texture1);
-        GL.Get().ActiveTexture(TextureUnit.Texture2);
-        GL.Get().BindTexture(TextureTarget.Texture2D, s_skybox.GetBrdfLutHandle());
+        s_skybox.GetBrdfLut().Bind(Texture.Unit.Texture2);
 
         // Render to framebuffer
         GL.Get().Enable(GLEnum.DepthTest);

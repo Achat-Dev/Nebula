@@ -88,10 +88,10 @@ internal class Window : IDisposable
         modelRenderer.SetShaderInstance(shaderInstance);
 
         // PBR Textured
-        Texture albedoMap = Texture.Create("Art/Textures/Metal_Albedo.jpg", Texture.WrapMode.Repeat, Texture.FilterMode.Linear, Texture.Format.Rgba);
-        Texture normalMap = Texture.Create("Art/Textures/Metal_NormalGL.jpg", Texture.WrapMode.Repeat, Texture.FilterMode.Linear, Texture.Format.Rgba);
-        Texture metallicMap = Texture.Create("Art/Textures/Metal_Metallic.jpg", Texture.WrapMode.Repeat, Texture.FilterMode.Linear, Texture.Format.Rgba);
-        Texture roughnessMap = Texture.Create("Art/Textures/Metal_Roughness.jpg", Texture.WrapMode.Repeat, Texture.FilterMode.Linear, Texture.Format.Rgba);
+        Texture albedoMap = Texture.Create("Art/Textures/Metal_Albedo.jpg", TextureConfig.DefaultRgba);
+        Texture normalMap = Texture.Create("Art/Textures/Metal_NormalGL.jpg", TextureConfig.DefaultRgba);
+        Texture metallicMap = Texture.Create("Art/Textures/Metal_Metallic.jpg", TextureConfig.DefaultRgba);
+        Texture roughnessMap = Texture.Create("Art/Textures/Metal_Roughness.jpg", TextureConfig.DefaultRgba);
         //Texture ambientOcclusionMap = Texture.Create("Art/Textures/Bricks_AmbientOcclusion.jpg", Texture.WrapMode.Repeat, Texture.FilterMode.Linear, Texture.Format.Rgba);
 
         shaderInstance = new ShaderInstance(Shader.Create(Shader.DefaultType.PBRTextured));

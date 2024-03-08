@@ -5,6 +5,21 @@ namespace Nebula.Rendering;
 
 public class Texture : ICacheable, IDisposable, ITextureBindable
 {
+    public enum Format
+    {
+        R = 6403,
+        Rg = 33319,
+        Rgb = 6407,
+        Rgba = 6408,
+        Hdr = 6407,
+    }
+
+    public enum DataType
+    {
+        UnsignedByte = 5121,
+        Float = 5126,
+    }
+
     public enum WrapMode
     {
         ClampToBorder = 33069,
@@ -18,13 +33,6 @@ public class Texture : ICacheable, IDisposable, ITextureBindable
         Linear = 9729,
         LinearMipmapLinear = 9987,
         Nearest = 9728,
-    }
-
-    public enum Format
-    {
-        Rgb,
-        Rgba,
-        Hdr,
     }
 
     public enum Unit
@@ -65,106 +73,117 @@ public class Texture : ICacheable, IDisposable, ITextureBindable
 
     private readonly uint r_handle;
 
-    private Texture(string path, WrapMode wrapMode, FilterMode filterMode, Format format)
+    private unsafe Texture(string path, TextureConfig config)
     {
         r_handle = GL.Get().GenTexture();
         Bind(Unit.Texture0);
 
-        switch (format)
+        if (config.DataType == DataType.Float)
         {
-            case Format.Rgb:
-                CreateRgbTexture(path, wrapMode, filterMode);
-                break;
-            case Format.Rgba:
-                CreateRgbaTexture(path, wrapMode, filterMode);
-                break;
-            case Format.Hdr:
-                CreateHdrTexture(path, wrapMode, filterMode);
-                break;
+            ImageResultFloat imageResultFloat = ImageResultFloat.FromMemory(AssetLoader.LoadAsByteArray(path, out _), config.GetColorComponents());
+
+            fixed (void* d = imageResultFloat.Data)
+            {
+                GL.Get().TexImage2D(TextureTarget.Texture2D, 0, config.GetInternalFormat(), (uint)imageResultFloat.Width, (uint)imageResultFloat.Height, 0, config.GetPixelFormat(), config.GetPixelType(), d);
+            }
+        }
+        else
+        {
+            ImageResult imageResult = ImageResult.FromMemory(AssetLoader.LoadAsByteArray(path, out _), config.GetColorComponents());
+
+            fixed (void* d = imageResult.Data)
+            {
+                GL.Get().TexImage2D(TextureTarget.Texture2D, 0, config.GetInternalFormat(), (uint)imageResult.Width, (uint)imageResult.Height, 0, config.GetPixelFormat(), config.GetPixelType(), d);
+            }
+        }
+
+        int wrapMode = config.GetWrapMode();
+        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, wrapMode);
+        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, wrapMode);
+
+        int filterMode = config.GetFilterMode();
+        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, filterMode);
+        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, filterMode);
+
+        if (config.GenerateMipMaps)
+        {
+            GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureBaseLevel, 0);
+            GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLevel, config.MaxMipMapLevel);
+            GL.Get().GenerateMipmap(TextureTarget.Texture2D);
         }
     }
 
-    public static Texture Create(string path, WrapMode wrapMode, FilterMode filterMode, Format format, bool flipVertical = false)
+    private unsafe Texture(Shader captureShader, Vector2i size, TextureConfig config)
     {
-        if (Cache.TextureCache.GetValue(path, out Texture texture))
+        r_handle = GL.Get().GenTexture();
+        Bind(Unit.Texture0);
+
+        GL.Get().TexImage2D(TextureTarget.Texture2D, 0, config.GetInternalFormat(), (uint)size.X, (uint)size.Y, 0, config.GetPixelFormat(), config.GetPixelType(), null);
+
+        int wrapMode = config.GetWrapMode();
+        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, wrapMode);
+        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, wrapMode);
+
+        int filterMode = config.GetFilterMode();
+        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, filterMode);
+        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, filterMode);
+
+        if (config.GenerateMipMaps)
+        {
+            GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureBaseLevel, 0);
+            GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLevel, config.MaxMipMapLevel);
+            GL.Get().GenerateMipmap(TextureTarget.Texture2D);
+        }
+
+        FramebufferAttachmentConfig depthAttachmentConfig = new FramebufferAttachmentConfig(FramebufferAttachment.AttachmentType.Depth, FramebufferAttachment.ReadWriteMode.Writeonly);
+        Framebuffer framebuffer = new Framebuffer(size, depthAttachmentConfig);
+        framebuffer.Bind();
+
+        captureShader.Use();
+
+        VertexArrayObject vao = Model.Load("Art/Models/Plane.obj").GetMeshes()[0].GetVao();
+
+        GL.Get().Viewport(size);
+        GL.Get().FramebufferTexture2D(FramebufferTarget.Framebuffer, Silk.NET.OpenGL.FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, r_handle, 0);
+        GL.Get().Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+        vao.Draw();
+
+        framebuffer.Unbind();
+        IDisposable disposable = framebuffer;
+        disposable.Dispose();
+
+        GL.Get().Viewport(Game.GetWindowSize());
+    }
+
+    public static Texture Create(string path, TextureConfig config, bool flipVertical = false)
+    {
+        if (Cache.TextureCache.TryGetValue(path, out Texture texture))
         {
             Logger.EngineVerbose($"Texture from path \"{path}\" already exists, returning cached instance");
             return texture;
         }
 
-        Logger.EngineDebug($"Creating texture from path \"{path}\" with wrap mode \"{wrapMode}\", filter mode \"{filterMode}\" and format \"{format}\"");
+        Logger.EngineDebug($"Creating texture from path \"{path}\" with {config.ToString()}");
         if (flipVertical)
         {
             StbImage.stbi_set_flip_vertically_on_load(1);
         }
-        texture = new Texture(path, wrapMode, filterMode, format);
+        texture = new Texture(path, config);
         StbImage.stbi_set_flip_vertically_on_load(0);
         Cache.TextureCache.CacheData(path, texture);
         return texture;
     }
 
-    private unsafe void CreateRgbTexture(string path, WrapMode wrapMode, FilterMode filterMode)
+    public static Texture CreateFromCapture(Shader captureShader, Vector2i size, TextureConfig config)
     {
-        ImageResult imageResult = ImageResult.FromMemory(AssetLoader.LoadAsByteArray(path, out _), ColorComponents.RedGreenBlue);
-
-        fixed (void* d = imageResult.Data)
-        {
-            GL.Get().TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgb, (uint)imageResult.Width, (uint)imageResult.Height, 0, PixelFormat.Rgb, PixelType.UnsignedByte, d);
-        }
-
-        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)wrapMode);
-        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)wrapMode);
-        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)filterMode);
-        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)filterMode);
-        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureBaseLevel, 0);
-        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLevel, 8);
-
-        GL.Get().GenerateMipmap(TextureTarget.Texture2D);
-    }
-
-    private unsafe void CreateRgbaTexture(string path, WrapMode wrapMode, FilterMode filterMode)
-    {
-        ImageResult imageResult = ImageResult.FromMemory(AssetLoader.LoadAsByteArray(path, out _), ColorComponents.RedGreenBlueAlpha);
-
-        fixed (void* d = imageResult.Data)
-        {
-            GL.Get().TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgba, (uint)imageResult.Width, (uint)imageResult.Height, 0, PixelFormat.Rgba, PixelType.UnsignedByte, d);
-        }
-
-        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)wrapMode);
-        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)wrapMode);
-        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)filterMode);
-        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)filterMode);
-        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureBaseLevel, 0);
-        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLevel, 8);
-
-        GL.Get().GenerateMipmap(TextureTarget.Texture2D);
-    }
-
-    private unsafe void CreateHdrTexture(string path, WrapMode wrapMode, FilterMode filterMode)
-    {
-        ImageResultFloat imageResultFloat = ImageResultFloat.FromMemory(AssetLoader.LoadAsByteArray(path, out _), ColorComponents.RedGreenBlue);
-
-        fixed (void* d = imageResultFloat.Data)
-        {
-            GL.Get().TexImage2D(TextureTarget.Texture2D, 0, InternalFormat.Rgb16f, (uint)imageResultFloat.Width, (uint)imageResultFloat.Height, 0, PixelFormat.Rgb, PixelType.Float, d);
-        }
-
-        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)wrapMode);
-        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)wrapMode);
-        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)filterMode);
-        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)filterMode);
+        // Don't cache captured textures because they are unique every time
+        return new Texture(captureShader, size, config);
     }
 
     public void Bind(Unit textureUnit)
     {
         GL.Get().ActiveTexture((TextureUnit)textureUnit);
         GL.Get().BindTexture(TextureTarget.Texture2D, r_handle);
-    }
-
-    internal uint GetHandle()
-    {
-        return r_handle;
     }
 
     public void Delete()

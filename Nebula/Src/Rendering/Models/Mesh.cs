@@ -6,16 +6,10 @@ namespace Nebula.Rendering;
 
 internal class Mesh : IDisposable
 {
-    private float[] m_vertices;
-    private uint[] m_indices;
-
     private readonly VertexArrayObject r_vao;
 
     private Mesh(float[] vertices, uint[] indices, VertexFlags vertexFlags)
     {
-        m_vertices = vertices;
-        m_indices = indices;
-
         BufferObject<float> vbo = new BufferObject<float>(vertices, BufferTargetARB.ArrayBuffer);
         BufferObject<uint> ibo = new BufferObject<uint>(indices, BufferTargetARB.ElementArrayBuffer);
         r_vao = new VertexArrayObject(vbo, ibo, vertexFlags.GenerateBufferLayout());
@@ -94,8 +88,6 @@ internal class Mesh : IDisposable
 
     public void Dispose()
     {
-        m_vertices = null;
-        m_indices = null;
         r_vao.Dispose();
     }
 }

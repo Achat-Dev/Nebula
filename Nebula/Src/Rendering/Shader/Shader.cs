@@ -122,6 +122,7 @@ public class Shader : ICacheable, IDisposable
 
             for (int i = 0; i < lines.Length; i++)
             {
+                lines[i] = lines[i].TrimStart(' ', '\t');
                 if (lines[i].StartsWith(include))
                 {
                     string path = lines[i].Substring(include.Length + 1).TrimEnd();

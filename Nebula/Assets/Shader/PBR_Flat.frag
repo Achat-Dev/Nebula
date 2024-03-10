@@ -106,11 +106,8 @@ void main()
 	colour += calculatePointLights(viewDirection, f0, normal);
 	colour += calculateIBL(viewDirection, f0, normal);
 
-	// HDR tonemapping
-	colour = colour / (colour + vec3(1.0));
-
-	// Gamma correction
-	colour = pow(colour, vec3(1.0 / 2.2));
+	#include Math/PBR/HDRTonemapping.glsl
+	#include Math/PBR/GammaCorrection.glsl
 
 	o_colour = vec4(colour, 1.0);
 }

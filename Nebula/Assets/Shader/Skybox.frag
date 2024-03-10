@@ -10,11 +10,8 @@ void main()
 {
 	vec3 colour = texture(u_cubemap, io_uv).rgb;
 
-	// HDR tonemapping
-	colour = colour / (colour + vec3(1.0));
-
-	// Gamma correction is done outomatically by StbImageSharp on load
-	colour = pow(colour, vec3(1.0/2.2));
+	#include Math/PBR/HDRTonemapping.glsl
+	#include Math/PBR/GammaCorrection.glsl
 
 	o_colour = vec4(colour, 1.0);
 }

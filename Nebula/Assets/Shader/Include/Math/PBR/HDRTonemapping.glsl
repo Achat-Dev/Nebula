@@ -1,0 +1,1 @@
+﻿colour = colour / (colour + vec3(1.0));

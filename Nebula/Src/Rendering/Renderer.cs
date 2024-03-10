@@ -29,8 +29,8 @@ public static class Renderer
         TextureConfig skyboxConfig = TextureConfig.DefaultHdr;
         skyboxConfig.WrapMode = Texture.WrapMode.ClampToEdge;
         skyboxConfig.GenerateMipMaps = false;
-        Texture skyboxTexture = Texture.Create("Art/Textures/Skybox_v2.hdr", skyboxConfig, true);
-        s_skybox = new Skybox(skyboxTexture);
+        Texture skyboxTexture = Texture.Create("Art/Textures/Skybox_RuralRoad.hdr", skyboxConfig, true);
+        s_skybox = new Skybox(skyboxTexture, SkyboxConfig.DefaultSmall);
     }
 
     public static void SetClearColour(Colour colour)

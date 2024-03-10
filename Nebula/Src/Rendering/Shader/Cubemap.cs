@@ -79,7 +79,7 @@ internal class Cubemap : ICacheable, IDisposable, ITextureBindable
                 GL.Get().Viewport(mipSize);
 
                 float roughness = (float)mip / (float)(maxMipLevels - 1);
-                mappingShader.SetFloat(mappingShader.GetCachedUniformLocation("u_roughness"), roughness);
+                mappingShader.SetFloat("u_roughness", roughness);
 
                 CaptureFaces(mappingShader, vao, mip, viewMatrices);
             }
@@ -146,8 +146,8 @@ internal class Cubemap : ICacheable, IDisposable, ITextureBindable
 
         mappingShader = Shader.Create("Shader/EquirectangularToCubemap.vert", fragmentPath, false);
         mappingShader.Use();
-        mappingShader.SetInt(mappingShader.GetCachedUniformLocation("u_environmentMap"), 0);
-        mappingShader.SetMat4(mappingShader.GetCachedUniformLocation("u_projection"), Matrix4x4.CreatePerspectiveFieldOfView(90f, 1f, 0.1f, 100f));
+        mappingShader.SetInt("u_environmentMap", 0);
+        mappingShader.SetMat4("u_projection", Matrix4x4.CreatePerspectiveFieldOfView(90f, 1f, 0.1f, 100f));
 
         // Don't dispose this as this is the vao from the cached cube model
         // | Disposing this will make the cube model unable to render
@@ -168,7 +168,7 @@ internal class Cubemap : ICacheable, IDisposable, ITextureBindable
     {
         for (int i = 0; i < 6; i++)
         {
-            mappingShader.SetMat4(mappingShader.GetCachedUniformLocation("u_view"), viewMatrices[i]);
+            mappingShader.SetMat4("u_view", viewMatrices[i]);
             GL.Get().FramebufferTexture2D(FramebufferTarget.Framebuffer, Silk.NET.OpenGL.FramebufferAttachment.ColorAttachment0, TextureTarget.TextureCubeMapPositiveX + i, r_handle, level);
             GL.Get().Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             vao.Draw();

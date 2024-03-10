@@ -155,9 +155,25 @@ public class Shader : ICacheable, IDisposable
         GL.Get().Uniform1(location, value);
     }
 
+    internal void SetFloat(string name, float value)
+    {
+        if (TryGetCachedUniformLocation(name, out int location))
+        {
+            GL.Get().Uniform1(location, value);
+        }
+    }
+
     internal void SetVec2(int location, Vector2 value)
     {
         GL.Get().Uniform2(location, value.X, value.Y);
+    }
+
+    internal void SetVec2(string name, Vector2 value)
+    {
+        if (TryGetCachedUniformLocation(name, out int location))
+        {
+            GL.Get().Uniform2(location, value.X, value.Y);
+        }
     }
 
     internal void SetVec3(int location, Vector3 value)
@@ -165,9 +181,25 @@ public class Shader : ICacheable, IDisposable
         GL.Get().Uniform3(location, value.X, value.Y, value.Z);
     }
 
+    internal void SetVec3(string name, Vector3 value)
+    {
+        if (TryGetCachedUniformLocation(name, out int location))
+        {
+            GL.Get().Uniform3(location, value.X, value.Y, value.Z);
+        }
+    }
+
     internal void SetVec4(int location, Vector4 value)
     {
         GL.Get().Uniform4(location, value.X, value.Y, value.Z, value.W);
+    }
+
+    internal void SetVec4(string name, Vector4 value)
+    {
+        if (TryGetCachedUniformLocation(name, out int location))
+        {
+            GL.Get().Uniform4(location, value.X, value.Y, value.Z, value.W);
+        }
     }
 
     internal void SetInt(int location, int value)
@@ -175,9 +207,25 @@ public class Shader : ICacheable, IDisposable
         GL.Get().Uniform1(location, value);
     }
 
+    internal void SetInt(string name, int value)
+    {
+        if (TryGetCachedUniformLocation(name, out int location))
+        {
+            GL.Get().Uniform1(location, value);
+        }
+    }
+
     internal void SetVec2i(int location, Vector2i value)
     {
         GL.Get().Uniform2(location, value.X, value.Y);
+    }
+
+    internal void SetVec2i(string name, Vector2i value)
+    {
+        if (TryGetCachedUniformLocation(name, out int location))
+        {
+            GL.Get().Uniform2(location, value.X, value.Y);
+        }
     }
 
     internal void SetVec3i(int location, Vector3i value)
@@ -185,9 +233,25 @@ public class Shader : ICacheable, IDisposable
         GL.Get().Uniform3(location, value.X, value.Y, value.Z);
     }
 
+    internal void SetVec3i(string name, Vector3i value)
+    {
+        if (TryGetCachedUniformLocation(name, out int location))
+        {
+            GL.Get().Uniform3(location, value.X, value.Y, value.Z);
+        }
+    }
+
     internal void SetVec4i(int location, Vector4i value)
     {
         GL.Get().Uniform4(location, value.X, value.Y, value.Z, value.W);
+    }
+
+    internal void SetVec4i(string name, Vector4i value)
+    {
+        if (TryGetCachedUniformLocation(name, out int location))
+        {
+            GL.Get().Uniform4(location, value.X, value.Y, value.Z, value.W);
+        }
     }
 
     internal unsafe void SetMat3(int location, Matrix3x3 value)
@@ -195,20 +259,43 @@ public class Shader : ICacheable, IDisposable
         GL.Get().UniformMatrix3(location, 1, false, (float*)&value);
     }
 
+    internal unsafe void SetMat3(string name, Matrix3x3 value)
+    {
+        if (TryGetCachedUniformLocation(name, out int location))
+        {
+            GL.Get().UniformMatrix3(location, 1, false, (float*)&value);
+        }
+    }
+
     internal unsafe void SetMat4(int location, Matrix4x4 value)
     {
         GL.Get().UniformMatrix4(location, 1, false, (float*) &value);
     }
 
-    internal int GetCachedUniformLocation(string name)
+    internal unsafe void SetMat4(string name, Matrix4x4 value)
     {
-        if (r_uniformLocationCache.TryGetValue(name, out int location))
+        if (TryGetCachedUniformLocation(name, out int location))
         {
-            return location;
+            GL.Get().UniformMatrix4(location, 1, false, (float*)&value);
+        }
+    }
+
+    internal bool TryGetCachedUniformLocation(string name, out int result)
+    {
+        if (r_uniformLocationCache.TryGetValue(name, out result))
+        {
+            return true;
+        }
+
+        result = GL.Get().GetUniformLocation(r_handle, name);
+
+        if (result != -1)
+        {
+            r_uniformLocationCache.Add(name, result);
         }
 
         Logger.EngineError($"Uniform \"{name}\" not found");
-        return -1;
+        return false;
     }
 
     internal bool IsLit()

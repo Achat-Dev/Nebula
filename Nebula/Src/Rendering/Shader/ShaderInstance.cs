@@ -23,197 +23,259 @@ public class ShaderInstance
 
     public float GetFloat(string name)
     {
-        return r_floatBuffer[r_shader.GetCachedUniformLocation(name)];
+        if (r_shader.TryGetCachedUniformLocation(name, out int location))
+        {
+            return r_floatBuffer[location];
+        }
+        return 0f;
     }
 
     public void SetFloat(string name, float value)
     {
-        int location = r_shader.GetCachedUniformLocation(name);
-        if (r_floatBuffer.ContainsKey(location))
+        if (r_shader.TryGetCachedUniformLocation(name, out int location))
         {
-            r_floatBuffer[location] = value;
-        }
-        else
-        {
-            r_floatBuffer.Add(r_shader.GetCachedUniformLocation(name), value);
+            if (r_floatBuffer.ContainsKey(location))
+            {
+                r_floatBuffer[location] = value;
+            }
+            else
+            {
+                r_floatBuffer.Add(location, value);
+            }
         }
     }
 
     public Vector2 GetVec2(string name)
     {
-        return r_vec2Buffer[r_shader.GetCachedUniformLocation(name)];
+        if (r_shader.TryGetCachedUniformLocation(name, out int location))
+        {
+            return r_vec2Buffer[location];
+        }
+        return Vector2.Zero;
     }
 
     public void SetVec2(string name, Vector2 value)
     {
-        int location = r_shader.GetCachedUniformLocation(name);
-        if (r_vec2Buffer.ContainsKey(location))
+        if (r_shader.TryGetCachedUniformLocation(name, out int location))
         {
-            r_vec2Buffer[location] = value;
-        }
-        else
-        {
-            r_vec2Buffer.Add(r_shader.GetCachedUniformLocation(name), value);
+            if (r_vec2Buffer.ContainsKey(location))
+            {
+                r_vec2Buffer[location] = value;
+            }
+            else
+            {
+                r_vec2Buffer.Add(location, value);
+            }
         }
     }
 
     public Vector3 GetVec3(string name)
     {
-        return r_vec3Buffer[r_shader.GetCachedUniformLocation(name)];
+        if (r_shader.TryGetCachedUniformLocation(name, out int location))
+        {
+            return r_vec3Buffer[location];
+        }
+        return Vector3.Zero;
     }
 
     public void SetVec3(string name, Vector3 value)
     {
-        int location = r_shader.GetCachedUniformLocation(name);
-        if (r_vec3Buffer.ContainsKey(location))
+        if (r_shader.TryGetCachedUniformLocation(name, out int location))
         {
-            r_vec3Buffer[location] = value;
-        }
-        else
-        {
-            r_vec3Buffer.Add(r_shader.GetCachedUniformLocation(name), value);
+            if (r_vec3Buffer.ContainsKey(location))
+            {
+                r_vec3Buffer[location] = value;
+            }
+            else
+            {
+                r_vec3Buffer.Add(location, value);
+            }
         }
     }
 
     public Vector4 GetVec4(string name)
     {
-        return r_vec4Buffer[r_shader.GetCachedUniformLocation(name)];
+        if (r_shader.TryGetCachedUniformLocation(name, out int location))
+        {
+            return r_vec4Buffer[location];
+        }
+        return Vector4.Zero;
     }
 
     public void SetVec4(string name, Vector4 value)
     {
-        int location = r_shader.GetCachedUniformLocation(name);
-        if (r_vec4Buffer.ContainsKey(location))
+        if (r_shader.TryGetCachedUniformLocation(name, out int location))
         {
-            r_vec4Buffer[location] = value;
-        }
-        else
-        {
-            r_vec4Buffer.Add(r_shader.GetCachedUniformLocation(name), value);
+            if (r_vec4Buffer.ContainsKey(location))
+            {
+                r_vec4Buffer[location] = value;
+            }
+            else
+            {
+                r_vec4Buffer.Add(location, value);
+            }
         }
     }
 
     public int GetInt(string name)
     {
-        return r_intBuffer[r_shader.GetCachedUniformLocation(name)];
+        if (r_shader.TryGetCachedUniformLocation(name, out int location))
+        {
+            return r_intBuffer[location];
+        }
+        return 0;
     }
 
     public void SetInt(string name, int value)
     {
-        int location = r_shader.GetCachedUniformLocation(name);
-        if (r_intBuffer.ContainsKey(location))
+        if (r_shader.TryGetCachedUniformLocation(name, out int location))
         {
-            r_intBuffer[location] = value;
-        }
-        else
-        {
-            r_intBuffer.Add(r_shader.GetCachedUniformLocation(name), value);
+            if (r_intBuffer.ContainsKey(location))
+            {
+                r_intBuffer[location] = value;
+            }
+            else
+            {
+                r_intBuffer.Add(location, value);
+            }
         }
     }
 
     public Vector2i GetVec2i(string name)
     {
-        return r_vec2iBuffer[r_shader.GetCachedUniformLocation(name)];
+        if (r_shader.TryGetCachedUniformLocation(name, out int location))
+        {
+            return r_vec2iBuffer[location];
+        }
+        return Vector2i.Zero;
     }
 
     public void SetVec2i(string name, Vector2i value)
     {
-        int location = r_shader.GetCachedUniformLocation(name);
-        if (r_vec2iBuffer.ContainsKey(location))
+        if (r_shader.TryGetCachedUniformLocation(name, out int location))
         {
-            r_vec2iBuffer[location] = value;
-        }
-        else
-        {
-            r_vec2iBuffer.Add(r_shader.GetCachedUniformLocation(name), value);
+            if (r_vec2iBuffer.ContainsKey(location))
+            {
+                r_vec2iBuffer[location] = value;
+            }
+            else
+            {
+                r_vec2iBuffer.Add(location, value);
+            }
         }
     }
 
     public Vector3i GetVec3i(string name)
     {
-        return r_vec3iBuffer[r_shader.GetCachedUniformLocation(name)];
+        if (r_shader.TryGetCachedUniformLocation(name, out int location))
+        {
+            return r_vec3iBuffer[location];
+        }
+        return Vector3i.Zero;
     }
 
     public void SetVec3i(string name, Vector3i value)
     {
-        int location = r_shader.GetCachedUniformLocation(name);
-        if (r_vec3iBuffer.ContainsKey(location))
+        if (r_shader.TryGetCachedUniformLocation(name, out int location))
         {
-            r_vec3iBuffer[location] = value;
-        }
-        else
-        {
-            r_vec3iBuffer.Add(r_shader.GetCachedUniformLocation(name), value);
+            if (r_vec3iBuffer.ContainsKey(location))
+            {
+                r_vec3iBuffer[location] = value;
+            }
+            else
+            {
+                r_vec3iBuffer.Add(location, value);
+            }
         }
     }
 
     public Vector4i GetVec4i(string name)
     {
-        return r_vec4iBuffer[r_shader.GetCachedUniformLocation(name)];
+        if (r_shader.TryGetCachedUniformLocation(name, out int location))
+        {
+            return r_vec4iBuffer[location];
+        }
+        return Vector4i.Zero;
     }
 
     public void SetVec4i(string name, Vector4i value)
     {
-        int location = r_shader.GetCachedUniformLocation(name);
-        if (r_vec4iBuffer.ContainsKey(location))
+        if (r_shader.TryGetCachedUniformLocation(name, out int location))
         {
-            r_vec4iBuffer[location] = value;
-        }
-        else
-        {
-            r_vec4iBuffer.Add(r_shader.GetCachedUniformLocation(name), value);
+            if (r_vec4iBuffer.ContainsKey(location))
+            {
+                r_vec4iBuffer[location] = value;
+            }
+            else
+            {
+                r_vec4iBuffer.Add(location, value);
+            }
         }
     }
 
     public Matrix3x3 GetMat3(string name)
     {
-        return r_mat3Buffer[r_shader.GetCachedUniformLocation(name)];
+        if (r_shader.TryGetCachedUniformLocation(name, out int location))
+        {
+            return r_mat3Buffer[location];
+        }
+        return Matrix3x3.Identity;
     }
 
     public void SetMat3(string name, Matrix3x3 value)
     {
-        int location = r_shader.GetCachedUniformLocation(name);
-        if (r_mat3Buffer.ContainsKey(location))
+        if (r_shader.TryGetCachedUniformLocation(name, out int location))
         {
-            r_mat3Buffer[location] = value;
-        }
-        else
-        {
-            r_mat3Buffer.Add(r_shader.GetCachedUniformLocation(name), value);
+            if (r_mat3Buffer.ContainsKey(location))
+            {
+                r_mat3Buffer[location] = value;
+            }
+            else
+            {
+                r_mat3Buffer.Add(location, value);
+            }
         }
     }
 
     public Matrix4x4 GetMat4(string name)
     {
-        return r_mat4Buffer[r_shader.GetCachedUniformLocation(name)];
+        if (r_shader.TryGetCachedUniformLocation(name, out int location))
+        {
+            return r_mat4Buffer[location];
+        }
+        return Matrix4x4.Identity;
     }
 
     public void SetMat4(string name, Matrix4x4 value)
     {
-        int location = r_shader.GetCachedUniformLocation(name);
-        if (r_mat4Buffer.ContainsKey(location))
+        if (r_shader.TryGetCachedUniformLocation(name, out int location))
         {
-            r_mat4Buffer[location] = value;
-        }
-        else
-        {
-            r_mat4Buffer.Add(r_shader.GetCachedUniformLocation(name), value);
+            if (r_mat4Buffer.ContainsKey(location))
+            {
+                r_mat4Buffer[location] = value;
+            }
+            else
+            {
+                r_mat4Buffer.Add(location, value);
+            }
         }
     }
 
     public void SetTexture(string name, Texture texture, Texture.Unit textureUnit)
     {
-        int location = r_shader.GetCachedUniformLocation(name);
-        int textureUnitInt = (int)textureUnit - (int)Texture.Unit.Texture0;
-        if (r_textureBuffer.ContainsKey(texture))
+        if (r_shader.TryGetCachedUniformLocation(name, out int location))
         {
-            r_textureBuffer[texture] = textureUnit;
-            r_intBuffer[location] = textureUnitInt;
-        }
-        else
-        {
-            r_textureBuffer.Add(texture, textureUnit);
-            r_intBuffer.Add(location, textureUnitInt);
+            int textureUnitInt = (int)textureUnit - (int)Texture.Unit.Texture0;
+            if (r_textureBuffer.ContainsKey(texture))
+            {
+                r_textureBuffer[texture] = textureUnit;
+                r_intBuffer[location] = textureUnitInt;
+            }
+            else
+            {
+                r_textureBuffer.Add(texture, textureUnit);
+                r_intBuffer.Add(location, textureUnitInt);
+            }
         }
     }
 

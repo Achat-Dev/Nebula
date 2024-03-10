@@ -21,7 +21,7 @@ public class Game
         s_instance = this;
         m_title = title;
 
-        Logger.Init(LogLevel.Debug);
+        Logger.Init(LogLevel.Info);
         Logger.EngineInfo("Creating game");
         AssetLoader.Init();
 

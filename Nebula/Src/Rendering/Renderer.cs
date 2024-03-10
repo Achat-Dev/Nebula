@@ -73,7 +73,7 @@ public static class Renderer
 
         s_skybox.GetEnvironmentMap().Bind(Texture.Unit.Texture0);
         s_skyboxShader.Use();
-        s_skyboxShader.SetMat4(s_skyboxShader.GetCachedUniformLocation("u_viewProjection"), viewProjectionMatrix);
+        s_skyboxShader.SetMat4("u_viewProjection", viewProjectionMatrix);
         s_skyboxVao.Draw();
 
         // Render framebuffer to screen
@@ -141,6 +141,5 @@ public static class Renderer
     internal static void Dispose()
     {
         Logger.EngineInfo("Disposing renderer");
-        s_skybox.Dispose();
     }
 }

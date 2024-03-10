@@ -125,7 +125,7 @@ internal class Window : IDisposable
             m_pointLightEntites[i] = new Entity();
             pointLights[i] = m_pointLightEntites[i].AddComponent<PointLightComponent>();
             pointLights[i].GetEntity().GetTransform().SetLocalScale(Vector3.One * 0.2f);
-            pointLights[i].SetRange(0f);
+            pointLights[i].SetRange(2f);
 
             modelRenderer = m_pointLightEntites[i].AddComponent<ModelRendererComponent>();
             modelRenderer.SetModel(Model.Load("Art/Models/Cube.obj"));

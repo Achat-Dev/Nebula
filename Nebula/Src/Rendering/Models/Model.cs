@@ -23,13 +23,15 @@ public class Model : ICacheable, IDisposable
 
     public static unsafe Model Load(string path, VertexFlags vertexFlags)
     {
-        if (Cache.ModelCache.TryGetValue(path, out Model model))
+        string cacheKey = path + (int)vertexFlags;
+
+        if (Cache.ModelCache.TryGetValue(cacheKey, out Model model))
         {
-            Logger.EngineVerbose($"Model at path \"{path}\" is already loaded, returning cached instance");
+            Logger.EngineVerbose($"Model at path \"{path}\" with vertex flags \"{vertexFlags}\" is already loaded, returning cached instance");
             return model;
         }
 
-        Logger.EngineDebug($"Loading model at path \"{path}\"");
+        Logger.EngineDebug($"Loading model at path \"{path}\" with vertex flags \"{vertexFlags}\"");
 
         AssimpScene* assimpScene = Assimp.Get().ImportFileFromMemory(AssetLoader.LoadAsByteArray(path, out int dataSize), (uint)dataSize, c_postProcessSteps, "");
 
@@ -42,7 +44,7 @@ public class Model : ICacheable, IDisposable
         model = new Model(assimpScene, assimpScene->MRootNode, vertexFlags);
         Assimp.Get().FreeScene(assimpScene);
 
-        Cache.ModelCache.CacheData(path, model);
+        Cache.ModelCache.CacheData(cacheKey, model);
 
         return model;
     }

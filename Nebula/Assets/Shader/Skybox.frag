@@ -13,7 +13,7 @@ void main()
 	// HDR tonemapping
 	colour = colour / (colour + vec3(1.0));
 
-	// Gamma correction
+	// Gamma correction is done outomatically by StbImageSharp on load
 	colour = pow(colour, vec3(1.0/2.2));
 
 	o_colour = vec4(colour, 1.0);

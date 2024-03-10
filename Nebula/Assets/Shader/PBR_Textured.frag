@@ -14,7 +14,6 @@ uniform sampler2D u_albedoMap;
 uniform sampler2D u_normalMap;
 uniform sampler2D u_metallicMap;
 uniform sampler2D u_roughnessMap;
-//uniform sampler2D u_ambientOcclusionMap;
 
 #include Math/Pi.glsl
 #include Math/PBR/DistributionGGX.glsl
@@ -97,11 +96,11 @@ vec3 calculatePointLights(vec3 viewDirection, vec3 f0, vec3 albedo, vec3 normal,
 	return colour;
 }
 
+// nDotV is calculated twice, once with the normalised and once with the unnormlaised normal
+// | This is to minimise artifacts in the specular lighting
 vec3 calculateIBL(vec3 viewDirection, vec3 f0, vec3 albedo, vec3 normal, float metallic, float roughness)
 {
-	float nDotV = max(dot(normal, viewDirection), 0.0);
-
-	vec3 fresnel = fresnelSchlickRoughness(nDotV, f0, roughness);
+	vec3 fresnel = fresnelSchlickRoughness(max(dot(normal, viewDirection), 0.0), f0, roughness);
 	vec3 kd = 1.0 - fresnel;
 	kd *= 1.0 - metallic;
 
@@ -109,13 +108,8 @@ vec3 calculateIBL(vec3 viewDirection, vec3 f0, vec3 albedo, vec3 normal, float m
 	vec3 diffuse = albedo * irradiance;
 
 	vec3 prefiltered = textureLod(u_prefilteredMap, reflect(-viewDirection, normal), roughness * MAX_REFLECTION_LOD).rgb;
-	vec2 brdf = texture(u_brdfLut, vec2(nDotV, roughness)).rg;
+	vec2 brdf = texture(u_brdfLut, vec2(max(dot(io_normal, viewDirection), 0.0), roughness)).rg;
 	vec3 specular = prefiltered * (fresnel * brdf.x + brdf.y);
-
-	// Right now, no ambient occlusion is used
-	// | This is because if there is no ambient occlusion map, a completely white map has to be bound
-	//float ambientOcclusion = texture(u_ambientOcclusionMap, io_uv).r;
-	//return (kd * diffuse + specular) * ambientOcclusion;
 
 	return kd * diffuse + specular;
 }

@@ -147,7 +147,7 @@ public class Texture : ICacheable, IDisposable, ITextureBindable
 
         captureShader.Use();
 
-        VertexArrayObject vao = Model.Load("Art/Models/Plane.obj").GetMeshes()[0].GetVao();
+        VertexArrayObject vao = Model.Load("Art/Models/Plane.obj", VertexFlags.Position | VertexFlags.UV).GetMeshes()[0].GetVao();
 
         GL.Get().Viewport(size);
         GL.Get().FramebufferTexture2D(FramebufferTarget.Framebuffer, Silk.NET.OpenGL.FramebufferAttachment.ColorAttachment0, TextureTarget.Texture2D, r_handle, 0);

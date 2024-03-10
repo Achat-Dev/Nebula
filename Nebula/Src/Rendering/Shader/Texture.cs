@@ -82,6 +82,12 @@ public class Texture : ICacheable, IDisposable, ITextureBindable
         {
             ImageResultFloat imageResultFloat = ImageResultFloat.FromMemory(AssetLoader.LoadAsByteArray(path, out _), config.GetColorComponents());
 
+            // Clamp loaded data to avoid artifacts
+            for (int i = 0; i < imageResultFloat.Data.Length; i++)
+            {
+                imageResultFloat.Data[i] = Math.Clamp(imageResultFloat.Data[i], -100f, 100f);
+            }
+
             fixed (void* d = imageResultFloat.Data)
             {
                 GL.Get().TexImage2D(TextureTarget.Texture2D, 0, config.GetInternalFormat(), (uint)imageResultFloat.Width, (uint)imageResultFloat.Height, 0, config.GetPixelFormat(), config.GetPixelType(), d);

@@ -1,4 +1,6 @@
-﻿using Silk.NET.OpenGL;
+﻿using StbImageSharp;
+
+using Silk.NET.OpenGL;
 
 namespace Nebula.Rendering;
 
@@ -14,6 +16,9 @@ public static class Renderer
     internal static void Init()
     {
         Logger.EngineInfo("Initialising renderer");
+
+        StbImage.stbi_ldr_to_hdr_gamma(1f);
+        StbImage.stbi_hdr_to_ldr_gamma(1f);
 
         GL.Get().ClearColor(System.Drawing.Color.LightBlue);
         GL.Get().Enable(EnableCap.TextureCubeMapSeamless);

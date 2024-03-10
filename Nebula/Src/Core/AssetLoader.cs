@@ -1,15 +1,13 @@
-﻿using System.Reflection;
-
-namespace Nebula;
+﻿namespace Nebula;
 
 internal static class AssetLoader
 {
-    private static Assembly s_assembly;
+    private static string s_assetPath;
 
     internal static void Init()
     {
         Logger.EngineInfo("Initialising asset loader");
-        s_assembly = typeof(AssetLoader).Assembly;
+        s_assetPath = Game.GetProcessPath() + "Assets/";
     }
 
     internal static string LoadAsFileContent(string path)
@@ -48,9 +46,8 @@ internal static class AssetLoader
 
     private static bool GetStream(string path, out Stream stream)
     {
-        path = path.Replace('/', '.');
-        path = "Nebula.Assets." + path;
-        stream = s_assembly.GetManifestResourceStream(path);
+        path = s_assetPath + path;
+        stream = File.OpenRead(path);
         if (stream == null)
         {
             Logger.EngineError($"Failed to load engine internal resource at path \"{path}\"");

@@ -63,6 +63,6 @@ public class Game
 
     public static string GetProcessPath()
     {
-        return Environment.ProcessPath + '/';
+        return Path.GetDirectoryName(Environment.ProcessPath) + '/';
     }
 }

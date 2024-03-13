@@ -39,7 +39,7 @@ public class TestUpdateableComponent : UpdateableComponent
 
     public override void OnUpdate(float deltaTime)
     {
-        if (Input.IsKeyPressed(Key.Escape))
+        if (Input.WasKeyPressed(Key.Escape))
         {
             Game.Close();
         }

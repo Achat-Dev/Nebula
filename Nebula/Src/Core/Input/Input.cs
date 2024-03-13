@@ -5,6 +5,7 @@ namespace Nebula;
 public static class Input
 {
     private static Vector2 s_mousePosition;
+    private static Vector2 s_mouseDelta;
     private static Vector2 s_scrollDelta;
     private static InputState s_lastInputState = new InputState();
     private static InputState s_currentInputState = new InputState();
@@ -32,6 +33,8 @@ public static class Input
         {
             s_lastInputState.MouseState[i] = s_currentInputState.MouseState[i];
         }
+
+        s_mouseDelta = Vector2.Zero;
     }
 
     private static void OnKeyPressed(IKeyboard keyboard, Silk.NET.Input.Key key, int keyCode)
@@ -56,6 +59,7 @@ public static class Input
 
     private static void OnMouseMove(IMouse mouse, System.Numerics.Vector2 mousePosition)
     {
+        s_mouseDelta = (Vector2)mousePosition - s_mousePosition;
         s_mousePosition = mousePosition;
     }
 
@@ -65,7 +69,7 @@ public static class Input
         s_scrollDelta.Y = scrollWheel.Y;
     }
 
-    public static bool IsKeyPressed(Key key)
+    public static bool WasKeyPressed(Key key)
     {
         return !s_lastInputState.KeyboardState[(int)key] && s_currentInputState.KeyboardState[(int)key];
     }
@@ -75,17 +79,22 @@ public static class Input
         return s_currentInputState.KeyboardState[(int)key];
     }
 
-    public static bool IsKeyReleased(Key key)
+    public static bool WasKeyReleased(Key key)
     {
         return s_lastInputState.KeyboardState[(int)key] && !s_currentInputState.KeyboardState[(int)key];
     }
 
-    public static bool IsMouseButtonPressed(MouseButton mouseButton)
+    public static bool WasMouseButtonPressed(MouseButton mouseButton)
     {
         return !s_lastInputState.MouseState[(int)mouseButton] && s_currentInputState.MouseState[(int)mouseButton];
     }
 
-    public static bool IsMouseButtonReleased(MouseButton mouseButton)
+    public static bool IsMouseButtonDown(MouseButton mouseButton)
+    {
+        return s_currentInputState.MouseState[(int)mouseButton];
+    }
+
+    public static bool WasMouseButtonReleased(MouseButton mouseButton)
     {
         return s_lastInputState.MouseState[(int)mouseButton] && !s_currentInputState.MouseState[(int)mouseButton];
     }
@@ -93,6 +102,11 @@ public static class Input
     public static Vector2 GetMousePosition()
     {
         return s_mousePosition;
+    }
+
+    public static Vector2 GetMouseDelta()
+    {
+        return s_mouseDelta;
     }
 
     public static Vector2 GetScrollDelta()

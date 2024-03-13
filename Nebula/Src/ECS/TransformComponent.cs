@@ -41,6 +41,11 @@ public class TransformComponent : Component
         return m_localRotation;
     }
 
+    public void SetLocalRotation(Vector3 eulerAngles)
+    {
+        m_localRotation = Quaternion.FromEulerAngles(eulerAngles);
+    }
+
     public void SetLocalRotation(Quaternion rotation)
     {
         m_localRotation = rotation;
@@ -72,6 +77,12 @@ public class TransformComponent : Component
     {
         // Properly implement once parenting is implemented
         return m_localRotation;
+    }
+
+    public void SetWorldRotation(Vector3 eulerAngles)
+    {
+        // Properly implement once parenting is implemented
+        m_localRotation = Quaternion.FromEulerAngles(eulerAngles);
     }
 
     public void SetWorldRotation(Quaternion rotation)

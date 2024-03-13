@@ -24,6 +24,25 @@ public struct Quaternion : IEquatable<Quaternion>
         return new Vector3(X, Y, Z);
     }
 
+    public Vector3 GetEulerAngles()
+    {
+        Vector3 result;
+
+        float a = 2f * (W * X + Y * Z);
+        float b = 1f - 2f * (X * X + Y * Y);
+        result.X = MathHelper.RadiansToDegrees(MathF.Atan2(a, b));
+
+        a = MathF.Sqrt(1f + 2f * (W * Y - X * Z));
+        b = MathF.Sqrt(1f - 2f * (W * Y - X * Z));
+        result.Y = MathHelper.RadiansToDegrees(2f * MathF.Atan2(a, b) - MathF.PI * 0.5f);
+
+        a = 2f * (W * Z + X * Y);
+        b = 1f - 2f * (Y * Y + Z * Z);
+        result.Z = MathHelper.RadiansToDegrees(MathF.Atan2(a, b));
+
+        return result;
+    }
+
     public void Invert()
     {
         float sqrMagnitude = SqrMagnitude();
@@ -70,6 +89,29 @@ public struct Quaternion : IEquatable<Quaternion>
         Vector3 xyz = axis * MathF.Sin(angle);
 
         return new Quaternion(xyz.X, xyz.Y, xyz.Z, MathF.Cos(angle));
+    }
+
+    public static Quaternion FromEulerAngles(Vector3 eulerAngles)
+    {
+        eulerAngles.X = MathHelper.DegreesToRadians(eulerAngles.X);
+        eulerAngles.Y = MathHelper.DegreesToRadians(eulerAngles.Y);
+        eulerAngles.Z = MathHelper.DegreesToRadians(eulerAngles.Z);
+
+        float sinX = MathF.Sin(eulerAngles.X * 0.5f);
+        float cosX = MathF.Cos(eulerAngles.X * 0.5f);
+        float sinY = MathF.Sin(eulerAngles.Y * 0.5f);
+        float cosY = MathF.Cos(eulerAngles.Y * 0.5f);
+        float sinZ = MathF.Sin(eulerAngles.Z * 0.5f);
+        float cosZ = MathF.Cos(eulerAngles.Z * 0.5f);
+
+        Quaternion result;
+
+        result.X = sinX * cosY * cosZ - cosX * sinY * sinZ;
+        result.Y = cosX * sinY * cosZ + sinX * cosY * sinZ;
+        result.Z = cosX * cosY * sinZ - sinX * sinY * cosZ;
+        result.W = cosX * cosY * cosZ + sinX * sinY * sinZ;
+
+        return result;
     }
 
     /* -------------------- Operators -------------------- */

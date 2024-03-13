@@ -13,6 +13,7 @@ internal class Window : IDisposable
 
     // Temporary
     private CameraComponent m_camera;
+    private Vector3 m_eulerAngles;
     private Entity[] m_pointLightEntites = new Entity[3];
 
     public Window(string title, Vector2i size, bool vSync)
@@ -148,23 +149,26 @@ internal class Window : IDisposable
         float dt = (float)deltaTime;
 
         TransformComponent cameraTransform = m_camera.GetEntity().GetTransform();
-        if (Input.IsKeyDown(Key.W)) cameraTransform.Translate(cameraTransform.GetForward() * dt);
-        if (Input.IsKeyDown(Key.A)) cameraTransform.Translate(-cameraTransform.GetRight() * dt);
-        if (Input.IsKeyDown(Key.S)) cameraTransform.Translate(-cameraTransform.GetForward() * dt);
-        if (Input.IsKeyDown(Key.D)) cameraTransform.Translate(cameraTransform.GetRight() * dt);
-        if (Input.IsKeyDown(Key.Space)) cameraTransform.Translate(cameraTransform.GetUp() * dt);
-        if (Input.IsKeyDown(Key.ControlLeft)) cameraTransform.Translate(-cameraTransform.GetUp() * dt);
-        if (Input.IsKeyDown(Key.Q)) cameraTransform.Rotate(Quaternion.FromAxisAngle(Vector3.Up, -40 * dt));
-        if (Input.IsKeyDown(Key.E)) cameraTransform.Rotate(Quaternion.FromAxisAngle(Vector3.Up, 40 * dt));
-        if (Input.IsKeyDown(Key.R)) cameraTransform.Rotate(Quaternion.FromAxisAngle(Vector3.Right, -40 * dt));
-        if (Input.IsKeyDown(Key.T)) cameraTransform.Rotate(Quaternion.FromAxisAngle(Vector3.Right, 40 * dt));
-        if (Input.IsKeyDown(Key.Z)) cameraTransform.Rotate(Quaternion.FromAxisAngle(Vector3.Forward, -40 * dt));
-        if (Input.IsKeyDown(Key.U)) cameraTransform.Rotate(Quaternion.FromAxisAngle(Vector3.Forward, 40 * dt));
 
-        if (Input.IsKeyPressed(Key.AltLeft))
+        if (Input.IsMouseButtonDown(MouseButton.Right))
+        {
+            Vector2 mouseDelta = Input.GetMouseDelta() * 10f * dt;
+
+            m_eulerAngles += new Vector3(mouseDelta.Y, mouseDelta.X, 0f);
+            m_eulerAngles.X = Math.Clamp(m_eulerAngles.X, -89f, 89f);
+
+            cameraTransform.SetLocalRotation(m_eulerAngles);
+        }
+
+        if (Input.IsKeyDown(Key.W)) cameraTransform.Translate(cameraTransform.GetForward() * 2f * dt);
+        if (Input.IsKeyDown(Key.A)) cameraTransform.Translate(-cameraTransform.GetRight() * 2f * dt);
+        if (Input.IsKeyDown(Key.S)) cameraTransform.Translate(-cameraTransform.GetForward() * 2f * dt);
+        if (Input.IsKeyDown(Key.D)) cameraTransform.Translate(cameraTransform.GetRight() * 2f * dt);
+
+        if (Input.WasKeyPressed(Key.AltLeft))
         {
             cameraTransform.SetLocalScale(Vector3.One);
-            cameraTransform.SetWorldPosition(Vector3.Zero);
+            cameraTransform.SetWorldPosition(new Vector3(0f, 0f, -5f));
             cameraTransform.SetLocalRotation(Quaternion.Identity);
         }
 

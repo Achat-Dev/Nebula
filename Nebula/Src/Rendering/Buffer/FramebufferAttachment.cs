@@ -95,12 +95,12 @@ internal class FramebufferAttachment : IDisposable, ITextureBindable
 
     void IDisposable.Dispose()
     {
-        switch (r_config.AttachmentType)
+        switch (r_config.ReadWriteMode)
         {
-            case AttachmentType.Colour:
+            case ReadWriteMode.Readable:
                 GL.Get().DeleteTexture(r_handle);
                 break;
-            case AttachmentType.Depth:
+            case ReadWriteMode.Writeonly:
                 GL.Get().DeleteRenderbuffer(r_handle);
                 break;
         }

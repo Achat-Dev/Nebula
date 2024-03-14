@@ -66,6 +66,8 @@ internal class Window : IDisposable
 
     private unsafe void OnLoad()
     {
+        Nebula.GargabeCollection.Init(10f);
+        Nebula.AssetLoader.Init();
         Nebula.Input.Init(m_window.CreateInput());
         Nebula.Rendering.GL.Init(Silk.NET.OpenGL.GL.GetApi(m_window));
         Nebula.Rendering.Assimp.Init();
@@ -178,8 +180,9 @@ internal class Window : IDisposable
             m_pointLightEntites[i].GetTransform().SetWorldPosition(new Vector3(MathF.Sin((float)m_window.Time + piThird * i) * 4, 0, MathF.Cos((float)m_window.Time + piThird * i) * 4));
         }
 
-        Scene.GetActive().Update((float)deltaTime);
+        Scene.GetActive().Update(dt);
         Input.RefreshInputStates();
+        GargabeCollection.Update(dt);
     }
 
     private unsafe void OnRender(double deltaTime)

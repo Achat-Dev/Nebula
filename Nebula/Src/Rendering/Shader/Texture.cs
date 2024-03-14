@@ -117,6 +117,8 @@ public class Texture : ICacheable, IDisposable, ITextureBindable
             GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLevel, config.MaxMipMapLevel);
             GL.Get().GenerateMipmap(TextureTarget.Texture2D);
         }
+
+        GargabeCollection.QueueCollection();
     }
 
     private unsafe Texture(Shader captureShader, Vector2i size, TextureConfig config)

@@ -36,6 +36,7 @@ public static class Renderer
         skyboxConfig.GenerateMipMaps = false;
         Texture skyboxTexture = Texture.Create("Art/Textures/Skybox_RuralRoad.hdr", skyboxConfig, true);
         s_skybox = new Skybox(skyboxTexture, SkyboxConfig.DefaultSmall);
+        skyboxTexture.Delete();
     }
 
     public static void SetClearColour(Colour colour)

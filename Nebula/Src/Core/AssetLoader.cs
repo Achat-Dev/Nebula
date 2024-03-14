@@ -1,6 +1,6 @@
 ﻿namespace Nebula;
 
-internal static class AssetLoader
+public static class AssetLoader
 {
     private static string s_assetPath;
 
@@ -10,24 +10,26 @@ internal static class AssetLoader
         s_assetPath = Game.GetProcessPath() + "Assets/";
     }
 
-    internal static string LoadAsFileContent(string path)
+    public static string LoadAsFileContent(string path)
     {
         if (GetStream(path, out Stream stream))
         {
             using (StreamReader reader = new StreamReader(stream, System.Text.Encoding.UTF8))
             {
+                GargabeCollection.QueueCollection();
                 return reader.ReadToEnd();
             }
         }
         return string.Empty;
     }
 
-    internal static byte[] LoadAsByteArray(string path, out int dataSize)
+    public static byte[] LoadAsByteArray(string path, out int dataSize)
     {
         if (GetStream(path, out Stream stream))
         {
             using (MemoryStream memoryStream = new MemoryStream())
             {
+                GargabeCollection.QueueCollection();
                 stream.CopyTo(memoryStream);
                 byte[] data = memoryStream.ToArray();
                 dataSize = sizeof(byte) * data.Length;
@@ -38,7 +40,7 @@ internal static class AssetLoader
         return default(byte[]);
     }
 
-    internal static Stream LoadAsStream(string path)
+    public static Stream LoadAsStream(string path)
     {
         GetStream(path, out Stream stream);
         return stream;

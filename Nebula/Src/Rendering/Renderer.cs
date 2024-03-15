@@ -8,7 +8,6 @@ public static class Renderer
 {
     private static Shader s_skyboxShader;
     private static Shader s_screenShader;
-    private static Skybox s_skybox;
     private static VertexArrayObject s_skyboxVao;
     private static VertexArrayObject s_screenVao;
     private static HashSet<ModelRendererComponent> s_modelRenderers = new HashSet<ModelRendererComponent>();
@@ -35,7 +34,8 @@ public static class Renderer
         skyboxConfig.WrapMode = Texture.WrapMode.ClampToEdge;
         skyboxConfig.GenerateMipMaps = false;
         Texture skyboxTexture = Texture.Create("Art/Textures/Skybox_RuralRoad.hdr", skyboxConfig, true);
-        s_skybox = new Skybox(skyboxTexture, SkyboxConfig.DefaultSmall);
+        Skybox skybox = new Skybox(skyboxTexture, SkyboxConfig.DefaultSmall);
+        Scene.GetActive().GetSkyLight().SetSkybox(skybox);
         skyboxTexture.Delete();
     }
 
@@ -51,9 +51,13 @@ public static class Renderer
 
         UpdateUniformBuffers(camera);
 
-        s_skybox.GetIrradianceMap().Bind(Texture.Unit.Texture0);
+        Scene scene = Scene.GetActive();
+
+        scene.GetSkyLight().SetupModelRendering();
+
+        /*s_skybox.GetIrradianceMap().Bind(Texture.Unit.Texture0);
         s_skybox.GetPrefilteredMap().Bind(Texture.Unit.Texture1);
-        s_skybox.GetBrdfLut().Bind(Texture.Unit.Texture2);
+        s_skybox.GetBrdfLut().Bind(Texture.Unit.Texture2);*/
 
         // Render to framebuffer
         GL.Get().Enable(GLEnum.DepthTest);
@@ -72,7 +76,8 @@ public static class Renderer
         viewProjectionMatrix.M43 = 0;
         viewProjectionMatrix.M44 = 0;
 
-        s_skybox.GetEnvironmentMap().Bind(Texture.Unit.Texture0);
+        scene.GetSkyLight().SetupSkyboxRendering();
+        //skybox.GetEnvironmentMap().Bind(Texture.Unit.Texture0);
         s_skyboxShader.Use();
         s_skyboxShader.SetMat4("u_viewProjection", viewProjectionMatrix);
         s_skyboxVao.Draw();
@@ -94,7 +99,7 @@ public static class Renderer
         UniformBuffer cameraBuffer = UniformBuffer.GetAtLocation(UniformBuffer.DefaultType.Camera);
         cameraBuffer.BufferData(0, camera.GetEntity().GetTransform().GetWorldPosition());
 
-        DirectionalLight directionalLight = Lighting.GetDirectionalLight();
+        DirectionalLight directionalLight = Scene.GetActive().GetDirectionalLight();
         Vector4 directionalLightColour = ((Vector4)directionalLight.GetColour()) * directionalLight.GetIntensity();
 
         UniformBuffer lightBuffer = UniformBuffer.GetAtLocation(UniformBuffer.DefaultType.Lights);

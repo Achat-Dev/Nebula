@@ -1,13 +1,16 @@
-﻿namespace Nebula;
+﻿using Nebula.Rendering;
+
+namespace Nebula;
 
 public class Scene
 {
+    private readonly DirectionalLight r_directionalLight = new DirectionalLight();
+    private readonly SkyLight r_skyLight = new SkyLight();
+
     private readonly List<Entity> r_entities = new List<Entity>();
     private readonly Stack<Entity> r_entityRemovalStack = new Stack<Entity>();
 
     private static Scene s_active;
-
-    private Scene() { }
 
     internal void Update(float deltaTime)
     {
@@ -33,6 +36,16 @@ public class Scene
     internal void RemoveEntity(Entity entity)
     {
         r_entityRemovalStack.Push(entity);
+    }
+
+    public DirectionalLight GetDirectionalLight()
+    {
+        return r_directionalLight;
+    }
+
+    public SkyLight GetSkyLight()
+    {
+        return r_skyLight;
     }
 
     public static Scene Load()

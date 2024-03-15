@@ -143,7 +143,7 @@ internal class Window : IDisposable
         flatShaderInstances[1].SetVec3("u_colour", (Vector3)Colour.Green);
         flatShaderInstances[2].SetVec3("u_colour", (Vector3)Colour.Blue);
 
-        Lighting.GetDirectionalLight().SetIntensity(1f);
+        Scene.GetActive().GetDirectionalLight().SetIntensity(0f);
     }
 
     private void OnUpdate(double deltaTime)

@@ -17,7 +17,6 @@ public static class Lighting
         private float _____;
     }
 
-    private static DirectionalLight s_directionalLight = new DirectionalLight();
     private static readonly List<PointLightComponent> s_pointLights = new List<PointLightComponent>();
     private static int s_pointLightCount = 0;
 
@@ -43,11 +42,6 @@ public static class Lighting
             data[i].Range = s_pointLights[i].GetRange();
         }
         return data;
-    }
-
-    public static DirectionalLight GetDirectionalLight()
-    {
-        return s_directionalLight;
     }
 
     public static int GetPointLightCount()

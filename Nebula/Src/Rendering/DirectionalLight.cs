@@ -6,7 +6,7 @@ public class DirectionalLight
     private Colour m_colour = Colour.White;
     private float m_intensity = 1f;
 
-    public DirectionalLight()
+    internal DirectionalLight()
     {
         SetDirection(new Vector3(-0.5f, -0.663f, 0.557f));
     }

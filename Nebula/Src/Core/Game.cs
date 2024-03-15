@@ -21,7 +21,7 @@ public class Game
         s_instance = this;
         m_title = title;
 
-        Logger.Init(LogLevel.Info);
+        Logger.Init(LogLevel.Debug);
         Logger.EngineInfo("Creating game");
 
         m_window = new Window(title, size, vSync);

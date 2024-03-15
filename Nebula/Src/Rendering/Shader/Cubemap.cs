@@ -118,7 +118,11 @@ internal class Cubemap : ICacheable, IDisposable, ITextureBindable
             return cubemap;
         }
 
-        Logger.EngineDebug($"Creating cubemap from texture \"{textureBindable}\" with a cubemap type of \"{cubemapType}\" and a face size of {faceSize}");
+        Logger.EngineBegin(LogLevel.Debug)
+            .Debug("Creating cubemap from texture")
+            .Verbose(" with a cubemap type of \"{0}\" and a face size of {1}", cubemapType, faceSize)
+            .Write();
+
         cubemap = new Cubemap(textureBindable, cubemapType, faceSize);
         Cache.CubemapCache.CacheData(hash, cubemap);
         return cubemap;

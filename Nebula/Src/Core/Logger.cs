@@ -17,8 +17,9 @@ public enum LogLevel
 
 public static class Logger
 {
-    private static ILogger m_devLogger;
-    private static ILogger m_appLogger;
+    private static LogLevel s_logLevel;
+    private static ILogger s_devLogger;
+    private static ILogger s_appLogger;
 
     internal static void Init(LogLevel logLevel)
     {
@@ -32,16 +33,17 @@ public static class Logger
             File.Delete(filePath);
         }
 
+        s_logLevel = logLevel;
         LoggingLevelSwitch logLevelSwitch = new LoggingLevelSwitch();
         logLevelSwitch.MinimumLevel = (LogEventLevel)logLevel;
 
-        m_devLogger = new LoggerConfiguration()
+        s_devLogger = new LoggerConfiguration()
             .MinimumLevel.ControlledBy(logLevelSwitch)
             .WriteTo.Console(outputTemplate: engineOutputTemplate)
             .WriteTo.File(path: filePath, outputTemplate: engineOutputTemplate, shared: true)
             .CreateLogger();
 
-        m_appLogger = new LoggerConfiguration()
+        s_appLogger = new LoggerConfiguration()
             .MinimumLevel.ControlledBy(logLevelSwitch)
             .WriteTo.Console(outputTemplate: clientOutputTemplate)
             .WriteTo.File(path: filePath, outputTemplate: clientOutputTemplate, shared: true)
@@ -56,12 +58,17 @@ public static class Logger
         Serilog.Log.CloseAndFlush();
     }
 
-    internal static void EngineVerbose(object o) { m_devLogger.Verbose(o.ToString()); }
-    internal static void EngineDebug(object o) { m_devLogger.Debug(o.ToString()); }
-    internal static void EngineInfo(object o) { m_devLogger.Information(o.ToString()); }
-    internal static void EngineWarn(object o) { m_devLogger.Warning(o.ToString() + Environment.NewLine + new StackTrace(1, true).ToString()); }
-    internal static void EngineError(object o) { m_devLogger.Error(o.ToString() + Environment.NewLine + new StackTrace(1, true).ToString()); }
-    internal static void EngineFatal(object o) { m_devLogger.Fatal(o.ToString() + Environment.NewLine + new StackTrace(1, true).ToString()); }
+    internal static BufferedLogger EngineBegin(LogLevel logLevel)
+    {
+        return new BufferedLogger(s_logLevel, logLevel);
+    }
+
+    internal static void EngineVerbose(object o) { s_devLogger.Verbose(o.ToString()); }
+    internal static void EngineDebug(object o) { s_devLogger.Debug(o.ToString()); }
+    internal static void EngineInfo(object o) { s_devLogger.Information(o.ToString()); }
+    internal static void EngineWarn(object o) { s_devLogger.Warning(o.ToString() + Environment.NewLine + new StackTrace(1, true).ToString()); }
+    internal static void EngineError(object o) { s_devLogger.Error(o.ToString() + Environment.NewLine + new StackTrace(1, true).ToString()); }
+    internal static void EngineFatal(object o) { s_devLogger.Fatal(o.ToString() + Environment.NewLine + new StackTrace(1, true).ToString()); }
 
     [Conditional("DEBUG")]
     internal static void EngineAssert(bool condition, string message = "Assertion failed:")
@@ -74,12 +81,12 @@ public static class Logger
         }
     }
 
-    public static void Verbose(object o) { m_appLogger.Verbose(o.ToString()); }
-    public static void Debug(object o) { m_appLogger.Debug(o.ToString()); }
-    public static void Info(object o) { m_appLogger.Information(o.ToString()); }
-    public static void Warn(object o) { m_appLogger.Warning(o.ToString()); }
-    public static void Error(object o) { m_appLogger.Error(o.ToString()); }
-    public static void Fatal(object o) { m_appLogger.Fatal(o.ToString()); }
+    public static void Verbose(object o) { s_appLogger.Verbose(o.ToString()); }
+    public static void Debug(object o) { s_appLogger.Debug(o.ToString()); }
+    public static void Info(object o) { s_appLogger.Information(o.ToString()); }
+    public static void Warn(object o) { s_appLogger.Warning(o.ToString()); }
+    public static void Error(object o) { s_appLogger.Error(o.ToString()); }
+    public static void Fatal(object o) { s_appLogger.Fatal(o.ToString()); }
 
     [Conditional("DEBUG")]
     public static void Assert(bool condition, string message = "Assertion failed:")

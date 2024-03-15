@@ -171,7 +171,11 @@ public class Texture : ICacheable, IDisposable, ITextureBindable
             return texture;
         }
 
-        Logger.EngineDebug($"Creating texture from path \"{path}\" with {config.ToString()}");
+        Logger.EngineBegin(LogLevel.Debug)
+            .Debug("Creating texture from path \"{0}\"", path)
+            .Verbose(" with {0}", config)
+            .Write();
+
         if (flipVertical)
         {
             StbImage.stbi_set_flip_vertically_on_load(1);

@@ -31,7 +31,10 @@ public class Model : ICacheable, IDisposable
             return model;
         }
 
-        Logger.EngineDebug($"Loading model at path \"{path}\" with vertex flags \"{vertexFlags}\"");
+        Logger.EngineBegin(LogLevel.Debug)
+            .Debug("Loading model at path \"{0}\"", path)
+            .Verbose(" with vertex flags \"{0}\"", vertexFlags)
+            .Write();
 
         AssimpScene* assimpScene = Assimp.Get().ImportFileFromMemory(AssetLoader.LoadAsByteArray(path, out int dataSize), (uint)dataSize, c_postProcessSteps, "");
 

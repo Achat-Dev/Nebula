@@ -2,7 +2,7 @@
 
 namespace Nebula;
 
-public class BufferedLogger
+public class LogBuffer
 {
     private readonly bool r_useEngineLogger;
     private readonly LogLevel r_currentLogLevel;
@@ -10,14 +10,14 @@ public class BufferedLogger
     private readonly StringBuilder r_stringBuilder = new StringBuilder();
     private readonly List<object> r_objectBuffer = new List<object>();
 
-    internal BufferedLogger(LogLevel currentLogLevel, LogLevel writeLogLevel, bool useEngineLogger)
+    internal LogBuffer(LogLevel currentLogLevel, LogLevel writeLogLevel, bool useEngineLogger)
     {
         r_useEngineLogger = useEngineLogger;
         r_currentLogLevel = currentLogLevel;
         r_writeLogLevel = writeLogLevel;
     }
 
-    public BufferedLogger Verbose(object o)
+    public LogBuffer Verbose(object o)
     {
         if (r_currentLogLevel <= LogLevel.Verbose)
         {
@@ -26,7 +26,7 @@ public class BufferedLogger
         return this;
     }
 
-    public BufferedLogger Verbose(string message, params object[] objects)
+    public LogBuffer Verbose(string message, params object[] objects)
     {
         if (r_currentLogLevel <= LogLevel.Verbose)
         {
@@ -36,7 +36,7 @@ public class BufferedLogger
         return this;
     }
 
-    public BufferedLogger Debug(object o)
+    public LogBuffer Debug(object o)
     {
         if (r_currentLogLevel <= LogLevel.Debug)
         {
@@ -45,7 +45,7 @@ public class BufferedLogger
         return this;
     }
 
-    public BufferedLogger Debug(string message, params object[] objects)
+    public LogBuffer Debug(string message, params object[] objects)
     {
         if (r_currentLogLevel <= LogLevel.Debug)
         {
@@ -55,7 +55,7 @@ public class BufferedLogger
         return this;
     }
 
-    public BufferedLogger Info(object o)
+    public LogBuffer Info(object o)
     {
         if (r_currentLogLevel <= LogLevel.Info)
         {
@@ -64,7 +64,7 @@ public class BufferedLogger
         return this;
     }
 
-    public BufferedLogger Info(string message, params object[] objects)
+    public LogBuffer Info(string message, params object[] objects)
     {
         if (r_currentLogLevel <= LogLevel.Info)
         {
@@ -74,7 +74,7 @@ public class BufferedLogger
         return this;
     }
 
-    public BufferedLogger Warn(object o)
+    public LogBuffer Warn(object o)
     {
         if (r_currentLogLevel <= LogLevel.Warn)
         {
@@ -83,7 +83,7 @@ public class BufferedLogger
         return this;
     }
 
-    public BufferedLogger Warn(string message, params object[] objects)
+    public LogBuffer Warn(string message, params object[] objects)
     {
         if (r_currentLogLevel <= LogLevel.Warn)
         {
@@ -93,7 +93,7 @@ public class BufferedLogger
         return this;
     }
 
-    public BufferedLogger Error(object o)
+    public LogBuffer Error(object o)
     {
         if (r_currentLogLevel <= LogLevel.Error)
         {
@@ -102,7 +102,7 @@ public class BufferedLogger
         return this;
     }
 
-    public BufferedLogger Error(string message, params object[] objects)
+    public LogBuffer Error(string message, params object[] objects)
     {
         if (r_currentLogLevel <= LogLevel.Error)
         {
@@ -112,13 +112,13 @@ public class BufferedLogger
         return this;
     }
 
-    public BufferedLogger Fatal(object o)
+    public LogBuffer Fatal(object o)
     {
         r_stringBuilder.Append(o);
         return this;
     }
 
-    public BufferedLogger Fatal(string message, params object[] objects)
+    public LogBuffer Fatal(string message, params object[] objects)
     {
         r_stringBuilder.Append(message);
         r_objectBuffer.Add(objects);

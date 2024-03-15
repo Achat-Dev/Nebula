@@ -60,9 +60,9 @@ public static class Logger
 
     /* -------------------- Engine Methods -------------------- */
 
-    internal static BufferedLogger EngineBegin(LogLevel logLevel)
+    internal static LogBuffer EngineBegin(LogLevel logLevel)
     {
-        return new BufferedLogger(s_logLevel, logLevel, true);
+        return new LogBuffer(s_logLevel, logLevel, true);
     }
 
     internal static void EngineVerbose(object o)
@@ -171,9 +171,9 @@ public static class Logger
 
     /* -------------------- App Methods -------------------- */
 
-    public static BufferedLogger Begin(LogLevel logLevel)
+    public static LogBuffer Begin(LogLevel logLevel)
     {
-        return new BufferedLogger(s_logLevel, logLevel, false);
+        return new LogBuffer(s_logLevel, logLevel, false);
     }
 
     public static void Verbose(object o)

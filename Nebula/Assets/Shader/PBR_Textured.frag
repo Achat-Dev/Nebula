@@ -111,7 +111,7 @@ vec3 calculateIBL(vec3 viewDirection, vec3 f0, vec3 albedo, vec3 normal, float m
 	vec2 brdf = texture(u_brdfLut, vec2(max(dot(io_normal, viewDirection), 0.0), roughness)).rg;
 	vec3 specular = prefiltered * (fresnel * brdf.x + brdf.y);
 
-	return kd * diffuse + specular;
+	return (kd * diffuse + specular) * u_skyLightIntensity;
 }
 
 void main()

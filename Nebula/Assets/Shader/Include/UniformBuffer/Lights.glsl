@@ -15,6 +15,7 @@ struct PointLight
 
 layout (std140, binding = 2) uniform ub_lights
 {
+	uniform float u_skyLightIntensity;
 	uniform int u_pointLightCount;
 	uniform DirectionalLight u_directionalLight;
 	uniform PointLight u_pointLights[MAX_POINT_LIGHTS];

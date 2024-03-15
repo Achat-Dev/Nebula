@@ -95,7 +95,6 @@ internal class Window : IDisposable
         Texture normalMap = Texture.Create("Art/Textures/Metal_NormalGL.jpg", TextureConfig.DefaultRgba);
         Texture metallicMap = Texture.Create("Art/Textures/Metal_Metallic.jpg", TextureConfig.DefaultRgba);
         Texture roughnessMap = Texture.Create("Art/Textures/Metal_Roughness.jpg", TextureConfig.DefaultRgba);
-        //Texture ambientOcclusionMap = Texture.Create("Art/Textures/Bricks_AmbientOcclusion.jpg", Texture.WrapMode.Repeat, Texture.FilterMode.Linear, Texture.Format.Rgba);
 
         shaderInstance = new ShaderInstance(Shader.Create(Shader.DefaultType.PBRTextured));
         shaderInstance.SetInt("u_irradianceMap", 0);
@@ -107,7 +106,6 @@ internal class Window : IDisposable
         shaderInstance.SetTexture("u_metallicMap", metallicMap, Texture.Unit.Texture5);
         shaderInstance.SetTexture("u_roughnessMap", roughnessMap, Texture.Unit.Texture6);
         //shaderInstance.SetTexture("u_ambientOcclusionMap", ambientOcclusionMap, Texture.Unit.Texture7);
-        //shaderInstance.SetInt("u_ambientOcclusionMap", 7);
 
         Entity pbrTexturedEntity = new Entity("PBR textured");
         pbrTexturedEntity.GetTransform().SetWorldPosition(new Vector3(1f, 0f, 0f));
@@ -143,7 +141,8 @@ internal class Window : IDisposable
         flatShaderInstances[1].SetVec3("u_colour", (Vector3)Colour.Green);
         flatShaderInstances[2].SetVec3("u_colour", (Vector3)Colour.Blue);
 
-        Scene.GetActive().GetDirectionalLight().SetIntensity(0f);
+        Scene.GetActive().GetDirectionalLight().SetIntensity(1f);
+        Scene.GetActive().GetSkyLight().SetIntensity(1f);
     }
 
     private void OnUpdate(double deltaTime)

@@ -48,7 +48,7 @@ public class UniformBuffer : ICacheable, IDisposable
         Create((int)DefaultType.Matrices, new UniformBufferLayout(UniformBufferElement.Mat4, UniformBufferElement.Mat3));
         Create((int)DefaultType.Camera, new UniformBufferLayout(UniformBufferElement.Vec3));
         Create((int)DefaultType.Lights,
-            new UniformBufferLayout(UniformBufferElement.Int),
+            new UniformBufferLayout(UniformBufferElement.Float, UniformBufferElement.Int),
             new UniformBufferLayout(UniformBufferElement.Vec3, UniformBufferElement.Vec3),
             new UniformBufferLayout(128, UniformBufferElement.Float, UniformBufferElement.Vec3, UniformBufferElement.Vec3));
     }

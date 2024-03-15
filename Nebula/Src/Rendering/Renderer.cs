@@ -103,7 +103,8 @@ public static class Renderer
         Vector4 directionalLightColour = ((Vector4)directionalLight.GetColour()) * directionalLight.GetIntensity();
 
         UniformBuffer lightBuffer = UniformBuffer.GetAtLocation(UniformBuffer.DefaultType.Lights);
-        lightBuffer.BufferData(0, Lighting.GetPointLightCount());
+        lightBuffer.BufferData(0, Scene.GetActive().GetSkyLight().GetIntensity());
+        lightBuffer.BufferData(4, Lighting.GetPointLightCount());
         lightBuffer.BufferData(16, (Vector4)directionalLight.GetDirection(), directionalLightColour);
         lightBuffer.BufferData(48, Lighting.GetPointLightData());
 

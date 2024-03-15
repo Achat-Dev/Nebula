@@ -2,15 +2,17 @@
 
 namespace Nebula;
 
-internal class BufferedLogger
+public class BufferedLogger
 {
+    private readonly bool r_useEngineLogger;
     private readonly LogLevel r_currentLogLevel;
     private readonly LogLevel r_writeLogLevel;
     private readonly StringBuilder r_stringBuilder = new StringBuilder();
     private readonly List<object> r_objectBuffer = new List<object>();
 
-    public BufferedLogger(LogLevel currentLogLevel, LogLevel writeLogLevel)
+    internal BufferedLogger(LogLevel currentLogLevel, LogLevel writeLogLevel, bool useEngineLogger)
     {
+        r_useEngineLogger = useEngineLogger;
         r_currentLogLevel = currentLogLevel;
         r_writeLogLevel = writeLogLevel;
     }
@@ -125,26 +127,29 @@ internal class BufferedLogger
 
     public void Write()
     {
-        switch (r_writeLogLevel)
+        if (r_useEngineLogger)
         {
-            case LogLevel.Verbose:
-                Logger.EngineVerbose(r_stringBuilder.ToString(), r_objectBuffer.ToArray());
-                break;
-            case LogLevel.Debug:
-                Logger.EngineDebug(r_stringBuilder.ToString(), r_objectBuffer.ToArray());
-                break;
-            case LogLevel.Info:
-                Logger.EngineInfo(r_stringBuilder.ToString(), r_objectBuffer.ToArray());
-                break;
-            case LogLevel.Warn:
-                Logger.EngineWarn(r_stringBuilder.ToString(), r_objectBuffer.ToArray());
-                break;
-            case LogLevel.Error:
-                Logger.EngineError(r_stringBuilder.ToString(), r_objectBuffer.ToArray());
-                break;
-            case LogLevel.Fatal:
-                Logger.EngineFatal(r_stringBuilder.ToString(), r_objectBuffer.ToArray());
-                break;
+            switch (r_writeLogLevel)
+            {
+                case LogLevel.Verbose:  Logger.EngineVerbose(r_stringBuilder.ToString(), r_objectBuffer.ToArray()); break;
+                case LogLevel.Debug:    Logger.EngineDebug(r_stringBuilder.ToString(), r_objectBuffer.ToArray());   break;
+                case LogLevel.Info:     Logger.EngineInfo(r_stringBuilder.ToString(), r_objectBuffer.ToArray());    break;
+                case LogLevel.Warn:     Logger.EngineWarn(r_stringBuilder.ToString(), r_objectBuffer.ToArray());    break;
+                case LogLevel.Error:    Logger.EngineError(r_stringBuilder.ToString(), r_objectBuffer.ToArray());   break;
+                case LogLevel.Fatal:    Logger.EngineFatal(r_stringBuilder.ToString(), r_objectBuffer.ToArray());   break;
+            }
+        }
+        else
+        {
+            switch (r_writeLogLevel)
+            {
+                case LogLevel.Verbose:  Logger.Verbose(r_stringBuilder.ToString(), r_objectBuffer.ToArray());   break;
+                case LogLevel.Debug:    Logger.Debug(r_stringBuilder.ToString(), r_objectBuffer.ToArray());     break;
+                case LogLevel.Info:     Logger.Info(r_stringBuilder.ToString(), r_objectBuffer.ToArray());      break;
+                case LogLevel.Warn:     Logger.Warn(r_stringBuilder.ToString(), r_objectBuffer.ToArray());      break;
+                case LogLevel.Error:    Logger.Error(r_stringBuilder.ToString(), r_objectBuffer.ToArray());     break;
+                case LogLevel.Fatal:    Logger.Fatal(r_stringBuilder.ToString(), r_objectBuffer.ToArray());     break;
+            }
         }
 
         r_stringBuilder.Clear();

@@ -58,9 +58,11 @@ public static class Logger
         Serilog.Log.CloseAndFlush();
     }
 
+    /* -------------------- Engine Methods -------------------- */
+
     internal static BufferedLogger EngineBegin(LogLevel logLevel)
     {
-        return new BufferedLogger(s_logLevel, logLevel);
+        return new BufferedLogger(s_logLevel, logLevel, true);
     }
 
     internal static void EngineVerbose(object o)
@@ -167,12 +169,106 @@ public static class Logger
         }
     }
 
-    public static void Verbose(object o) { s_appLogger.Verbose(o.ToString()); }
-    public static void Debug(object o) { s_appLogger.Debug(o.ToString()); }
-    public static void Info(object o) { s_appLogger.Information(o.ToString()); }
-    public static void Warn(object o) { s_appLogger.Warning(o.ToString()); }
-    public static void Error(object o) { s_appLogger.Error(o.ToString()); }
-    public static void Fatal(object o) { s_appLogger.Fatal(o.ToString()); }
+    /* -------------------- App Methods -------------------- */
+
+    public static BufferedLogger Begin(LogLevel logLevel)
+    {
+        return new BufferedLogger(s_logLevel, logLevel, false);
+    }
+
+    public static void Verbose(object o)
+    {
+        s_appLogger.Verbose(o.ToString());
+    }
+
+    public static void Verbose(string message)
+    {
+        s_appLogger.Verbose(message);
+    }
+
+    public static void Verbose(string message, params object[] objects)
+    {
+        s_appLogger.Verbose(message, objects);
+    }
+
+    public static void Debug(object o)
+    {
+        s_appLogger.Debug(o.ToString());
+    }
+
+    public static void Debug(string message)
+    {
+        s_appLogger.Debug(message);
+    }
+
+    public static void Debug(string message, params object[] objects)
+    {
+        s_appLogger.Debug(message, objects);
+    }
+
+    public static void Info(object o)
+    {
+        s_appLogger.Information(o.ToString());
+    }
+
+    public static void Info(string message)
+    {
+        s_appLogger.Information(message);
+    }
+
+    public static void Info(string message, params object[] objects)
+    {
+        s_appLogger.Information(message, objects);
+    }
+
+    public static void Warn(object o)
+    {
+        s_appLogger.Warning(o.ToString() + Environment.NewLine + new StackTrace(1, true));
+    }
+
+    public static void Warn(string message)
+    {
+        s_appLogger.Warning(message + Environment.NewLine + new StackTrace(1, true).ToString());
+    }
+
+    public static void Warn(string message, params object[] objects)
+    {
+        message += Environment.NewLine + new StackTrace(1, true).ToString();
+        s_appLogger.Warning(message, objects);
+    }
+
+    public static void Error(object o)
+    {
+        s_appLogger.Error(o.ToString() + Environment.NewLine + new StackTrace(1, true));
+    }
+
+    public static void Error(string message)
+    {
+        s_appLogger.Error(message + Environment.NewLine + new StackTrace(1, true).ToString());
+    }
+
+    public static void Error(string message, params object[] objects)
+    {
+        message += Environment.NewLine + new StackTrace(1, true).ToString();
+        s_appLogger.Error(message, objects);
+    }
+
+    public static void Fatal(object o)
+    {
+        s_appLogger.Fatal(o.ToString() + Environment.NewLine + new StackTrace(1, true));
+    }
+
+    public static void Fatal(string message)
+    {
+        s_appLogger.Fatal(message + Environment.NewLine + new StackTrace(1, true).ToString());
+    }
+
+    public static void Fatal(string message, params object[] objects)
+    {
+        message += Environment.NewLine + new StackTrace(1, true).ToString();
+        s_appLogger.Fatal(message, objects);
+    }
+
 
     [Conditional("DEBUG")]
     public static void Assert(bool condition, string message = "Assertion failed:")

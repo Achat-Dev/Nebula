@@ -104,9 +104,9 @@ public static class Renderer
 
         UniformBuffer lightBuffer = UniformBuffer.GetAtLocation(UniformBuffer.DefaultType.Lights);
         lightBuffer.BufferData(0, Scene.GetActive().GetSkyLight().GetIntensity());
-        lightBuffer.BufferData(4, Lighting.GetPointLightCount());
+        lightBuffer.BufferData(4, PointLightComponent.GetPointLightCount());
         lightBuffer.BufferData(16, (Vector4)directionalLight.GetDirection(), directionalLightColour);
-        lightBuffer.BufferData(48, Lighting.GetPointLightData());
+        lightBuffer.BufferData(48, PointLightComponent.GetPointLightData());
 
         UniformBuffer matrixBuffer = UniformBuffer.GetAtLocation(UniformBuffer.DefaultType.Matrices);
         matrixBuffer.BufferData(0, camera.GetViewProjectionMatrix());

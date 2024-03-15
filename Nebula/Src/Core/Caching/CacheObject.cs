@@ -37,7 +37,7 @@ internal struct CacheObject<T, U> : IDisposable where U : ICacheable, IDisposabl
 
     public void Dispose()
     {
-        Logger.EngineDebug($"Disposing cache object of type {typeof(U)}");
+        Logger.EngineDebug("Disposing cache object of type {0}", typeof(U));
         foreach (var item in s_cache)
         {
             item.Value.Dispose();

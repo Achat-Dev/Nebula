@@ -29,7 +29,7 @@ internal class Framebuffer : IDisposable
     {
         if (size.X == 0 || size.Y == 0)
         {
-            Logger.EngineWarn($"Trying to resize a framebuffer to {size}, a size of 0 is not allowed");
+            Logger.EngineWarn("Trying to resize a framebuffer to {0}, a size of 0 is not allowed", size);
             return;
         }
 
@@ -65,7 +65,7 @@ internal class Framebuffer : IDisposable
                 return m_attachments[i];
             }
         }
-        Logger.EngineError($"Framebuffer doesn't have an attachment of type {attachmentType}");
+        Logger.EngineError("Framebuffer doesn't have an attachment of type {0}", attachmentType);
         return null;
     }
 

@@ -52,7 +52,7 @@ public static class AssetLoader
         stream = File.OpenRead(path);
         if (stream == null)
         {
-            Logger.EngineError($"Failed to load engine internal resource at path \"{path}\"");
+            Logger.EngineError("Failed to load engine internal resource at path {0}", path);
             return false;
         }
         else

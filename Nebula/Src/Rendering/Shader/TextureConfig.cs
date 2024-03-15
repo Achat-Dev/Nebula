@@ -105,28 +105,4 @@ public struct TextureConfig
                 return StbImageSharp.ColorComponents.RedGreenBlue;
         }
     }
-
-    public override string ToString()
-    {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.Append("wrap mode: \"");
-        stringBuilder.Append(WrapMode);
-        stringBuilder.Append("\", filter mode: \"");
-        stringBuilder.Append(FilterMode);
-        stringBuilder.Append("\", format: \"");
-        stringBuilder.Append(Format);
-        stringBuilder.Append("\" (Rgb and Hdr are aliases) and data type: \"");
-        stringBuilder.Append(DataType);
-        if (GenerateMipMaps)
-        {
-            stringBuilder.Append("\", texture uses mip maps with a max level of \"");
-            stringBuilder.Append(MaxMipMapLevel);
-            stringBuilder.Append("\"");
-        }
-        else
-        {
-            stringBuilder.Append("\", texture doesn't use mip maps");
-        }
-        return stringBuilder.ToString();
-    }
 }

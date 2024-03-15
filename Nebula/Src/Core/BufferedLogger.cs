@@ -7,6 +7,7 @@ internal class BufferedLogger
     private readonly LogLevel r_currentLogLevel;
     private readonly LogLevel r_writeLogLevel;
     private readonly StringBuilder r_stringBuilder = new StringBuilder();
+    private readonly List<object> r_objectBuffer = new List<object>();
 
     public BufferedLogger(LogLevel currentLogLevel, LogLevel writeLogLevel)
     {
@@ -27,7 +28,8 @@ internal class BufferedLogger
     {
         if (r_currentLogLevel <= LogLevel.Verbose)
         {
-            r_stringBuilder.AppendFormat(message, objects);
+            r_stringBuilder.Append(message);
+            r_objectBuffer.AddRange(objects);
         }
         return this;
     }
@@ -45,7 +47,8 @@ internal class BufferedLogger
     {
         if (r_currentLogLevel <= LogLevel.Debug)
         {
-            r_stringBuilder.AppendFormat(message, objects);
+            r_stringBuilder.Append(message);
+            r_objectBuffer.AddRange(objects);
         }
         return this;
     }
@@ -63,7 +66,8 @@ internal class BufferedLogger
     {
         if (r_currentLogLevel <= LogLevel.Info)
         {
-            r_stringBuilder.AppendFormat(message, objects);
+            r_stringBuilder.Append(message);
+            r_objectBuffer.AddRange(objects);
         }
         return this;
     }
@@ -81,7 +85,8 @@ internal class BufferedLogger
     {
         if (r_currentLogLevel <= LogLevel.Warn)
         {
-            r_stringBuilder.AppendFormat(message, objects);
+            r_stringBuilder.Append(message);
+            r_objectBuffer.AddRange(objects);
         }
         return this;
     }
@@ -99,7 +104,8 @@ internal class BufferedLogger
     {
         if (r_currentLogLevel <= LogLevel.Error)
         {
-            r_stringBuilder.AppendFormat(message, objects);
+            r_stringBuilder.Append(message);
+            r_objectBuffer.AddRange(objects);
         }
         return this;
     }
@@ -112,7 +118,8 @@ internal class BufferedLogger
 
     public BufferedLogger Fatal(string message, params object[] objects)
     {
-        r_stringBuilder.AppendFormat(message, objects);
+        r_stringBuilder.Append(message);
+        r_objectBuffer.Add(objects);
         return this;
     }
 
@@ -121,25 +128,27 @@ internal class BufferedLogger
         switch (r_writeLogLevel)
         {
             case LogLevel.Verbose:
-                Logger.EngineVerbose(r_stringBuilder);
+                Logger.EngineVerbose(r_stringBuilder.ToString(), r_objectBuffer.ToArray());
                 break;
             case LogLevel.Debug:
-                Logger.EngineDebug(r_stringBuilder);
+                Logger.EngineDebug(r_stringBuilder.ToString(), r_objectBuffer.ToArray());
                 break;
             case LogLevel.Info:
-                Logger.EngineInfo(r_stringBuilder);
+                Logger.EngineInfo(r_stringBuilder.ToString(), r_objectBuffer.ToArray());
                 break;
             case LogLevel.Warn:
-                Logger.EngineWarn(r_stringBuilder);
+                Logger.EngineWarn(r_stringBuilder.ToString(), r_objectBuffer.ToArray());
                 break;
             case LogLevel.Error:
-                Logger.EngineError(r_stringBuilder);
+                Logger.EngineError(r_stringBuilder.ToString(), r_objectBuffer.ToArray());
                 break;
             case LogLevel.Fatal:
-                Logger.EngineFatal(r_stringBuilder);
+                Logger.EngineFatal(r_stringBuilder.ToString(), r_objectBuffer.ToArray());
                 break;
         }
 
         r_stringBuilder.Clear();
+        r_objectBuffer.Clear();
+        r_objectBuffer.TrimExcess();
     }
 }

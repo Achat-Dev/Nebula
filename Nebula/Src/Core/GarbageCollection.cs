@@ -10,7 +10,7 @@ internal static class GargabeCollection
 
     internal static void Init(float collectionIntervall)
     {
-        Logger.EngineInfo($"Initialising gargabe collection with a collection intervall of {collectionIntervall} seconds");
+        Logger.EngineInfo("Initialising gargabe collection with a collection intervall of {0} seconds", collectionIntervall);
         s_collectionIntervall = collectionIntervall;
         s_timer = 0f;
     }
@@ -18,7 +18,7 @@ internal static class GargabeCollection
     public static void QueueCollection()
     {
         s_collectionCount = Math.Min(s_collectionCount + 1, c_maxCollectionQueueCount);
-        Logger.EngineVerbose($"Queueing garbage collection, {s_collectionCount} collections queued");
+        Logger.EngineVerbose("Queueing garbage collection, {0} collections queued", s_collectionCount);
     }
 
     internal static void Update(float deltaTime)
@@ -30,7 +30,7 @@ internal static class GargabeCollection
             {
                 GC.Collect();
                 s_collectionCount = Math.Max(s_collectionCount - 1, 0);
-                Logger.EngineDebug($"Collecting gargabe, {s_collectionCount} collections queued");
+                Logger.EngineDebug("Collecting gargabe, {0} collections queued", s_collectionCount);
             }
             s_timer = 0f;
         }

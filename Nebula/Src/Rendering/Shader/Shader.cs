@@ -48,7 +48,7 @@ public class Shader : ICacheable, IDisposable
         GL.Get().GetProgram(r_handle, GLEnum.LinkStatus, out int status);
         if (status == 0)
         {
-            Logger.EngineError($"Failed to link shaders\n{GL.Get().GetProgramInfoLog(r_handle)}");
+            Logger.EngineError("Failed to link shaders\n{0}", GL.Get().GetProgramInfoLog(r_handle));
         }
 
         // Clean up
@@ -71,11 +71,11 @@ public class Shader : ICacheable, IDisposable
     {
         if (Cache.ShaderCache.TryGetValue((vertexPath, fragmentPath), out Shader shader))
         {
-            Logger.EngineVerbose($"Shader from sources \"{vertexPath}\" and \"{fragmentPath}\" already exists, returning cached instance");
+            Logger.EngineVerbose("Shader from sources {0} and {1} already exists, returning cached instance", vertexPath, fragmentPath);
             return shader;
         }
 
-        Logger.EngineDebug($"Creating shader from sources \"{vertexPath}\" and \"{fragmentPath}\"");
+        Logger.EngineDebug("Creating shader from sources {0} and {1}", vertexPath, fragmentPath);
         shader = new Shader(vertexPath, fragmentPath, isLit);
         Cache.ShaderCache.CacheData((vertexPath, fragmentPath), shader);
         return shader;
@@ -105,7 +105,7 @@ public class Shader : ICacheable, IDisposable
         string infoLog = GL.Get().GetShaderInfoLog(handle);
         if (!string.IsNullOrWhiteSpace(infoLog))
         {
-            Logger.EngineError($"Failed to compile shader of type {type}\n{infoLog}");
+            Logger.EngineError("Failed to compile shader of type {0}\n{1}", type, infoLog);
         }
 
         return handle;
@@ -294,7 +294,7 @@ public class Shader : ICacheable, IDisposable
             r_uniformLocationCache.Add(name, result);
         }
 
-        Logger.EngineError($"Uniform \"{name}\" not found");
+        Logger.EngineError("Uniform {} not found", name);
         return false;
     }
 
@@ -307,7 +307,7 @@ public class Shader : ICacheable, IDisposable
     {
         if (Cache.ShaderCache.TryGetKey(this, out (string, string) key))
         {
-            Logger.EngineDebug($"Deleting shader with sources \"{key.Item1}\" and \"{key.Item2}\"");
+            Logger.EngineDebug("Deleting shader with sources {0} and {1}", key.Item1, key.Item2);
             Cache.ShaderCache.RemoveData(key);
         }
 

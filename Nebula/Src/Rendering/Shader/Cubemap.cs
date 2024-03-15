@@ -98,11 +98,11 @@ internal class Cubemap : ICacheable, IDisposable, ITextureBindable
 
         if (Cache.CubemapCache.TryGetValue(hash, out Cubemap cubemap))
         {
-            Logger.EngineVerbose($"Cubemap with hash \"{hash}\" already exists, returning cached instance");
+            Logger.EngineVerbose("Cubemap with hash \"{0}\" already exists, returning cached instance", hash);
             return cubemap;
         }
 
-        Logger.EngineDebug($"Creating cubemap from path \"{pathRight}\", \"{pathLeft}\", \"{pathTop}\", \"{pathBottom}\", \"{pathFront}\", \"{pathBack}\"");
+        Logger.EngineDebug("Creating cubemap from path {0}, {1}, {2}, {3}, {4}, {5}", pathRight, pathLeft, pathTop, pathBottom, pathFront, pathBack);
         cubemap = new Cubemap(pathRight, pathLeft, pathTop, pathBottom, pathFront, pathBack);
         Cache.CubemapCache.CacheData(hash, cubemap);
         return cubemap;
@@ -114,7 +114,7 @@ internal class Cubemap : ICacheable, IDisposable, ITextureBindable
 
         if (Cache.CubemapCache.TryGetValue(hash, out Cubemap cubemap))
         {
-            Logger.EngineVerbose($"Cubemap with hash \"{hash}\" already exists, returning cached instance");
+            Logger.EngineVerbose("Cubemap with hash \"{0}\" already exists, returning cached instance", hash);
             return cubemap;
         }
 
@@ -197,7 +197,7 @@ internal class Cubemap : ICacheable, IDisposable, ITextureBindable
     {
         if (Cache.CubemapCache.TryGetKey(this, out int key))
         {
-            Logger.EngineDebug($"Deleting cubemap with hash \"{key}\"");
+            Logger.EngineDebug("Deleting cubemap with hash \"{}\"", key);
             Cache.CubemapCache.RemoveData(key);
         }
 

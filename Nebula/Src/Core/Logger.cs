@@ -63,12 +63,98 @@ public static class Logger
         return new BufferedLogger(s_logLevel, logLevel);
     }
 
-    internal static void EngineVerbose(object o) { s_devLogger.Verbose(o.ToString()); }
-    internal static void EngineDebug(object o) { s_devLogger.Debug(o.ToString()); }
-    internal static void EngineInfo(object o) { s_devLogger.Information(o.ToString()); }
-    internal static void EngineWarn(object o) { s_devLogger.Warning(o.ToString() + Environment.NewLine + new StackTrace(1, true).ToString()); }
-    internal static void EngineError(object o) { s_devLogger.Error(o.ToString() + Environment.NewLine + new StackTrace(1, true).ToString()); }
-    internal static void EngineFatal(object o) { s_devLogger.Fatal(o.ToString() + Environment.NewLine + new StackTrace(1, true).ToString()); }
+    internal static void EngineVerbose(object o)
+    {
+        s_devLogger.Verbose(o.ToString());
+    }
+
+    internal static void EngineVerbose(string message)
+    {
+        s_devLogger.Verbose(message);
+    }
+
+    internal static void EngineVerbose(string message, params object[] objects)
+    {
+        s_devLogger.Verbose(message, objects);
+    }
+
+    internal static void EngineDebug(object o)
+    {
+        s_devLogger.Debug(o.ToString());
+    }
+
+    internal static void EngineDebug(string message)
+    {
+        s_devLogger.Debug(message);
+    }
+
+    internal static void EngineDebug(string message, params object[] objects)
+    {
+        s_devLogger.Debug(message, objects);
+    }
+
+    internal static void EngineInfo(object o)
+    {
+        s_devLogger.Information(o.ToString());
+    }
+
+    internal static void EngineInfo(string message)
+    {
+        s_devLogger.Information(message);
+    }
+
+    internal static void EngineInfo(string message, params object[] objects)
+    {
+        s_devLogger.Information(message, objects);
+    }
+
+    internal static void EngineWarn(object o)
+    {
+        s_devLogger.Warning(o.ToString() + Environment.NewLine + new StackTrace(1, true));
+    }
+
+    internal static void EngineWarn(string message)
+    {
+        s_devLogger.Warning(message + Environment.NewLine + new StackTrace(1, true).ToString());
+    }
+
+    internal static void EngineWarn(string message, params object[] objects)
+    {
+        message += Environment.NewLine + new StackTrace(1, true).ToString();
+        s_devLogger.Warning(message, objects);
+    }
+
+    internal static void EngineError(object o)
+    {
+        s_devLogger.Error(o.ToString() + Environment.NewLine + new StackTrace(1, true));
+    }
+
+    internal static void EngineError(string message)
+    {
+        s_devLogger.Error(message + Environment.NewLine + new StackTrace(1, true).ToString());
+    }
+
+    internal static void EngineError(string message, params object[] objects)
+    {
+        message += Environment.NewLine + new StackTrace(1, true).ToString();
+        s_devLogger.Error(message, objects);
+    }
+
+    internal static void EngineFatal(object o)
+    {
+        s_devLogger.Fatal(o.ToString() + Environment.NewLine + new StackTrace(1, true));
+    }
+
+    internal static void EngineFatal(string message)
+    {
+        s_devLogger.Fatal(message + Environment.NewLine + new StackTrace(1, true).ToString());
+    }
+
+    internal static void EngineFatal(string message, params object[] objects)
+    {
+        message += Environment.NewLine + new StackTrace(1, true).ToString();
+        s_devLogger.Fatal(message, objects);
+    }
 
     [Conditional("DEBUG")]
     internal static void EngineAssert(bool condition, string message = "Assertion failed:")

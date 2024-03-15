@@ -167,13 +167,13 @@ public class Texture : ICacheable, IDisposable, ITextureBindable
     {
         if (Cache.TextureCache.TryGetValue(path, out Texture texture))
         {
-            Logger.EngineVerbose($"Texture from path \"{path}\" already exists, returning cached instance");
+            Logger.EngineVerbose("Texture from path {0} already exists, returning cached instance", path);
             return texture;
         }
 
         Logger.EngineBegin(LogLevel.Debug)
-            .Debug("Creating texture from path \"{0}\"", path)
-            .Verbose(" with {0}", config)
+            .Debug("Creating texture from path {0}", path)
+            .Verbose(" with wrap mode: \"{1}\", filter mode: \"{2}\", format: \"{3}\" (Rgb and Hdr are aliases), data type: \"{4}\", texture uses mip maps: \"{5}\" (if used, max mip map level is {6})", config.WrapMode, config.FilterMode, config.Format, config.DataType, config.GenerateMipMaps, config.MaxMipMapLevel)
             .Write();
 
         if (flipVertical)
@@ -202,7 +202,7 @@ public class Texture : ICacheable, IDisposable, ITextureBindable
     {
         if (Cache.TextureCache.TryGetKey(this, out string key))
         {
-            Logger.EngineDebug($"Deleting texture loaded from path \"{key}\"");
+            Logger.EngineDebug("Deleting texture loaded from path {0}", key);
             Cache.TextureCache.RemoveData(key);
         }
 

@@ -97,7 +97,7 @@ public class Entity
             }
         }
 
-        Logger.EngineWarn($"Entity doesn't have a component of type {type}");
+        Logger.EngineWarn("Entity doesn't have a component of type {0}", type);
         return null;
     }
 

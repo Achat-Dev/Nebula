@@ -27,20 +27,20 @@ public class Model : ICacheable, IDisposable
 
         if (Cache.ModelCache.TryGetValue(cacheKey, out Model model))
         {
-            Logger.EngineVerbose($"Model at path \"{path}\" with vertex flags \"{vertexFlags}\" is already loaded, returning cached instance");
+            Logger.EngineVerbose("Model at path {0} with vertex flags \"{1}\" is already loaded, returning cached instance", path, vertexFlags);
             return model;
         }
 
         Logger.EngineBegin(LogLevel.Debug)
-            .Debug("Loading model at path \"{0}\"", path)
-            .Verbose(" with vertex flags \"{0}\"", vertexFlags)
+            .Debug("Loading model at path {0}", path)
+            .Verbose(" with vertex flags \"{1}\"", vertexFlags)
             .Write();
 
         AssimpScene* assimpScene = Assimp.Get().ImportFileFromMemory(AssetLoader.LoadAsByteArray(path, out int dataSize), (uint)dataSize, c_postProcessSteps, "");
 
         if (assimpScene == null || assimpScene->MFlags == Silk.NET.Assimp.Assimp.SceneFlagsIncomplete || assimpScene->MRootNode == null)
         {
-            Logger.EngineError($"Failed to load model at path \"{path}\"\n{Assimp.Get().GetErrorStringS()}");
+            Logger.EngineError("Failed to load model at path {0}\n{1}", path, Assimp.Get().GetErrorStringS());
             return null;
         }
 
@@ -84,7 +84,7 @@ public class Model : ICacheable, IDisposable
     {
         if (Cache.ModelCache.TryGetKey(this, out string key))
         {
-            Logger.EngineDebug($"Deleting model loaded from path \"{key}\"");
+            Logger.EngineDebug("Deleting model loaded from path {0}", key);
             Cache.ModelCache.RemoveData(key);
         }
 

@@ -1,6 +1,4 @@
-﻿using System.Text;
-
-namespace Nebula.Rendering;
+﻿namespace Nebula.Rendering;
 
 public struct TextureConfig
 {
@@ -12,7 +10,7 @@ public struct TextureConfig
     public int MaxMipMapLevel;
 
     public static readonly TextureConfig DefaultRgb = new TextureConfig(Texture.Format.Rgb, Texture.DataType.UnsignedByte, Texture.WrapMode.Repeat, Texture.FilterMode.Linear, true, 8);
-    public static readonly TextureConfig DefaultRgba = new TextureConfig();
+    public static readonly TextureConfig DefaultRgba = new TextureConfig(Texture.Format.Rgba, Texture.DataType.UnsignedByte, Texture.WrapMode.Repeat, Texture.FilterMode.Linear, true, 8);
     public static readonly TextureConfig DefaultHdr = new TextureConfig(Texture.Format.Hdr, Texture.DataType.Float, Texture.WrapMode.Repeat, Texture.FilterMode.Linear, true, 8);
 
     public TextureConfig()
@@ -69,6 +67,10 @@ public struct TextureConfig
                     case Texture.DataType.Float:        return Silk.NET.OpenGL.InternalFormat.Rgba16f;
                     default:                            return Silk.NET.OpenGL.InternalFormat.Rgba;
                 }
+            case Texture.Format.Depth:
+                return Silk.NET.OpenGL.InternalFormat.DepthComponent;
+            case Texture.Format.DepthStencil:
+                return Silk.NET.OpenGL.InternalFormat.DepthStencil;
             default:
                 switch (DataType)
                 {

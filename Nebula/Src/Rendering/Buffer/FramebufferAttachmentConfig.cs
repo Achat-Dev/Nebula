@@ -1,35 +1,45 @@
-﻿using Silk.NET.OpenGL;
-
-namespace Nebula.Rendering;
+﻿namespace Nebula.Rendering;
 
 internal struct FramebufferAttachmentConfig
 {
     public FramebufferAttachment.AttachmentType AttachmentType;
     public FramebufferAttachment.ReadWriteMode ReadWriteMode;
-    internal Silk.NET.OpenGL.FramebufferAttachment Attachment;
-    internal InternalFormat InternalFormat;
-    internal PixelFormat PixelFormat;
-    internal PixelType PixelType;
+    public TextureConfig TextureConfig;
 
-    public FramebufferAttachmentConfig(FramebufferAttachment.AttachmentType attachmentType, FramebufferAttachment.ReadWriteMode readWriteMode)
+    public static readonly FramebufferAttachmentConfig DefaultColour = new FramebufferAttachmentConfig(
+        FramebufferAttachment.AttachmentType.Colour,
+        FramebufferAttachment.ReadWriteMode.Readable,
+        new TextureConfig(Texture.Format.Rgb, Texture.DataType.UnsignedByte, Texture.WrapMode.ClampToEdge, Texture.FilterMode.Linear, false, 0));
+
+    public static readonly FramebufferAttachmentConfig DefaultDepth = new FramebufferAttachmentConfig(
+        FramebufferAttachment.AttachmentType.Depth,
+        FramebufferAttachment.ReadWriteMode.Writeonly,
+        new TextureConfig(Texture.Format.Depth, Texture.DataType.Float, Texture.WrapMode.ClampToEdge, Texture.FilterMode.Linear, false, 0));
+
+    public static readonly FramebufferAttachmentConfig DefaultDepthStencil = new FramebufferAttachmentConfig(
+        FramebufferAttachment.AttachmentType.DepthStencil,
+        FramebufferAttachment.ReadWriteMode.Writeonly,
+        new TextureConfig(Texture.Format.DepthStencil, Texture.DataType.UnsignedInt248, Texture.WrapMode.ClampToEdge, Texture.FilterMode.Linear, false, 0));
+
+    public FramebufferAttachmentConfig(FramebufferAttachment.AttachmentType attachmentType, FramebufferAttachment.ReadWriteMode readWriteMode, TextureConfig textureConfig)
     {
         AttachmentType = attachmentType;
         ReadWriteMode = readWriteMode;
+        TextureConfig = textureConfig;
+    }
 
-        switch (attachmentType)
+    internal Silk.NET.OpenGL.FramebufferAttachment GetSilkAttachment()
+    {
+        switch (AttachmentType)
         {
             case FramebufferAttachment.AttachmentType.Colour:
-                Attachment = Silk.NET.OpenGL.FramebufferAttachment.ColorAttachment0;
-                InternalFormat = InternalFormat.Rgb;
-                PixelFormat = PixelFormat.Rgb;
-                PixelType = PixelType.UnsignedByte;
-                break;
+                return Silk.NET.OpenGL.FramebufferAttachment.ColorAttachment0;
             case FramebufferAttachment.AttachmentType.Depth:
-                Attachment = Silk.NET.OpenGL.FramebufferAttachment.DepthStencilAttachment;
-                InternalFormat = InternalFormat.Depth24Stencil8;
-                PixelFormat = PixelFormat.DepthStencil;
-                PixelType = PixelType.UnsignedInt248;
-                break;
+                return Silk.NET.OpenGL.FramebufferAttachment.DepthAttachment;
+            case FramebufferAttachment.AttachmentType.DepthStencil:
+                return Silk.NET.OpenGL.FramebufferAttachment.DepthStencilAttachment;
+            default:
+                return Silk.NET.OpenGL.FramebufferAttachment.ColorAttachment0;
         }
     }
 }

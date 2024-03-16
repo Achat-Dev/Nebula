@@ -144,8 +144,7 @@ internal class Cubemap : ICacheable, IDisposable, ITextureBindable
 
     private void SetupCapturing(Vector2i faceSize, string fragmentPath, out Framebuffer framebuffer, out Shader mappingShader, out VertexArrayObject vao, out Matrix4x4[] viewMatrices)
     {
-        FramebufferAttachmentConfig depthAttachmentConfig = new FramebufferAttachmentConfig(FramebufferAttachment.AttachmentType.Depth, FramebufferAttachment.ReadWriteMode.Writeonly);
-        framebuffer = new Framebuffer(faceSize, depthAttachmentConfig);
+        framebuffer = new Framebuffer(faceSize, FramebufferAttachmentConfig.DefaultDepthStencil);
         framebuffer.Bind();
 
         mappingShader = Shader.Create("Shader/EquirectangularToCubemap.vert", fragmentPath, false);

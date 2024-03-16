@@ -46,20 +46,14 @@ public static class Renderer
 
     internal static void Render(CameraComponent camera)
     {
+        Scene scene = Scene.GetActive();
         Framebuffer framebuffer = camera.GetFramebuffer();
         framebuffer.Bind();
 
         UpdateUniformBuffers(camera);
 
-        Scene scene = Scene.GetActive();
-
-        scene.GetSkyLight().SetupModelRendering();
-
-        /*s_skybox.GetIrradianceMap().Bind(Texture.Unit.Texture0);
-        s_skybox.GetPrefilteredMap().Bind(Texture.Unit.Texture1);
-        s_skybox.GetBrdfLut().Bind(Texture.Unit.Texture2);*/
-
         // Render to framebuffer
+        scene.GetSkyLight().SetupModelRendering();
         GL.Get().Enable(GLEnum.DepthTest);
         GL.Get().Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         foreach (var modelRenderer in s_modelRenderers)
@@ -77,7 +71,6 @@ public static class Renderer
         viewProjectionMatrix.M44 = 0;
 
         scene.GetSkyLight().SetupSkyboxRendering();
-        //skybox.GetEnvironmentMap().Bind(Texture.Unit.Texture0);
         s_skyboxShader.Use();
         s_skyboxShader.SetMat4("u_viewProjection", viewProjectionMatrix);
         s_skyboxVao.Draw();

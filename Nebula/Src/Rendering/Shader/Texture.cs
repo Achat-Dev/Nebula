@@ -12,12 +12,15 @@ public class Texture : ICacheable, IDisposable, ITextureBindable
         Rgb = 6407,
         Rgba = 6408,
         Hdr = 6407,
+        Depth = 6402,
+        DepthStencil = 35056,
     }
 
     public enum DataType
     {
         UnsignedByte = 5121,
         Float = 5126,
+        UnsignedInt248 = 34042,
     }
 
     public enum WrapMode
@@ -143,8 +146,7 @@ public class Texture : ICacheable, IDisposable, ITextureBindable
             GL.Get().GenerateMipmap(TextureTarget.Texture2D);
         }
 
-        FramebufferAttachmentConfig depthAttachmentConfig = new FramebufferAttachmentConfig(FramebufferAttachment.AttachmentType.Depth, FramebufferAttachment.ReadWriteMode.Writeonly);
-        Framebuffer framebuffer = new Framebuffer(size, depthAttachmentConfig);
+        Framebuffer framebuffer = new Framebuffer(size, FramebufferAttachmentConfig.DefaultDepthStencil);
         framebuffer.Bind();
 
         captureShader.Use();

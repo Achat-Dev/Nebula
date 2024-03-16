@@ -17,9 +17,7 @@ public class CameraComponent : StartableComponent
 
         Vector2i windowSize = Game.GetWindowSize();
 
-        FramebufferAttachmentConfig colourAttachmentConfig = new FramebufferAttachmentConfig(FramebufferAttachment.AttachmentType.Colour, FramebufferAttachment.ReadWriteMode.Readable);
-        FramebufferAttachmentConfig depthAttachmentConfig = new FramebufferAttachmentConfig(FramebufferAttachment.AttachmentType.Depth, FramebufferAttachment.ReadWriteMode.Writeonly);
-        m_framebuffer = new Framebuffer(windowSize, colourAttachmentConfig, depthAttachmentConfig);
+        m_framebuffer = new Framebuffer(windowSize, FramebufferAttachmentConfig.DefaultColour, FramebufferAttachmentConfig.DefaultDepthStencil);
 
         OnResize(windowSize);
     }

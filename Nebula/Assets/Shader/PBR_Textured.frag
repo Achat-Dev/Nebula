@@ -37,31 +37,30 @@ vec3 getNormalFromMap()
 	return normalize(tbn * tangentNormal);
 }
 
-vec3 calculateDirectionalLight(vec3 viewDirection, vec3 f0, vec3 albedo, vec3 normal, float metallic, float roughness)
+vec3 calculateDirectionalLight(TexturedLightParams params)
 {
 	// Calculate Cook-Torrance BRDF
 	vec3 lightDirection = -u_directionalLight.direction;
-	vec3 halfVector = normalize(viewDirection + lightDirection);
+	vec3 halfVector = normalize(params.viewDirection + lightDirection);
 
-	float nDotH = max(dot(normal, halfVector), 0.0);
-	float nDotL = max(dot(normal, lightDirection), 0.0);
-	float nDotV = max(dot(normal, viewDirection), 0.0);
-	float hDotV = clamp(dot(halfVector, viewDirection), 0.0, 1.0);
+	float nDotH = max(dot(params.normal, halfVector), 0.0);
+	float nDotL = max(dot(params.normal, lightDirection), 0.0);
+	float hDotV = clamp(dot(halfVector, params.viewDirection), 0.0, 1.0);
 
 	// Calculate kd
-	vec3 fresnel = fresnelSchlick(hDotV, f0);
+	vec3 fresnel = fresnelSchlick(hDotV, params.f0);
 	vec3 kd = vec3(1.0) - fresnel;
-	kd *= 1.0 - metallic;
+	kd *= 1.0 - params.metallic;
 
 	// Calculate specular
-	vec3 specular = distributionGGX(nDotH, roughness) * geometrySchlickGGX(nDotL, roughness) * geometrySchlickGGX(nDotV, roughness) * fresnel;
-	float specularDenom = 4.0 * nDotV * nDotL + 0.0001; // plus at the end to prevent dividing by 0
+	vec3 specular = distributionGGX(nDotH, params.roughness) * geometrySchlickGGX(nDotL, params.roughness) * geometrySchlickGGX(params.nDotV, params.roughness) * fresnel;
+	float specularDenom = 4.0 * params.nDotV * nDotL + 0.0001; // plus at the end to prevent dividing by 0
 	specular /= specularDenom;
 
-	return (kd * albedo / PI + specular) * u_directionalLight.colour * nDotL;
+	return (kd * params.albedo / PI + specular) * u_directionalLight.colour * nDotL;
 }
 
-vec3 calculatePointLights(vec3 viewDirection, vec3 f0, vec3 albedo, vec3 normal, float metallic, float roughness)
+vec3 calculatePointLights(TexturedLightParams params)
 {
 	vec3 colour = vec3(0.0);
 	for (int i = 0; i < u_pointLightCount; i++)
@@ -74,41 +73,38 @@ vec3 calculatePointLights(vec3 viewDirection, vec3 f0, vec3 albedo, vec3 normal,
 
 		// Calculate Cook-Torrance BRDF
 		lightDirection = normalize(lightDirection);
-		vec3 halfVector = normalize(viewDirection + lightDirection);
+		vec3 halfVector = normalize(params.viewDirection + lightDirection);
 
-		float nDotH = max(dot(normal, halfVector), 0.0);
-		float nDotL = max(dot(normal, lightDirection), 0.0);
-		float nDotV = max(dot(normal, viewDirection), 0.0);
-		float hDotV = clamp(dot(halfVector, viewDirection), 0.0, 1.0);
+		float nDotH = max(dot(params.normal, halfVector), 0.0);
+		float nDotL = max(dot(params.normal, lightDirection), 0.0);
+		float hDotV = clamp(dot(halfVector, params.viewDirection), 0.0, 1.0);
 
 		// Calculate kd
-		vec3 fresnel = fresnelSchlick(hDotV, f0);
+		vec3 fresnel = fresnelSchlick(hDotV, params.f0);
 		vec3 kd = vec3(1.0) - fresnel;
-		kd *= 1.0 - metallic;
+		kd *= 1.0 - params.metallic;
 
 		// Calculate specular
-		vec3 specular = distributionGGX(nDotH, roughness) * geometrySchlickGGX(nDotL, roughness) * geometrySchlickGGX(nDotV, roughness) * fresnel;
-		float specularDenom = 4.0 * nDotV * nDotL + 0.0001; // plus at the end to prevent dividing by 0
+		vec3 specular = distributionGGX(nDotH, params.roughness) * geometrySchlickGGX(nDotL, params.roughness) * geometrySchlickGGX(params.nDotV, params.roughness) * fresnel;
+		float specularDenom = 4.0 * params.nDotV * nDotL + 0.0001; // plus at the end to prevent dividing by 0
 		specular /= specularDenom;
 
-		colour += (kd * albedo / PI + specular) * radiance * nDotL;
+		colour += (kd * params.albedo / PI + specular) * radiance * nDotL;
 	}
 	return colour;
 }
 
-// nDotV is calculated twice, once with the normalised and once with the unnormlaised normal
-// | This is to minimise artifacts in the specular lighting
-vec3 calculateIBL(vec3 viewDirection, vec3 f0, vec3 albedo, vec3 normal, float metallic, float roughness)
+vec3 calculateIBL(TexturedLightParams params)
 {
-	vec3 fresnel = fresnelSchlickRoughness(max(dot(normal, viewDirection), 0.0), f0, roughness);
+	vec3 fresnel = fresnelSchlickRoughness(params.nDotV, params.f0, params.roughness);
 	vec3 kd = 1.0 - fresnel;
-	kd *= 1.0 - metallic;
+	kd *= 1.0 - params.metallic;
 
-	vec3 irradiance = texture(u_irradianceMap, normal).rgb;
-	vec3 diffuse = albedo * irradiance;
+	vec3 irradiance = texture(u_irradianceMap, params.normal).rgb;
+	vec3 diffuse = params.albedo * irradiance;
 
-	vec3 prefiltered = textureLod(u_prefilteredMap, reflect(-viewDirection, normal), roughness * MAX_REFLECTION_LOD).rgb;
-	vec2 brdf = texture(u_brdfLut, vec2(max(dot(io_normal, viewDirection), 0.0), roughness)).rg;
+	vec3 prefiltered = textureLod(u_prefilteredMap, reflect(-params.viewDirection, params.normal), params.roughness * MAX_REFLECTION_LOD).rgb;
+	vec2 brdf = texture(u_brdfLut, vec2(params.nDotV, params.roughness)).rg;
 	vec3 specular = prefiltered * (fresnel * brdf.x + brdf.y);
 
 	return (kd * diffuse + specular) * u_skyLightIntensity;
@@ -116,18 +112,18 @@ vec3 calculateIBL(vec3 viewDirection, vec3 f0, vec3 albedo, vec3 normal, float m
 
 void main()
 {
-	vec3 albedo = pow(texture(u_albedoMap, io_uv).rgb, vec3(2.2));
-	vec3 normal = getNormalFromMap();
-	float metallic = texture(u_metallicMap, io_uv).r;
-	float roughness = texture(u_roughnessMap, io_uv).r;
+	TexturedLightParams params;
+	params.viewDirection = normalize(u_cameraPosition - io_vertexPosition);
+	params.normal = getNormalFromMap();
+	params.nDotV = max(dot(params.normal, params.viewDirection), 0.0);
+	params.albedo = pow(texture(u_albedoMap, io_uv).rgb, vec3(2.2));
+	params.metallic = texture(u_metallicMap, io_uv).r;
+	params.f0 = mix(vec3(0.04), params.albedo, params.metallic);
+	params.roughness = texture(u_roughnessMap, io_uv).r;
 
-
-	vec3 viewDirection = normalize(u_cameraPosition - io_vertexPosition);
-	vec3 f0 = mix(vec3(0.04), albedo, metallic);
-
-	vec3 colour = calculateDirectionalLight(viewDirection, f0, albedo, normal, metallic, roughness);
-	colour += calculatePointLights(viewDirection, f0, albedo, normal, metallic, roughness);
-	colour += calculateIBL(viewDirection, f0, albedo, normal, metallic, roughness);
+	vec3 colour = calculateDirectionalLight(params);
+	colour += calculatePointLights(params);
+	colour += calculateIBL(params);
 
 	#include Math/PBR/HDRTonemapping.glsl
 	#include Math/PBR/GammaCorrection.glsl

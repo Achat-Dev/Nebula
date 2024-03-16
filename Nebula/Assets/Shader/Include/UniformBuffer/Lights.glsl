@@ -13,6 +13,25 @@ struct PointLight
 	vec3 colour;
 };
 
+struct FlatLightParams
+{
+	vec3 viewDirection;
+	vec3 normal;
+	vec3 f0;
+	float nDotV;
+};
+
+struct TexturedLightParams
+{
+	vec3 viewDirection;
+	vec3 normal;
+	vec3 f0;
+	vec3 albedo;
+	float nDotV;
+	float metallic;
+	float roughness;
+};
+
 layout (std140, binding = 2) uniform ub_lights
 {
 	uniform float u_skyLightIntensity;

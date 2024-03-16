@@ -105,7 +105,7 @@ public class Shader : ICacheable, IDisposable
         string infoLog = GL.Get().GetShaderInfoLog(handle);
         if (!string.IsNullOrWhiteSpace(infoLog))
         {
-            Logger.EngineError("Failed to compile shader of type {0}\n{1}", type, infoLog);
+            Logger.EngineError("Failed to compile shader of type {0}\n" + infoLog, type);
         }
 
         return handle;

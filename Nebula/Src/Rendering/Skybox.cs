@@ -12,8 +12,7 @@ public class Skybox : IDisposable
         r_environmentMap = Cubemap.Create(hdrTexture, Cubemap.CubemapType.Skybox, config.EnvironmentMapSize);
         r_irradianceMap = Cubemap.Create(r_environmentMap, Cubemap.CubemapType.Irradiance, config.IrradianceMapSize);
         r_prefilteredMap = Cubemap.Create(r_environmentMap, Cubemap.CubemapType.Prefiltered, config.PrefilteredMapSize);
-        TextureConfig brdfLutConfig = TextureConfig.DefaultHdr;
-        brdfLutConfig.GenerateMipMaps = false;
+        TextureConfig brdfLutConfig = new TextureConfig(Texture.Format.Rg, Texture.DataType.Float, Texture.WrapMode.ClampToEdge, Texture.FilterMode.Linear, false, 0);
         r_brdfLutHandle = Texture.CreateFromCapture(Shader.Create("Shader/Brdf.vert", "Shader/Brdf.frag", false), config.EnvironmentMapSize, brdfLutConfig);
     }
 

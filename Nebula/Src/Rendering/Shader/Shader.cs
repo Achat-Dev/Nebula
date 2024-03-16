@@ -294,7 +294,7 @@ public class Shader : ICacheable, IDisposable
             r_uniformLocationCache.Add(name, result);
         }
 
-        Logger.EngineError("Uniform {} not found", name);
+        Logger.EngineError("Uniform {0} not found", name);
         return false;
     }
 

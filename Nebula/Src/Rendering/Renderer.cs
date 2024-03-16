@@ -96,13 +96,14 @@ public static class Renderer
         UniformBuffer cameraBuffer = UniformBuffer.GetAtLocation(UniformBuffer.DefaultType.Camera);
         cameraBuffer.BufferData(0, camera.GetEntity().GetTransform().GetWorldPosition());
 
-        DirectionalLight directionalLight = Scene.GetActive().GetDirectionalLight();
-        Vector4 directionalLightColour = ((Vector4)directionalLight.GetColour()) * directionalLight.GetIntensity();
-
         UniformBuffer lightBuffer = UniformBuffer.GetAtLocation(UniformBuffer.DefaultType.Lights);
         lightBuffer.BufferData(0, Scene.GetActive().GetSkyLight().GetIntensity());
         lightBuffer.BufferData(4, PointLightComponent.GetPointLightCount());
-        lightBuffer.BufferData(16, (Vector4)directionalLight.GetDirection(), directionalLightColour);
+
+        DirectionalLight directionalLight = Scene.GetActive().GetDirectionalLight();
+        Vector4 directionalLightColour = ((Vector4)directionalLight.GetColour()) * directionalLight.GetIntensity();
+        Vector4 directionalLightDirection = (Vector4)(Quaternion.FromEulerAngles(directionalLight.GetDirection()) * Vector3.Forward);
+        lightBuffer.BufferData(16, directionalLightDirection, directionalLightColour);
         lightBuffer.BufferData(48, PointLightComponent.GetPointLightData());
 
         UniformBuffer matrixBuffer = UniformBuffer.GetAtLocation(UniformBuffer.DefaultType.Matrices);
@@ -111,23 +112,24 @@ public static class Renderer
 
     internal static void DrawMesh(VertexArrayObject vao, Matrix4x4 modelMatrix, ShaderInstance shaderInstance)
     {
-        shaderInstance.SetMat4("u_modelMatrix", modelMatrix);
+        Shader shader = shaderInstance.GetShader();
+        shader.Use();
+        shader.SetMat4("u_modelMatrix", modelMatrix);
 
-        if (shaderInstance.GetShader().IsLit())
+        if (shader.IsLit())
         {
             if (modelMatrix.GetDeterminant() != 0f)
             {
                 modelMatrix.Invert();
                 modelMatrix.Transpose();
-                shaderInstance.SetMat3("u_normalMatrix", (Matrix3x3)modelMatrix);
+                shader.SetMat3("u_normalMatrix", (Matrix3x3)modelMatrix);
             }
             else
             {
-                shaderInstance.SetMat3("u_normalMatrix", Matrix3x3.Identity);
+                shader.SetMat3("u_normalMatrix", Matrix3x3.Identity);
             }
         }
 
-        shaderInstance.GetShader().Use();
         shaderInstance.SubmitDataToShader();
         vao.Draw();
     }

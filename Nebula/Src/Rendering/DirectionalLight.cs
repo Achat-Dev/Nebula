@@ -8,7 +8,7 @@ public class DirectionalLight
 
     internal DirectionalLight()
     {
-        SetDirection(new Vector3(-0.5f, -0.663f, 0.557f));
+        SetDirection(new Vector3(50f, -30f, 0f));
     }
 
     public Vector3 GetDirection()
@@ -16,9 +16,9 @@ public class DirectionalLight
         return m_direction;
     }
 
-    public void SetDirection(Vector3 direction)
+    public void SetDirection(Vector3 eulerAngles)
     {
-        m_direction = direction.Normalised();
+        m_direction = eulerAngles;
     }
 
     public Colour GetColour()

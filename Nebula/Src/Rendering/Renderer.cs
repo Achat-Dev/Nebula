@@ -21,6 +21,8 @@ public static class Renderer
 
         GL.Get().ClearColor(System.Drawing.Color.LightBlue);
         GL.Get().Enable(EnableCap.TextureCubeMapSeamless);
+        GL.Get().CullFace(TriangleFace.Back);
+        GL.Get().FrontFace(FrontFaceDirection.CW);
 
         s_skyboxShader = Shader.Create("Shader/Skybox.vert", "Shader/Skybox.frag", false);
         s_screenShader = Shader.Create("Shader/Output.vert", "Shader/Output.frag", false);
@@ -54,7 +56,8 @@ public static class Renderer
 
         // Render to framebuffer
         scene.GetSkyLight().SetupModelRendering();
-        GL.Get().Enable(GLEnum.DepthTest);
+        GL.Get().Enable(EnableCap.CullFace);
+        GL.Get().Enable(EnableCap.DepthTest);
         GL.Get().Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         foreach (var modelRenderer in s_modelRenderers)
         {
@@ -62,6 +65,7 @@ public static class Renderer
         }
 
         // Render skybox
+        GL.Get().Disable(EnableCap.CullFace);
         GL.Get().DepthFunc(GLEnum.Lequal);
 
         Matrix4x4 viewProjectionMatrix = camera.GetViewProjectionMatrix();
@@ -80,7 +84,7 @@ public static class Renderer
         s_screenShader.Use();
 
         GL.Get().DepthFunc(GLEnum.Less);
-        GL.Get().Disable(GLEnum.DepthTest);
+        GL.Get().Disable(EnableCap.DepthTest);
         GL.Get().Clear(ClearBufferMask.ColorBufferBit);
 
         framebuffer.GetAttachment(FramebufferAttachment.AttachmentType.Colour).Bind(Texture.Unit.Texture0);

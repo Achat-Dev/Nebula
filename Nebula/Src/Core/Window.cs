@@ -81,6 +81,7 @@ internal class Window : IDisposable
         shaderInstanceFlat.SetInt("u_irradianceMap", 0);
         shaderInstanceFlat.SetInt("u_prefilteredMap", 1);
         shaderInstanceFlat.SetInt("u_brdfLut", 2);
+        shaderInstanceFlat.SetInt("u_depthMap", 3);
         shaderInstanceFlat.SetVec3("u_albedo", (Vector3)Colour.White);
         shaderInstanceFlat.SetFloat("u_metallic", 0.1f);
         shaderInstanceFlat.SetFloat("u_roughness", 0.1f);
@@ -102,12 +103,11 @@ internal class Window : IDisposable
         shaderInstanceTextured.SetInt("u_irradianceMap", 0);
         shaderInstanceTextured.SetInt("u_prefilteredMap", 1);
         shaderInstanceTextured.SetInt("u_brdfLut", 2);
-        shaderInstanceTextured.SetTexture("u_albedoMap", albedoMap, Texture.Unit.Texture3);
-        shaderInstanceTextured.SetTexture("u_normalMap", normalMap, Texture.Unit.Texture4);
-        //shaderInstanceTextured.SetInt("u_metallicMap", 5);
-        shaderInstanceTextured.SetTexture("u_metallicMap", metallicMap, Texture.Unit.Texture5);
-        shaderInstanceTextured.SetTexture("u_roughnessMap", roughnessMap, Texture.Unit.Texture6);
-        //shaderInstanceTextured.SetTexture("u_ambientOcclusionMap", ambientOcclusionMap, Texture.Unit.Texture7);
+        shaderInstanceTextured.SetTexture("u_albedoMap", albedoMap, Texture.Unit.Texture4);
+        shaderInstanceTextured.SetTexture("u_normalMap", normalMap, Texture.Unit.Texture5);
+        //shaderInstanceTextured.SetInt("u_metallicMap", 6);
+        shaderInstanceTextured.SetTexture("u_metallicMap", metallicMap, Texture.Unit.Texture6);
+        shaderInstanceTextured.SetTexture("u_roughnessMap", roughnessMap, Texture.Unit.Texture7);
 
         Entity pbrTexturedEntity = new Entity("PBR textured");
         pbrTexturedEntity.GetTransform().SetWorldPosition(new Vector3(1f, 0f, 0f));
@@ -136,6 +136,12 @@ internal class Window : IDisposable
         cubeEntity2.GetTransform().SetLocalPosition(new Vector3(0f, 1.5f, 5f));
         cubeEntity2.GetTransform().SetLocalScale(new Vector3(10f, 5f, 0.1f));
         modelRenderer = cubeEntity2.AddComponent<ModelRendererComponent>();
+        modelRenderer.SetModel(Model.Load("Art/Models/Cube.obj"));
+        modelRenderer.SetShaderInstance(shaderInstanceGround);
+
+        Entity cubeEntity3 = new Entity();
+        cubeEntity3.GetTransform().SetLocalPosition(new Vector3(1f, 1.5f, -2f));
+        modelRenderer = cubeEntity3.AddComponent<ModelRendererComponent>();
         modelRenderer.SetModel(Model.Load("Art/Models/Cube.obj"));
         modelRenderer.SetShaderInstance(shaderInstanceGround);
 

@@ -12,10 +12,9 @@ public static class Renderer
     private static VertexArrayObject s_screenVao;
     private static HashSet<ModelRendererComponent> s_modelRenderers = new HashSet<ModelRendererComponent>();
 
-    private static Vector2i s_shadowMapSize = new Vector2i(1024, 1024);
+    private static Vector2i s_shadowMapSize = new Vector2i(512, 512);
     private static Framebuffer s_shadowMapFramebuffer;
     private static Shader s_shadowMapDepthShader;
-    private static Matrix4x4 s_directionalLightProjectionMatrix;
 
     internal static void Init()
     {
@@ -49,7 +48,6 @@ public static class Renderer
         depthConfig.ReadWriteMode = FramebufferAttachment.ReadWriteMode.Readable;
         s_shadowMapFramebuffer = new Framebuffer(s_shadowMapSize, depthConfig);
         s_shadowMapDepthShader = Shader.Create("Shader/DepthMap.vert", "Shader/DepthMap.frag", false);
-        s_directionalLightProjectionMatrix = Matrix4x4.CreateOrthographicFieldOfView(-10f, 10f, 0.1f, 20f);
     }
 
     public static void SetClearColour(Colour colour)
@@ -60,26 +58,23 @@ public static class Renderer
     internal static void Render(CameraComponent camera)
     {
         Scene scene = Scene.GetActive();
+        Matrix4x4 lightSpaceViewProjection = scene.GetDirectionalLight().GetViewProjectionMatrix();
 
-        UpdateUniformBuffers(camera);
+        UpdateUniformBuffers(camera, ref lightSpaceViewProjection);
 
         // Render shadows
         s_shadowMapFramebuffer.Bind();
-        GL.Get().Enable(EnableCap.DepthTest);
-        //GL.Get().DrawBuffer(DrawBufferMode.None);
-        //GL.Get().ReadBuffer(ReadBufferMode.None);
-        GL.Get().Viewport(s_shadowMapSize);
-        GL.Get().Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-        DirectionalLight directionalLight = scene.GetDirectionalLight();
-        Vector3 direction = directionalLight.GetDirection();
-        Quaternion rotation = Quaternion.FromEulerAngles(direction);
-        direction = rotation * Vector3.Forward;
-        Matrix4x4 directionalLightViewMatrix = Matrix4x4.CreateLookAt(-direction, Vector3.Zero, rotation * Vector3.Up);
-        Matrix4x4 directionalLightViewProjectionMatrix = directionalLightViewMatrix * s_directionalLightProjectionMatrix;
+        GL.Get().Enable(EnableCap.DepthTest);
+        GL.Get().DepthFunc(GLEnum.Less);
+
+        GL.Get().Enable(EnableCap.CullFace);
+        GL.Get().CullFace(TriangleFace.Front);
+        GL.Get().Viewport(s_shadowMapSize);
+        GL.Get().Clear(ClearBufferMask.DepthBufferBit);
 
         s_shadowMapDepthShader.Use();
-        s_shadowMapDepthShader.SetMat4("u_viewProjection", directionalLightViewProjectionMatrix);
+        s_shadowMapDepthShader.SetMat4("u_viewProjection", lightSpaceViewProjection);
 
         foreach (var modelRenderer in s_modelRenderers)
         {
@@ -91,18 +86,18 @@ public static class Renderer
             }
         }
 
-        GL.Get().Viewport(Game.GetWindowSize());
-        s_shadowMapFramebuffer.Unbind();
+        //s_shadowMapFramebuffer.Unbind();
         Framebuffer framebuffer = camera.GetFramebuffer();
         framebuffer.Bind();
-        //GL.Get().DrawBuffer(DrawBufferMode.ColorAttachment0);
-        //GL.Get().ReadBuffer(ReadBufferMode.ColorAttachment0);
+
+        GL.Get().Enable(EnableCap.DepthTest);
+        GL.Get().CullFace(TriangleFace.Back);
+        GL.Get().Viewport(Game.GetWindowSize());
+        GL.Get().Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
         // Render to framebuffer
         scene.GetSkyLight().SetupModelRendering();
-        GL.Get().Enable(EnableCap.CullFace);
-        GL.Get().Enable(EnableCap.DepthTest);
-        GL.Get().Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+        s_shadowMapFramebuffer.GetAttachment(FramebufferAttachment.AttachmentType.Depth).Bind(Texture.Unit.Texture3);
         foreach (var modelRenderer in s_modelRenderers)
         {
             modelRenderer.Draw();
@@ -127,7 +122,6 @@ public static class Renderer
         framebuffer.Unbind();
         s_screenShader.Use();
 
-        GL.Get().DepthFunc(GLEnum.Less);
         GL.Get().Disable(EnableCap.DepthTest);
         GL.Get().Clear(ClearBufferMask.ColorBufferBit);
 
@@ -135,7 +129,7 @@ public static class Renderer
         s_screenVao.Draw();
     }
 
-    private static void UpdateUniformBuffers(CameraComponent camera)
+    private static void UpdateUniformBuffers(CameraComponent camera, ref Matrix4x4 lightSpaceViewProjection)
     {
         UniformBuffer cameraBuffer = UniformBuffer.GetAtLocation(UniformBuffer.DefaultType.Camera);
         cameraBuffer.BufferData(0, camera.GetEntity().GetTransform().GetWorldPosition());
@@ -152,6 +146,7 @@ public static class Renderer
 
         UniformBuffer matrixBuffer = UniformBuffer.GetAtLocation(UniformBuffer.DefaultType.Matrices);
         matrixBuffer.BufferData(0, camera.GetViewProjectionMatrix());
+        matrixBuffer.BufferData(64, lightSpaceViewProjection);
     }
 
     internal static void DrawMesh(VertexArrayObject vao, Matrix4x4 modelMatrix, ShaderInstance shaderInstance)

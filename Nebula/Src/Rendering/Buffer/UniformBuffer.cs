@@ -45,7 +45,7 @@ public class UniformBuffer : ICacheable, IDisposable
     internal static void CreateDefaults()
     {
         Logger.EngineInfo("Creating default uniform buffer objects");
-        Create((int)DefaultType.Matrices, new UniformBufferLayout(UniformBufferElement.Mat4, UniformBufferElement.Mat3));
+        Create((int)DefaultType.Matrices, new UniformBufferLayout(UniformBufferElement.Mat4, UniformBufferElement.Mat4));
         Create((int)DefaultType.Camera, new UniformBufferLayout(UniformBufferElement.Vec3));
         Create((int)DefaultType.Lights,
             new UniformBufferLayout(UniformBufferElement.Float, UniformBufferElement.Int),

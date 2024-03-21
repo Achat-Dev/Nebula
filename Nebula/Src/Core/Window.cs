@@ -93,10 +93,11 @@ internal class Window : IDisposable
         modelRenderer.SetShaderInstance(shaderInstanceFlat);
 
         // PBR Textured
-        Texture albedoMap = Texture.Create("Art/Textures/Metal_Albedo.jpg", TextureConfig.DefaultRgba);
-        Texture normalMap = Texture.Create("Art/Textures/Metal_NormalGL.jpg", TextureConfig.DefaultRgba);
-        Texture metallicMap = Texture.Create("Art/Textures/Metal_Metallic.jpg", TextureConfig.DefaultRgba);
-        Texture roughnessMap = Texture.Create("Art/Textures/Metal_Roughness.jpg", TextureConfig.DefaultRgba);
+        TextureConfig textureConfig = TextureConfig.Defaults.Rgba();
+        Texture albedoMap = Texture.Create("Art/Textures/Metal_Albedo.jpg", textureConfig);
+        Texture normalMap = Texture.Create("Art/Textures/Metal_NormalGL.jpg", textureConfig);
+        Texture metallicMap = Texture.Create("Art/Textures/Metal_Metallic.jpg", textureConfig);
+        Texture roughnessMap = Texture.Create("Art/Textures/Metal_Roughness.jpg", textureConfig);
 
         ShaderInstance shaderInstanceTextured = new ShaderInstance(Shader.Create(Shader.DefaultType.PBRTextured));
         //ShaderInstance shaderInstanceTextured = new ShaderInstance(Shader.Create("Shader/ShadowMappingDepthMap.vert", "Shader/ShadowMappingDepthMap.frag", false));

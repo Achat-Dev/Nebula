@@ -15,7 +15,7 @@ public class CameraComponent : StartableComponent
     {
         Window.Resizing += OnResize;
         Vector2i windowSize = Game.GetWindowSize();
-        m_framebuffer = new Framebuffer(windowSize, FramebufferAttachmentConfig.DefaultColour, FramebufferAttachmentConfig.DefaultDepthStencil);
+        m_framebuffer = new Framebuffer(windowSize, FramebufferAttachmentConfig.Defaults.Colour(), FramebufferAttachmentConfig.Defaults.DepthStencil());
         OnResize(windowSize);
     }
 

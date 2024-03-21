@@ -146,7 +146,7 @@ public class Texture : ICacheable, IDisposable, ITextureBindable
             GL.Get().GenerateMipmap(TextureTarget.Texture2D);
         }
 
-        Framebuffer framebuffer = new Framebuffer(size, FramebufferAttachmentConfig.DefaultDepthStencil);
+        Framebuffer framebuffer = new Framebuffer(size, FramebufferAttachmentConfig.Defaults.DepthStencil());
         framebuffer.Bind();
 
         captureShader.Use();

@@ -76,19 +76,20 @@ internal class Window : IDisposable
 
         // Temporary
         // PBR Flat
-        ShaderInstance shaderInstance = new ShaderInstance(Shader.Create(Shader.DefaultType.PBRFlat));
-        shaderInstance.SetInt("u_irradianceMap", 0);
-        shaderInstance.SetInt("u_prefilteredMap", 1);
-        shaderInstance.SetInt("u_brdfLut", 2);
-        shaderInstance.SetVec3("u_albedo", (Vector3)Colour.White);
-        shaderInstance.SetFloat("u_metallic", 0.1f);
-        shaderInstance.SetFloat("u_roughness", 0.1f);
+        ShaderInstance shaderInstanceFlat = new ShaderInstance(Shader.Create(Shader.DefaultType.PBRFlat));
+        //ShaderInstance shaderInstanceFlat = new ShaderInstance(Shader.Create("Shader/ShadowMappingDepthMap.vert", "Shader/ShadowMappingDepthMap.frag", false));
+        shaderInstanceFlat.SetInt("u_irradianceMap", 0);
+        shaderInstanceFlat.SetInt("u_prefilteredMap", 1);
+        shaderInstanceFlat.SetInt("u_brdfLut", 2);
+        shaderInstanceFlat.SetVec3("u_albedo", (Vector3)Colour.White);
+        shaderInstanceFlat.SetFloat("u_metallic", 0.1f);
+        shaderInstanceFlat.SetFloat("u_roughness", 0.1f);
 
         Entity pbrFlatEntity = new Entity("PBR flat");
         pbrFlatEntity.GetTransform().SetWorldPosition(new Vector3(-1f, 0f, 0f));
         ModelRendererComponent modelRenderer = pbrFlatEntity.AddComponent<ModelRendererComponent>();
         modelRenderer.SetModel(Model.Load("Art/Models/Sphere.obj"));
-        modelRenderer.SetShaderInstance(shaderInstance);
+        modelRenderer.SetShaderInstance(shaderInstanceFlat);
 
         // PBR Textured
         Texture albedoMap = Texture.Create("Art/Textures/Metal_Albedo.jpg", TextureConfig.DefaultRgba);
@@ -96,31 +97,56 @@ internal class Window : IDisposable
         Texture metallicMap = Texture.Create("Art/Textures/Metal_Metallic.jpg", TextureConfig.DefaultRgba);
         Texture roughnessMap = Texture.Create("Art/Textures/Metal_Roughness.jpg", TextureConfig.DefaultRgba);
 
-        shaderInstance = new ShaderInstance(Shader.Create(Shader.DefaultType.PBRTextured));
-        shaderInstance.SetInt("u_irradianceMap", 0);
-        shaderInstance.SetInt("u_prefilteredMap", 1);
-        shaderInstance.SetInt("u_brdfLut", 2);
-        shaderInstance.SetTexture("u_albedoMap", albedoMap, Texture.Unit.Texture3);
-        shaderInstance.SetTexture("u_normalMap", normalMap, Texture.Unit.Texture4);
-        //shaderInstance.SetInt("u_metallicMap", 5);
-        shaderInstance.SetTexture("u_metallicMap", metallicMap, Texture.Unit.Texture5);
-        shaderInstance.SetTexture("u_roughnessMap", roughnessMap, Texture.Unit.Texture6);
-        //shaderInstance.SetTexture("u_ambientOcclusionMap", ambientOcclusionMap, Texture.Unit.Texture7);
+        ShaderInstance shaderInstanceTextured = new ShaderInstance(Shader.Create(Shader.DefaultType.PBRTextured));
+        //ShaderInstance shaderInstanceTextured = new ShaderInstance(Shader.Create("Shader/ShadowMappingDepthMap.vert", "Shader/ShadowMappingDepthMap.frag", false));
+        shaderInstanceTextured.SetInt("u_irradianceMap", 0);
+        shaderInstanceTextured.SetInt("u_prefilteredMap", 1);
+        shaderInstanceTextured.SetInt("u_brdfLut", 2);
+        shaderInstanceTextured.SetTexture("u_albedoMap", albedoMap, Texture.Unit.Texture3);
+        shaderInstanceTextured.SetTexture("u_normalMap", normalMap, Texture.Unit.Texture4);
+        //shaderInstanceTextured.SetInt("u_metallicMap", 5);
+        shaderInstanceTextured.SetTexture("u_metallicMap", metallicMap, Texture.Unit.Texture5);
+        shaderInstanceTextured.SetTexture("u_roughnessMap", roughnessMap, Texture.Unit.Texture6);
+        //shaderInstanceTextured.SetTexture("u_ambientOcclusionMap", ambientOcclusionMap, Texture.Unit.Texture7);
 
         Entity pbrTexturedEntity = new Entity("PBR textured");
         pbrTexturedEntity.GetTransform().SetWorldPosition(new Vector3(1f, 0f, 0f));
         modelRenderer = pbrTexturedEntity.AddComponent<ModelRendererComponent>();
         modelRenderer.SetModel(Model.Load("Art/Models/Sphere.obj"));
-        modelRenderer.SetShaderInstance(shaderInstance);
+        modelRenderer.SetShaderInstance(shaderInstanceTextured);
+
+        // Objects
+        ShaderInstance shaderInstanceGround = new ShaderInstance(Shader.Create(Shader.DefaultType.PBRFlat));
+        //ShaderInstance shaderInstanceGround = new ShaderInstance(Shader.Create("Shader/ShadowMappingDepthMap.vert", "Shader/ShadowMappingDepthMap.frag", false));
+        shaderInstanceGround.SetInt("u_irradianceMap", 0);
+        shaderInstanceGround.SetInt("u_prefilteredMap", 1);
+        shaderInstanceGround.SetInt("u_brdfLut", 2);
+        shaderInstanceGround.SetVec3("u_albedo", (Vector3)Colour.White);
+        shaderInstanceGround.SetFloat("u_metallic", 0f);
+        shaderInstanceGround.SetFloat("u_roughness", 1f);
+
+        Entity cubeEntity1 = new Entity();
+        cubeEntity1.GetTransform().SetLocalPosition(new Vector3(0f, -1f, 0f));
+        cubeEntity1.GetTransform().SetLocalScale(new Vector3(10f, 0.1f, 10f));
+        modelRenderer = cubeEntity1.AddComponent<ModelRendererComponent>();
+        modelRenderer.SetModel(Model.Load("Art/Models/Cube.obj"));
+        modelRenderer.SetShaderInstance(shaderInstanceGround);
+
+        Entity cubeEntity2 = new Entity();
+        cubeEntity2.GetTransform().SetLocalPosition(new Vector3(0f, 1.5f, 5f));
+        cubeEntity2.GetTransform().SetLocalScale(new Vector3(10f, 5f, 0.1f));
+        modelRenderer = cubeEntity2.AddComponent<ModelRendererComponent>();
+        modelRenderer.SetModel(Model.Load("Art/Models/Cube.obj"));
+        modelRenderer.SetShaderInstance(shaderInstanceGround);
 
         // Camera
         Entity cameraEntity = new Entity("Camera");
         m_camera = cameraEntity.AddComponent<CameraComponent>();
         cameraEntity.GetTransform().Translate(new Vector3(0, 0, -5));
 
+        // Lighting
         PointLightComponent[] pointLights = new PointLightComponent[3];
         ShaderInstance[] flatShaderInstances = new ShaderInstance[3];
-        // Lighting
         for (int i = 0; i < 3; i++)
         {
             m_pointLightEntites[i] = new Entity();
@@ -161,10 +187,11 @@ internal class Window : IDisposable
             cameraTransform.SetLocalRotation(m_eulerAngles);
         }
 
-        if (Input.IsKeyDown(Key.W)) cameraTransform.Translate(cameraTransform.GetForward() * 2f * dt);
-        if (Input.IsKeyDown(Key.A)) cameraTransform.Translate(-cameraTransform.GetRight() * 2f * dt);
-        if (Input.IsKeyDown(Key.S)) cameraTransform.Translate(-cameraTransform.GetForward() * 2f * dt);
-        if (Input.IsKeyDown(Key.D)) cameraTransform.Translate(cameraTransform.GetRight() * 2f * dt);
+        float cameraSpeed = 3f * dt;
+        if (Input.IsKeyDown(Key.W)) cameraTransform.Translate(cameraTransform.GetForward() * cameraSpeed);
+        if (Input.IsKeyDown(Key.A)) cameraTransform.Translate(-cameraTransform.GetRight() * cameraSpeed);
+        if (Input.IsKeyDown(Key.S)) cameraTransform.Translate(-cameraTransform.GetForward() * cameraSpeed);
+        if (Input.IsKeyDown(Key.D)) cameraTransform.Translate(cameraTransform.GetRight() * cameraSpeed);
 
         if (Input.WasKeyPressed(Key.AltLeft))
         {

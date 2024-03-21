@@ -1,4 +1,6 @@
-﻿namespace Nebula;
+﻿using Silk.NET.Assimp;
+
+namespace Nebula;
 
 public struct Matrix4x4 : IEquatable<Matrix4x4>
 {
@@ -282,6 +284,16 @@ public struct Matrix4x4 : IEquatable<Matrix4x4>
     {
         fov = MathHelper.DegreesToRadians(fov);
         return System.Numerics.Matrix4x4.CreatePerspectiveFieldOfViewLeftHanded(fov, aspectRatio, nearClippingPlane, farClippingPlane);
+    }
+
+    public static Matrix4x4 CreateOrthographicFieldOfView(float width, float height, float nearClippingPlane, float farClippingPlane)
+    {
+        return System.Numerics.Matrix4x4.CreateOrthographic(width, height, nearClippingPlane, farClippingPlane);
+    }
+
+    public static Matrix4x4 CreateOrthographicFieldOfViewLeftHanded(float width, float height, float nearClippingPlane, float farClippingPlane)
+    {
+        return System.Numerics.Matrix4x4.CreateOrthographicLeftHanded(width, height, nearClippingPlane, farClippingPlane);
     }
 
     /* -------------------- Operators -------------------- */

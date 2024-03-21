@@ -12,7 +12,7 @@ public static class Renderer
     private static VertexArrayObject s_screenVao;
     private static HashSet<ModelRendererComponent> s_modelRenderers = new HashSet<ModelRendererComponent>();
 
-    private static Vector2i s_shadowMapSize = new Vector2i(512, 512);
+    private static Vector2i s_shadowMapSize = new Vector2i(1024, 1024);
     private static Framebuffer s_shadowMapFramebuffer;
     private static Shader s_shadowMapDepthShader;
 

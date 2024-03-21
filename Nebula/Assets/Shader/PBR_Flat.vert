@@ -5,9 +5,9 @@ layout (location = 1) in vec3 i_normal;
 
 #include UniformBuffer/Matrices.glsl
 
+out vec4 io_vertexPositionLightSpace;
 out vec3 io_vertexPosition;
 out vec3 io_normal;
-out vec4 io_vertexPositionLightSpace;
 
 uniform mat4 u_modelMatrix;
 uniform mat3 u_normalMatrix;

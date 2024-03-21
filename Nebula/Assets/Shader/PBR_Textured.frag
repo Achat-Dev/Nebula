@@ -5,6 +5,7 @@
 
 out vec4 o_colour;
 
+in vec4 io_vertexPositionLightSpace;
 in vec3 io_vertexPosition;
 in vec3 io_normal;
 in vec3 io_tangent;
@@ -110,6 +111,23 @@ vec3 calculateIBL(TexturedLightParams params)
 	return (kd * diffuse + specular) * u_skyLightIntensity;
 }
 
+float calculateShadowValue()
+{
+	vec3 projectionUV = io_vertexPositionLightSpace.xyz / io_vertexPositionLightSpace.w;
+	projectionUV = projectionUV * 0.5 + 0.5;
+
+	float mappedDepth = texture(u_depthMap, projectionUV.xy).r;
+
+	if (mappedDepth < projectionUV.z)
+	{
+		return 1.0;
+	}
+	else
+	{
+		return 0.0;
+	}
+}
+
 void main()
 {
 	TexturedLightParams params;
@@ -121,7 +139,9 @@ void main()
 	params.f0 = mix(vec3(0.04), params.albedo, params.metallic);
 	params.roughness = texture(u_roughnessMap, io_uv).r;
 
-	vec3 colour = calculateDirectionalLight(params);
+	float shadowValue = 1.0 - calculateShadowValue();
+
+	vec3 colour = calculateDirectionalLight(params) * shadowValue;
 	colour += calculatePointLights(params);
 	colour += calculateIBL(params);
 

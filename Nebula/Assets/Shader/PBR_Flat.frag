@@ -5,9 +5,9 @@
 
 out vec4 o_colour;
 
+in vec4 io_vertexPositionLightSpace;
 in vec3 io_vertexPosition;
 in vec3 io_normal;
-in vec4 io_vertexPositionLightSpace;
 
 uniform vec3 u_albedo;
 uniform float u_metallic;
@@ -93,7 +93,7 @@ vec3 calculateIBL(FlatLightParams params)
 	return (kd * diffuse + specular) * u_skyLightIntensity;
 }
 
-float calculateShadow()
+float calculateShadowValue()
 {
 	vec3 projectionUV = io_vertexPositionLightSpace.xyz / io_vertexPositionLightSpace.w;
 	projectionUV = projectionUV * 0.5 + 0.5;
@@ -118,7 +118,7 @@ void main()
 	params.f0 = mix(vec3(0.04), u_albedo, u_metallic);
 	params.nDotV = max(dot(params.normal, params.viewDirection), 0.0);
 
-	float shadowValue = 1.0 - calculateShadow();
+	float shadowValue = 1.0 - calculateShadowValue();
 
 	vec3 colour = calculateDirectionalLight(params) * shadowValue;
 	colour += calculatePointLights(params);

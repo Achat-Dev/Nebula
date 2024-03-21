@@ -7,6 +7,7 @@ layout (location = 3) in vec2 i_uv;
 
 #include UniformBuffer/Matrices.glsl
 
+out vec4 io_vertexPositionLightSpace;
 out vec3 io_vertexPosition;
 out vec3 io_normal;
 out vec3 io_tangent;
@@ -21,5 +22,6 @@ void main()
 	io_normal = u_normalMatrix * i_normal;
 	io_tangent = u_normalMatrix * i_tangent;
 	io_uv = i_uv;
+	io_vertexPositionLightSpace = u_lightSpaceViewProjection * vec4(io_vertexPosition, 1.0);
 	gl_Position = u_viewProjection * vec4(io_vertexPosition, 1.0);
 }

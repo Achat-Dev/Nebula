@@ -103,6 +103,7 @@ internal class Window : IDisposable
         shaderInstanceTextured.SetInt("u_irradianceMap", 0);
         shaderInstanceTextured.SetInt("u_prefilteredMap", 1);
         shaderInstanceTextured.SetInt("u_brdfLut", 2);
+        shaderInstanceTextured.SetInt("u_depthMap", 3);
         shaderInstanceTextured.SetTexture("u_albedoMap", albedoMap, Texture.Unit.Texture4);
         shaderInstanceTextured.SetTexture("u_normalMap", normalMap, Texture.Unit.Texture5);
         //shaderInstanceTextured.SetInt("u_metallicMap", 6);

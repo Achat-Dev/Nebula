@@ -27,4 +27,10 @@ public class TextureConfig : TextureConfigBase
     {
 
     }
+
+    public TextureConfig(Texture.Format format, Texture.DataType dataType, Texture.WrapMode wrapMode, Texture.FilterMode minFilterMode, Texture.FilterMode maxFilterMode, bool generateMipMaps, int maxMipMapLevel)
+    : base(format, dataType, wrapMode, minFilterMode, maxFilterMode, generateMipMaps, maxMipMapLevel)
+    {
+
+    }
 }

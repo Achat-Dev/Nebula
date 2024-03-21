@@ -45,9 +45,8 @@ internal class FramebufferAttachment : IDisposable, ITextureBindable
                 GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, wrapMode);
                 GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, wrapMode);
 
-                int filterMode = (int)config.FilterMode;
-                GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, filterMode);
-                GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, filterMode);
+                GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)config.MinFilterMode);
+                GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)config.MaxFilterMode);
 
                 if (config.GenerateMipMaps)
                 {

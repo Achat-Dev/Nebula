@@ -110,9 +110,8 @@ public class Texture : ICacheable, IDisposable, ITextureBindable
         GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, wrapMode);
         GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, wrapMode);
 
-        int filterMode = (int)config.FilterMode;
-        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, filterMode);
-        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, filterMode);
+        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)config.MinFilterMode);
+        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)config.MaxFilterMode);
 
         if (config.GenerateMipMaps)
         {
@@ -135,9 +134,8 @@ public class Texture : ICacheable, IDisposable, ITextureBindable
         GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, wrapMode);
         GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, wrapMode);
 
-        int filterMode = (int)config.FilterMode;
-        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, filterMode);
-        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, filterMode);
+        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)config.MinFilterMode);
+        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)config.MaxFilterMode);
 
         if (config.GenerateMipMaps)
         {
@@ -175,7 +173,7 @@ public class Texture : ICacheable, IDisposable, ITextureBindable
 
         Logger.EngineBegin(LogLevel.Debug)
             .Debug("Creating texture from path {0}", path)
-            .Verbose(" with wrap mode: \"{1}\", filter mode: \"{2}\", format: \"{3}\" (Rgb and Hdr are aliases), data type: \"{4}\", texture uses mip maps: \"{5}\" (if used, max mip map level is {6})", config.WrapMode, config.FilterMode, config.Format, config.DataType, config.GenerateMipMaps, config.MaxMipMapLevel)
+            .Verbose(" with wrap mode: \"{1}\", filter mode: \"{2}\", format: \"{3}\" (Rgb and Hdr are aliases), data type: \"{4}\", texture uses mip maps: \"{5}\" (if used, max mip map level is {6})", config.WrapMode, config.MinFilterMode, config.Format, config.DataType, config.GenerateMipMaps, config.MaxMipMapLevel)
             .Write();
 
         if (flipVertical)

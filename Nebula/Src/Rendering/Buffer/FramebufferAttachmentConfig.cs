@@ -50,7 +50,13 @@ internal class FramebufferAttachmentConfig : TextureConfigBase
     private FramebufferAttachmentConfig() { }
 
     public FramebufferAttachmentConfig(FramebufferAttachment.AttachmentType attachmentType, FramebufferAttachment.ReadWriteMode readWriteMode, Texture.Format format, Texture.DataType dataType, Texture.WrapMode wrapMode, Texture.FilterMode filterMode, bool generateMipMaps, int maxMipMapLevel)
-        : base(format, dataType, wrapMode, filterMode, generateMipMaps, maxMipMapLevel)
+        : this(attachmentType, readWriteMode, format, dataType, wrapMode, filterMode, filterMode, generateMipMaps, maxMipMapLevel)
+    {
+
+    }
+
+    public FramebufferAttachmentConfig(FramebufferAttachment.AttachmentType attachmentType, FramebufferAttachment.ReadWriteMode readWriteMode, Texture.Format format, Texture.DataType dataType, Texture.WrapMode wrapMode, Texture.FilterMode minFilterMode, Texture.FilterMode maxFilterMode, bool generateMipMaps, int maxMipMapLevel)
+    : base(format, dataType, wrapMode, minFilterMode, maxFilterMode, generateMipMaps, maxMipMapLevel)
     {
         AttachmentType = attachmentType;
         ReadWriteMode = readWriteMode;

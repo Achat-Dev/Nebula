@@ -5,7 +5,8 @@ public abstract class TextureConfigBase
     public Texture.Format Format;
     public Texture.DataType DataType;
     public Texture.WrapMode WrapMode;
-    public Texture.FilterMode FilterMode;
+    public Texture.FilterMode MinFilterMode;
+    public Texture.FilterMode MaxFilterMode;
     public bool GenerateMipMaps;
     public int MaxMipMapLevel;
 
@@ -17,7 +18,19 @@ public abstract class TextureConfigBase
         Format = format;
         DataType = dataType;
         WrapMode = wrapMode;
-        FilterMode = filterMode;
+        MinFilterMode = filterMode;
+        MaxFilterMode = filterMode;
+        GenerateMipMaps = generateMipMaps;
+        MaxMipMapLevel = maxMipMapLevel;
+    }
+
+    protected TextureConfigBase(Texture.Format format, Texture.DataType dataType, Texture.WrapMode wrapMode, Texture.FilterMode minFilterMode, Texture.FilterMode maxFilterMode, bool generateMipMaps, int maxMipMapLevel)
+    {
+        Format = format;
+        DataType = dataType;
+        WrapMode = wrapMode;
+        MinFilterMode = minFilterMode;
+        MaxFilterMode = maxFilterMode;
         GenerateMipMaps = generateMipMaps;
         MaxMipMapLevel = maxMipMapLevel;
     }

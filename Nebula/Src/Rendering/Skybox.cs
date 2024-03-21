@@ -9,9 +9,16 @@ public class Skybox : IDisposable
 
     public Skybox(Texture hdrTexture, SkyboxConfig config)
     {
-        r_environmentMap = Cubemap.Create(hdrTexture, Cubemap.CubemapType.Skybox, config.EnvironmentMapSize);
-        r_irradianceMap = Cubemap.Create(r_environmentMap, Cubemap.CubemapType.Irradiance, config.IrradianceMapSize);
-        r_prefilteredMap = Cubemap.Create(r_environmentMap, Cubemap.CubemapType.Prefiltered, config.PrefilteredMapSize);
+        CubemapConfig cubemapConfig = new CubemapConfig(Cubemap.CubemapType.Skybox, Texture.Format.Rgb, Texture.DataType.Float, Texture.WrapMode.ClampToEdge, Texture.FilterMode.Linear, false, 0);
+        r_environmentMap = Cubemap.Create(hdrTexture, cubemapConfig, config.EnvironmentMapSize);
+
+        cubemapConfig.CubemapType = Cubemap.CubemapType.Irradiance;
+        r_irradianceMap = Cubemap.Create(r_environmentMap, cubemapConfig, config.IrradianceMapSize);
+
+        cubemapConfig.CubemapType = Cubemap.CubemapType.Prefiltered;
+        cubemapConfig.MinFilterMode = Texture.FilterMode.LinearMipmapLinear;
+        r_prefilteredMap = Cubemap.Create(r_environmentMap, cubemapConfig, config.PrefilteredMapSize);
+
         TextureConfig brdfLutConfig = new TextureConfig(Texture.Format.Rg, Texture.DataType.Float, Texture.WrapMode.ClampToEdge, Texture.FilterMode.Linear, false, 0);
         r_brdfLutHandle = Texture.CreateFromCapture(Shader.Create("Shader/Brdf.vert", "Shader/Brdf.frag", false), config.EnvironmentMapSize, brdfLutConfig);
     }

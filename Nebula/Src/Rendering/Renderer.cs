@@ -13,8 +13,9 @@ public static class Renderer
     private static HashSet<ModelRendererComponent> s_modelRenderers = new HashSet<ModelRendererComponent>();
 
     private static Vector2i s_shadowMapSize = new Vector2i(1024, 1024);
-    private static Framebuffer s_shadowMapFramebuffer;
-    private static Shader s_shadowMapDepthShader;
+    private static Framebuffer s_directionalShadowMapFramebuffer;
+    private static Shader s_directionalShadowMapShader;
+    private static Framebuffer s_omnidirectionalShadowMapFramebuffer;
 
     internal static void Init()
     {
@@ -44,10 +45,14 @@ public static class Renderer
         Scene.GetActive().GetSkyLight().SetSkybox(skybox);
         skyboxTexture.Delete();
 
-        FramebufferAttachmentConfig depthConfig = FramebufferAttachmentConfig.Defaults.Depth();
-        depthConfig.ReadWriteMode = FramebufferAttachment.ReadWriteMode.Readable;
-        s_shadowMapFramebuffer = new Framebuffer(s_shadowMapSize, depthConfig);
-        s_shadowMapDepthShader = Shader.Create("Shader/DepthMap.vert", "Shader/DepthMap.frag", false);
+        FramebufferAttachmentConfig directionalDepthConfig = FramebufferAttachmentConfig.Defaults.Depth();
+        directionalDepthConfig.TextureType = FramebufferAttachment.TextureType.Texture;
+        s_directionalShadowMapFramebuffer = new Framebuffer(s_shadowMapSize, directionalDepthConfig);
+        s_directionalShadowMapShader = Shader.Create("Shader/DirectionalShadowMap.vert", "Shader/DirectionalShadowMap.frag", false);
+
+        FramebufferAttachmentConfig omnidirectionalDepthConfig = FramebufferAttachmentConfig.Defaults.Depth();
+        omnidirectionalDepthConfig.TextureType = FramebufferAttachment.TextureType.Cubemap;
+        s_omnidirectionalShadowMapFramebuffer = new Framebuffer(s_shadowMapSize, omnidirectionalDepthConfig);
     }
 
     public static void SetClearColour(Colour colour)
@@ -63,7 +68,7 @@ public static class Renderer
         UpdateUniformBuffers(camera, ref lightSpaceViewProjection);
 
         // Render shadows
-        s_shadowMapFramebuffer.Bind();
+        s_directionalShadowMapFramebuffer.Bind();
 
         GL.Get().Enable(EnableCap.DepthTest);
         GL.Get().DepthFunc(GLEnum.Less);
@@ -73,12 +78,12 @@ public static class Renderer
         GL.Get().Viewport(s_shadowMapSize);
         GL.Get().Clear(ClearBufferMask.DepthBufferBit);
 
-        s_shadowMapDepthShader.Use();
-        s_shadowMapDepthShader.SetMat4("u_viewProjection", lightSpaceViewProjection);
+        s_directionalShadowMapShader.Use();
+        s_directionalShadowMapShader.SetMat4("u_viewProjection", lightSpaceViewProjection);
 
         foreach (var modelRenderer in s_modelRenderers)
         {
-            s_shadowMapDepthShader.SetMat4("u_modelMatrix", modelRenderer.GetEntity().GetTransform().GetWorldMatrix());
+            s_directionalShadowMapShader.SetMat4("u_modelMatrix", modelRenderer.GetEntity().GetTransform().GetWorldMatrix());
             List<Mesh> meshes = modelRenderer.GetModel().GetMeshes();
             foreach (var mesh in meshes)
             {
@@ -97,7 +102,7 @@ public static class Renderer
 
         // Render to framebuffer
         scene.GetSkyLight().SetupModelRendering();
-        s_shadowMapFramebuffer.GetAttachment(FramebufferAttachment.AttachmentType.Depth).Bind(Texture.Unit.Texture3);
+        s_directionalShadowMapFramebuffer.GetAttachment(FramebufferAttachment.AttachmentType.Depth).Bind(Texture.Unit.Texture3);
         foreach (var modelRenderer in s_modelRenderers)
         {
             modelRenderer.Draw();

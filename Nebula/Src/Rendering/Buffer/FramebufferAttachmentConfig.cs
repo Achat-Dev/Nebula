@@ -3,7 +3,7 @@
 internal class FramebufferAttachmentConfig : TextureConfigBase
 {
     public FramebufferAttachment.AttachmentType AttachmentType;
-    public FramebufferAttachment.ReadWriteMode ReadWriteMode;
+    public FramebufferAttachment.TextureType TextureType;
 
     public class Defaults
     {
@@ -11,7 +11,7 @@ internal class FramebufferAttachmentConfig : TextureConfigBase
         {
             return new FramebufferAttachmentConfig(
                 FramebufferAttachment.AttachmentType.Colour,
-                FramebufferAttachment.ReadWriteMode.Readable,
+                FramebufferAttachment.TextureType.Texture,
                 Texture.Format.Rgb,
                 Texture.DataType.UnsignedByte,
                 Texture.WrapMode.ClampToEdge,
@@ -24,7 +24,7 @@ internal class FramebufferAttachmentConfig : TextureConfigBase
         {
             return new FramebufferAttachmentConfig(
                 FramebufferAttachment.AttachmentType.Depth,
-                FramebufferAttachment.ReadWriteMode.Writeonly,
+                FramebufferAttachment.TextureType.Renderbuffer,
                 Texture.Format.Depth,
                 Texture.DataType.Float,
                 Texture.WrapMode.ClampToEdge,
@@ -37,7 +37,7 @@ internal class FramebufferAttachmentConfig : TextureConfigBase
         {
             return new FramebufferAttachmentConfig(
                 FramebufferAttachment.AttachmentType.DepthStencil,
-                FramebufferAttachment.ReadWriteMode.Writeonly,
+                FramebufferAttachment.TextureType.Renderbuffer,
                 Texture.Format.DepthStencil,
                 Texture.DataType.UnsignedInt248,
                 Texture.WrapMode.ClampToEdge,
@@ -49,17 +49,17 @@ internal class FramebufferAttachmentConfig : TextureConfigBase
 
     private FramebufferAttachmentConfig() { }
 
-    public FramebufferAttachmentConfig(FramebufferAttachment.AttachmentType attachmentType, FramebufferAttachment.ReadWriteMode readWriteMode, Texture.Format format, Texture.DataType dataType, Texture.WrapMode wrapMode, Texture.FilterMode filterMode, bool generateMipMaps, int maxMipMapLevel)
+    public FramebufferAttachmentConfig(FramebufferAttachment.AttachmentType attachmentType, FramebufferAttachment.TextureType readWriteMode, Texture.Format format, Texture.DataType dataType, Texture.WrapMode wrapMode, Texture.FilterMode filterMode, bool generateMipMaps, int maxMipMapLevel)
         : this(attachmentType, readWriteMode, format, dataType, wrapMode, filterMode, filterMode, generateMipMaps, maxMipMapLevel)
     {
 
     }
 
-    public FramebufferAttachmentConfig(FramebufferAttachment.AttachmentType attachmentType, FramebufferAttachment.ReadWriteMode readWriteMode, Texture.Format format, Texture.DataType dataType, Texture.WrapMode wrapMode, Texture.FilterMode minFilterMode, Texture.FilterMode maxFilterMode, bool generateMipMaps, int maxMipMapLevel)
+    public FramebufferAttachmentConfig(FramebufferAttachment.AttachmentType attachmentType, FramebufferAttachment.TextureType readWriteMode, Texture.Format format, Texture.DataType dataType, Texture.WrapMode wrapMode, Texture.FilterMode minFilterMode, Texture.FilterMode maxFilterMode, bool generateMipMaps, int maxMipMapLevel)
     : base(format, dataType, wrapMode, minFilterMode, maxFilterMode, generateMipMaps, maxMipMapLevel)
     {
         AttachmentType = attachmentType;
-        ReadWriteMode = readWriteMode;
+        TextureType = readWriteMode;
     }
 
     internal Silk.NET.OpenGL.FramebufferAttachment GetSilkAttachment()

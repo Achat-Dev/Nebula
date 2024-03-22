@@ -7,20 +7,9 @@ public class Shader : ICacheable, IDisposable
 {
     public static class Defaults
     {
-        public static Shader UnlitFlat()
-        {
-            return Create("Shader/Unlit_Flat.vert", "Shader/Unlit_Flat.frag", false);
-        }
-
-        public static Shader PBRFlat()
-        {
-            return Create("Shader/PBR_Flat.vert", "Shader/PBR_Flat.frag", true);
-        }
-
-        public static Shader PBRTextured()
-        {
-            return Create("Shader/PBR_Textured.vert", "Shader/PBR_Textured.frag", true);
-        }
+        public static readonly Shader UnlitFlat = Create("Shader/Unlit_Flat.vert", "Shader/Unlit_Flat.frag", false);
+        public static readonly Shader PBRFlat = Create("Shader/PBR_Flat.vert", "Shader/PBR_Flat.frag", true);
+        public static readonly Shader PBRTextured = Create("Shader/PBR_Textured.vert", "Shader/PBR_Textured.frag", true);
     }
 
     internal enum DataType

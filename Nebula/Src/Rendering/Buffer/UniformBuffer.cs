@@ -4,11 +4,14 @@ namespace Nebula.Rendering;
 
 public class UniformBuffer : ICacheable, IDisposable
 {
-    internal enum DefaultType
+    internal static class Defaults
     {
-        Matrices,
-        Camera,
-        Lights,
+        public static readonly UniformBuffer Matrices = Create(0, new UniformBufferLayout(UniformBufferElement.Mat4, UniformBufferElement.Mat4));
+        public static readonly UniformBuffer Camera = Create(1, new UniformBufferLayout(UniformBufferElement.Vec3));
+        public static readonly UniformBuffer Lights = Create(2,
+            new UniformBufferLayout(UniformBufferElement.Float, UniformBufferElement.Int),
+            new UniformBufferLayout(UniformBufferElement.Vec3, UniformBufferElement.Vec3),
+            new UniformBufferLayout(128, UniformBufferElement.Float, UniformBufferElement.Vec3, UniformBufferElement.Vec3));
     }
 
     private readonly uint r_handle;
@@ -42,17 +45,6 @@ public class UniformBuffer : ICacheable, IDisposable
         return uniformBuffer;
     }
 
-    internal static void CreateDefaults()
-    {
-        Logger.EngineInfo("Creating default uniform buffer objects");
-        Create((int)DefaultType.Matrices, new UniformBufferLayout(UniformBufferElement.Mat4, UniformBufferElement.Mat4));
-        Create((int)DefaultType.Camera, new UniformBufferLayout(UniformBufferElement.Vec3));
-        Create((int)DefaultType.Lights,
-            new UniformBufferLayout(UniformBufferElement.Float, UniformBufferElement.Int),
-            new UniformBufferLayout(UniformBufferElement.Vec3, UniformBufferElement.Vec3),
-            new UniformBufferLayout(128, UniformBufferElement.Float, UniformBufferElement.Vec3, UniformBufferElement.Vec3));
-    }
-
     public static UniformBuffer GetAtLocation(int location)
     {
         if (Cache.UniformBufferCache.TryGetValue(location, out UniformBuffer uniformBuffer))
@@ -61,11 +53,6 @@ public class UniformBuffer : ICacheable, IDisposable
         }
         Logger.EngineError("No uniform buffer at location {0} exists", location);
         return null;
-    }
-
-    internal static UniformBuffer GetAtLocation(DefaultType defaultType)
-    {
-        return GetAtLocation((int)defaultType);
     }
 
     private void Bind()

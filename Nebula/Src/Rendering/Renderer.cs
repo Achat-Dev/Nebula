@@ -138,10 +138,10 @@ public static class Renderer
 
     private static void UpdateUniformBuffers(CameraComponent camera, ref Matrix4x4 lightSpaceViewProjection)
     {
-        UniformBuffer cameraBuffer = UniformBuffer.GetAtLocation(UniformBuffer.DefaultType.Camera);
+        UniformBuffer cameraBuffer = UniformBuffer.Defaults.Camera;
         cameraBuffer.BufferData(0, camera.GetEntity().GetTransform().GetWorldPosition());
 
-        UniformBuffer lightBuffer = UniformBuffer.GetAtLocation(UniformBuffer.DefaultType.Lights);
+        UniformBuffer lightBuffer = UniformBuffer.Defaults.Lights;
         lightBuffer.BufferData(0, Scene.GetActive().GetSkyLight().GetIntensity());
         lightBuffer.BufferData(4, PointLightComponent.GetPointLightCount());
 
@@ -151,7 +151,7 @@ public static class Renderer
         lightBuffer.BufferData(16, directionalLightDirection, directionalLightColour);
         lightBuffer.BufferData(48, PointLightComponent.GetPointLightData());
 
-        UniformBuffer matrixBuffer = UniformBuffer.GetAtLocation(UniformBuffer.DefaultType.Matrices);
+        UniformBuffer matrixBuffer = UniformBuffer.Defaults.Matrices;
         matrixBuffer.BufferData(0, camera.GetViewProjectionMatrix());
         matrixBuffer.BufferData(64, lightSpaceViewProjection);
     }

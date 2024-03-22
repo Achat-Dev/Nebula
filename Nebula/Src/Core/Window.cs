@@ -72,11 +72,10 @@ internal class Window : IDisposable
         Nebula.Rendering.GL.Init(Silk.NET.OpenGL.GL.GetApi(m_window));
         Nebula.Rendering.Assimp.Init();
         Nebula.Rendering.Renderer.Init();
-        Nebula.Rendering.UniformBuffer.CreateDefaults();
 
         // Temporary
         // PBR Flat
-        ShaderInstance shaderInstanceFlat = new ShaderInstance(Shader.Defaults.PBRFlat());
+        ShaderInstance shaderInstanceFlat = new ShaderInstance(Shader.Defaults.PBRFlat);
         //ShaderInstance shaderInstanceFlat = new ShaderInstance(Shader.Create("Shader/ShadowMappingDepthMap.vert", "Shader/ShadowMappingDepthMap.frag", false));
         shaderInstanceFlat.SetInt("u_irradianceMap", 0);
         shaderInstanceFlat.SetInt("u_prefilteredMap", 1);
@@ -99,7 +98,7 @@ internal class Window : IDisposable
         Texture metallicMap = Texture.Create("Art/Textures/Metal_Metallic.jpg", textureConfig);
         Texture roughnessMap = Texture.Create("Art/Textures/Metal_Roughness.jpg", textureConfig);
 
-        ShaderInstance shaderInstanceTextured = new ShaderInstance(Shader.Defaults.PBRTextured());
+        ShaderInstance shaderInstanceTextured = new ShaderInstance(Shader.Defaults.PBRTextured);
         //ShaderInstance shaderInstanceTextured = new ShaderInstance(Shader.Create("Shader/ShadowMappingDepthMap.vert", "Shader/ShadowMappingDepthMap.frag", false));
         shaderInstanceTextured.SetInt("u_irradianceMap", 0);
         shaderInstanceTextured.SetInt("u_prefilteredMap", 1);
@@ -118,7 +117,7 @@ internal class Window : IDisposable
         modelRenderer.SetShaderInstance(shaderInstanceTextured);
 
         // Objects
-        ShaderInstance shaderInstanceGround = new ShaderInstance(Shader.Defaults.PBRFlat());
+        ShaderInstance shaderInstanceGround = new ShaderInstance(Shader.Defaults.PBRFlat);
         //ShaderInstance shaderInstanceGround = new ShaderInstance(Shader.Create("Shader/ShadowMappingDepthMap.vert", "Shader/ShadowMappingDepthMap.frag", false));
         shaderInstanceGround.SetInt("u_irradianceMap", 0);
         shaderInstanceGround.SetInt("u_prefilteredMap", 1);
@@ -164,7 +163,7 @@ internal class Window : IDisposable
 
             modelRenderer = m_pointLightEntites[i].AddComponent<ModelRendererComponent>();
             modelRenderer.SetModel(Model.Load("Art/Models/Cube.obj"));
-            flatShaderInstances[i] = new ShaderInstance(Shader.Defaults.UnlitFlat());
+            flatShaderInstances[i] = new ShaderInstance(Shader.Defaults.UnlitFlat);
             modelRenderer.SetShaderInstance(flatShaderInstances[i]);
         }
 

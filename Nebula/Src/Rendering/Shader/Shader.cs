@@ -67,9 +67,50 @@ public class Shader : ICacheable, IDisposable
         }
     }
 
+    private Shader(string vertexPath, string geometryPath, string fragmentPath, bool isLit)
+    {
+        r_isLit = isLit;
+
+        // Create shaders
+        uint vertexShaderHandle = CreateGLShader(ShaderType.VertexShader, GetSourceWithIncludes(AssetLoader.LoadAsFileContent(vertexPath), new HashSet<string>()));
+        uint geometryShaderHandle = CreateGLShader(ShaderType.GeometryShader, GetSourceWithIncludes(AssetLoader.LoadAsFileContent(geometryPath), new HashSet<string>()));
+        uint fragmentShaderHandle = CreateGLShader(ShaderType.FragmentShader, GetSourceWithIncludes(AssetLoader.LoadAsFileContent(fragmentPath), new HashSet<string>()));
+
+        // Link shaders
+        r_handle = GL.Get().CreateProgram();
+        GL.Get().AttachShader(r_handle, vertexShaderHandle);
+        GL.Get().AttachShader(r_handle, geometryShaderHandle);
+        GL.Get().AttachShader(r_handle, fragmentShaderHandle);
+        GL.Get().LinkProgram(r_handle);
+
+        GL.Get().GetProgram(r_handle, GLEnum.LinkStatus, out int status);
+        if (status == 0)
+        {
+            Logger.EngineError("Failed to link shaders\n{0}", GL.Get().GetProgramInfoLog(r_handle));
+        }
+
+        // Clean up
+        GL.Get().DetachShader(r_handle, vertexShaderHandle);
+        GL.Get().DetachShader(r_handle, geometryShaderHandle);
+        GL.Get().DetachShader(r_handle, fragmentShaderHandle);
+        GL.Get().DeleteShader(vertexShaderHandle);
+        GL.Get().DeleteShader(geometryShaderHandle);
+        GL.Get().DeleteShader(fragmentShaderHandle);
+
+        // Cache uniform locations
+        GL.Get().GetProgram(r_handle, GLEnum.ActiveUniforms, out int uniformCount);
+        for (uint i = 0; i < uniformCount; i++)
+        {
+            string name = GL.Get().GetActiveUniform(r_handle, i, out _, out _);
+            int location = GL.Get().GetUniformLocation(r_handle, name);
+            r_uniformLocationCache.Add(name, location);
+        }
+    }
+
     public static Shader Create(string vertexPath, string fragmentPath, bool isLit)
     {
-        if (Cache.ShaderCache.TryGetValue((vertexPath, fragmentPath), out Shader shader))
+        int hash = HashCode.Combine(vertexPath, fragmentPath);
+        if (Cache.ShaderCache.TryGetValue(hash, out Shader shader))
         {
             Logger.EngineVerbose("Shader from sources {0} and {1} already exists, returning cached instance", vertexPath, fragmentPath);
             return shader;
@@ -77,7 +118,22 @@ public class Shader : ICacheable, IDisposable
 
         Logger.EngineDebug("Creating shader from sources {0} and {1}", vertexPath, fragmentPath);
         shader = new Shader(vertexPath, fragmentPath, isLit);
-        Cache.ShaderCache.CacheData((vertexPath, fragmentPath), shader);
+        Cache.ShaderCache.CacheData(hash, shader);
+        return shader;
+    }
+
+    public static Shader Create(string vertexPath, string geometryPath, string fragmentPath, bool isLit)
+    {
+        int hash = HashCode.Combine(vertexPath, geometryPath, fragmentPath);
+        if (Cache.ShaderCache.TryGetValue(hash, out Shader shader))
+        {
+            Logger.EngineVerbose("Shader from sources {0}, {1} and {2} already exists, returning cached instance", vertexPath, geometryPath, fragmentPath);
+            return shader;
+        }
+
+        Logger.EngineDebug("Creating shader from sources {0}, {1} and {2}", vertexPath, geometryPath, fragmentPath);
+        shader = new Shader(vertexPath, geometryPath, fragmentPath, isLit);
+        Cache.ShaderCache.CacheData(hash, shader);
         return shader;
     }
 
@@ -305,9 +361,9 @@ public class Shader : ICacheable, IDisposable
 
     public void Delete()
     {
-        if (Cache.ShaderCache.TryGetKey(this, out (string, string) key))
+        if (Cache.ShaderCache.TryGetKey(this, out int key))
         {
-            Logger.EngineDebug("Deleting shader with sources {0} and {1}", key.Item1, key.Item2);
+            Logger.EngineDebug("Deleting shader with hash {0}", key);
             Cache.ShaderCache.RemoveData(key);
         }
 

@@ -16,6 +16,7 @@ public static class Renderer
     private static Framebuffer s_directionalShadowMapFramebuffer;
     private static Shader s_directionalShadowMapShader;
     private static Framebuffer s_omnidirectionalShadowMapFramebuffer;
+    private static Shader s_omnidirectionalShadowMapShader;
 
     internal static void Init()
     {
@@ -53,6 +54,7 @@ public static class Renderer
         FramebufferAttachmentConfig omnidirectionalDepthConfig = FramebufferAttachmentConfig.Defaults.Depth();
         omnidirectionalDepthConfig.TextureType = FramebufferAttachment.TextureType.Cubemap;
         s_omnidirectionalShadowMapFramebuffer = new Framebuffer(s_shadowMapSize, omnidirectionalDepthConfig);
+        s_omnidirectionalShadowMapShader = Shader.Create("Shader/OmnidirectionalShadowMap.vert", "Shader/OmnidirectionalShadowMap.geom", "Shader/OmnidirectionalShadowMap.frag", false);
     }
 
     public static void SetClearColour(Colour colour)

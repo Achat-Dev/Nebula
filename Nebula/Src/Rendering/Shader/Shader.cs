@@ -5,11 +5,22 @@ namespace Nebula.Rendering;
 
 public class Shader : ICacheable, IDisposable
 {
-    public enum DefaultType
+    public static class Defaults
     {
-        UnlitFlat,
-        PBRFlat,
-        PBRTextured,
+        public static Shader UnlitFlat()
+        {
+            return Create("Shader/Unlit_Flat.vert", "Shader/Unlit_Flat.frag", false);
+        }
+
+        public static Shader PBRFlat()
+        {
+            return Create("Shader/PBR_Flat.vert", "Shader/PBR_Flat.frag", true);
+        }
+
+        public static Shader PBRTextured()
+        {
+            return Create("Shader/PBR_Textured.vert", "Shader/PBR_Textured.frag", true);
+        }
     }
 
     internal enum DataType
@@ -135,21 +146,6 @@ public class Shader : ICacheable, IDisposable
         shader = new Shader(vertexPath, geometryPath, fragmentPath, isLit);
         Cache.ShaderCache.CacheData(hash, shader);
         return shader;
-    }
-
-    public static Shader Create(DefaultType defaultType)
-    {
-        switch (defaultType)
-        {
-            case DefaultType.UnlitFlat:
-                return Create("Shader/Unlit_Flat.vert", "Shader/Unlit_Flat.frag", false);
-            case DefaultType.PBRFlat:
-                return Create("Shader/PBR_Flat.vert", "Shader/PBR_Flat.frag", true);
-            case DefaultType.PBRTextured:
-                return Create("Shader/PBR_Textured.vert", "Shader/PBR_Textured.frag", true);
-            default:
-                return Create("Shader/Fallback.vert", "Shader/Fallback.frag", false);
-        }
     }
 
     private uint CreateGLShader(ShaderType type, string source)

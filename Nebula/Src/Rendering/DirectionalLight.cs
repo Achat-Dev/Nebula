@@ -6,7 +6,7 @@ public class DirectionalLight
     private Colour m_colour = Colour.White;
     private float m_intensity = 1f;
 
-    private static readonly Matrix4x4 s_projectionMatrix = Matrix4x4.CreateOrthographicFieldOfView(-10f, 10f, 0.1f, 20f);
+    private static readonly Matrix4x4 s_projectionMatrix = Matrix4x4.CreateOrthographicFieldOfView(-10f, 10f, 0.001f, 20f);
 
     internal DirectionalLight()
     {

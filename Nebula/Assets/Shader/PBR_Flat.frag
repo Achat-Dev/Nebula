@@ -93,14 +93,31 @@ vec3 calculateIBL(FlatLightParams params)
 	return (kd * diffuse + specular) * u_skyLightIntensity;
 }
 
-float calculateShadowValue()
+float calculateDirectionalShadowValue()
 {
-	vec3 projectionUV = io_vertexPositionLightSpace.xyz / io_vertexPositionLightSpace.w;
-	projectionUV = projectionUV * 0.5 + 0.5;
+	vec3 uv = io_vertexPositionLightSpace.xyz / io_vertexPositionLightSpace.w;
+	uv = uv * 0.5 + 0.5;
 
-	float mappedDepth = texture(u_depthMap, projectionUV.xy).r;
+	float mappedDepth = texture(u_directionalShadowMap, uv.xy).r;
 
-	if (mappedDepth < projectionUV.z)
+	if (mappedDepth < uv.z)
+	{
+		return 1.0;
+	}
+	else
+	{
+		return 0.0;
+	}
+}
+
+float calculateOmnidirectionalShadowValue()
+{
+    vec3 uv = io_vertexPosition - u_pointLights[0].position;
+
+    float mappedDepth = texture(u_omnidirectionalShadowMap, uv).r;
+    mappedDepth *= u_pointLightFarClippingPlane;
+
+	if (mappedDepth < length(uv))
 	{
 		return 1.0;
 	}
@@ -118,10 +135,11 @@ void main()
 	params.f0 = mix(vec3(0.04), u_albedo, u_metallic);
 	params.nDotV = max(dot(params.normal, params.viewDirection), 0.0);
 
-	float shadowValue = 1.0 - calculateShadowValue();
+	float directionalShadowValue = 1.0 - calculateDirectionalShadowValue();
+	float omnidirectionalShadowValue = 1.0 - calculateOmnidirectionalShadowValue();
 
-	vec3 colour = calculateDirectionalLight(params) * shadowValue;
-	colour += calculatePointLights(params);
+	vec3 colour = calculateDirectionalLight(params) * directionalShadowValue;
+	colour += calculatePointLights(params) * omnidirectionalShadowValue;
 	colour += calculateIBL(params);
 
 	#include Math/PBR/HDRTonemapping.glsl

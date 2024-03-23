@@ -80,7 +80,8 @@ internal class Window : IDisposable
         shaderInstanceFlat.SetInt("u_irradianceMap", 0);
         shaderInstanceFlat.SetInt("u_prefilteredMap", 1);
         shaderInstanceFlat.SetInt("u_brdfLut", 2);
-        shaderInstanceFlat.SetInt("u_depthMap", 3);
+        shaderInstanceFlat.SetInt("u_directionalShadowMap", 3);
+        shaderInstanceFlat.SetInt("u_omnidirectionalShadowMap", 4);
         shaderInstanceFlat.SetVec3("u_albedo", (Vector3)Colour.White);
         shaderInstanceFlat.SetFloat("u_metallic", 0.1f);
         shaderInstanceFlat.SetFloat("u_roughness", 0.1f);
@@ -99,16 +100,16 @@ internal class Window : IDisposable
         Texture roughnessMap = Texture.Create("Art/Textures/Metal_Roughness.jpg", textureConfig);
 
         ShaderInstance shaderInstanceTextured = new ShaderInstance(Shader.Defaults.PBRTextured);
-        //ShaderInstance shaderInstanceTextured = new ShaderInstance(Shader.Create("Shader/ShadowMappingDepthMap.vert", "Shader/ShadowMappingDepthMap.frag", false));
         shaderInstanceTextured.SetInt("u_irradianceMap", 0);
         shaderInstanceTextured.SetInt("u_prefilteredMap", 1);
         shaderInstanceTextured.SetInt("u_brdfLut", 2);
-        shaderInstanceTextured.SetInt("u_depthMap", 3);
-        shaderInstanceTextured.SetTexture("u_albedoMap", albedoMap, Texture.Unit.Texture4);
-        shaderInstanceTextured.SetTexture("u_normalMap", normalMap, Texture.Unit.Texture5);
-        //shaderInstanceTextured.SetInt("u_metallicMap", 6);
-        shaderInstanceTextured.SetTexture("u_metallicMap", metallicMap, Texture.Unit.Texture6);
-        shaderInstanceTextured.SetTexture("u_roughnessMap", roughnessMap, Texture.Unit.Texture7);
+        shaderInstanceTextured.SetInt("u_directionalShadowMap", 3);
+        //shaderInstanceTextured.SetInt("u_omnidirectionalShadowMap", 4);
+        shaderInstanceTextured.SetTexture("u_albedoMap", albedoMap, Texture.Unit.Texture5);
+        shaderInstanceTextured.SetTexture("u_normalMap", normalMap, Texture.Unit.Texture6);
+        //shaderInstanceTextured.SetInt("u_metallicMap", 7);
+        shaderInstanceTextured.SetTexture("u_metallicMap", metallicMap, Texture.Unit.Texture7);
+        shaderInstanceTextured.SetTexture("u_roughnessMap", roughnessMap, Texture.Unit.Texture8);
 
         Entity pbrTexturedEntity = new Entity("PBR textured");
         pbrTexturedEntity.GetTransform().SetWorldPosition(new Vector3(1f, 0f, 0f));
@@ -118,7 +119,6 @@ internal class Window : IDisposable
 
         // Objects
         ShaderInstance shaderInstanceGround = new ShaderInstance(Shader.Defaults.PBRFlat);
-        //ShaderInstance shaderInstanceGround = new ShaderInstance(Shader.Create("Shader/ShadowMappingDepthMap.vert", "Shader/ShadowMappingDepthMap.frag", false));
         shaderInstanceGround.SetInt("u_irradianceMap", 0);
         shaderInstanceGround.SetInt("u_prefilteredMap", 1);
         shaderInstanceGround.SetInt("u_brdfLut", 2);
@@ -149,17 +149,17 @@ internal class Window : IDisposable
         // Camera
         Entity cameraEntity = new Entity("Camera");
         m_camera = cameraEntity.AddComponent<CameraComponent>();
-        cameraEntity.GetTransform().Translate(new Vector3(0, 0, -5));
+        cameraEntity.GetTransform().Translate(new Vector3(0f, 0f, -5f));
 
         // Lighting
         PointLightComponent[] pointLights = new PointLightComponent[3];
         ShaderInstance[] flatShaderInstances = new ShaderInstance[3];
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < m_pointLightEntites.Length; i++)
         {
             m_pointLightEntites[i] = new Entity();
             pointLights[i] = m_pointLightEntites[i].AddComponent<PointLightComponent>();
             pointLights[i].GetEntity().GetTransform().SetLocalScale(Vector3.One * 0.2f);
-            pointLights[i].SetRange(2f);
+            pointLights[i].SetRange(10f);
 
             modelRenderer = m_pointLightEntites[i].AddComponent<ModelRendererComponent>();
             modelRenderer.SetModel(Model.Load("Art/Models/Cube.obj"));

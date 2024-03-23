@@ -9,7 +9,7 @@ public class UniformBuffer : ICacheable, IDisposable
         public static readonly UniformBuffer Matrices = Create(0, new UniformBufferLayout(UniformBufferElement.Mat4, UniformBufferElement.Mat4));
         public static readonly UniformBuffer Camera = Create(1, new UniformBufferLayout(UniformBufferElement.Vec3));
         public static readonly UniformBuffer Lights = Create(2,
-            new UniformBufferLayout(UniformBufferElement.Float, UniformBufferElement.Int),
+            new UniformBufferLayout(UniformBufferElement.Float, UniformBufferElement.Float, UniformBufferElement.Int),
             new UniformBufferLayout(UniformBufferElement.Vec3, UniformBufferElement.Vec3),
             new UniformBufferLayout(128, UniformBufferElement.Float, UniformBufferElement.Vec3, UniformBufferElement.Vec3));
     }

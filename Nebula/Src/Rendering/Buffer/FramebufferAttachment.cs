@@ -42,13 +42,12 @@ internal class FramebufferAttachment : IDisposable, ITextureBindable
         {
             case TextureType.Texture:
                 r_handle = GL.Get().GenTexture();
-                GL.Get().BindTexture(TextureTarget.Texture2D, r_handle);
+                Bind(Texture.Unit.Texture0);
 
                 GL.Get().TexImage2D(TextureTarget.Texture2D, 0, r_internalFormat, (uint)size.X, (uint)size.Y, 0, r_pixelFormat, r_pixelType, null);
 
                 GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, wrapMode);
                 GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, wrapMode);
-
                 GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)config.MinFilterMode);
                 GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)config.MaxFilterMode);
 
@@ -58,13 +57,13 @@ internal class FramebufferAttachment : IDisposable, ITextureBindable
                     GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLevel, config.MaxMipMapLevel);
                     GL.Get().GenerateMipmap(TextureTarget.Texture2D);
                 }
-                GL.Get().BindTexture(TextureTarget.Texture2D, 0);
 
+                GL.Get().BindTexture(TextureTarget.Texture2D, 0);
                 GL.Get().FramebufferTexture2D(FramebufferTarget.Framebuffer, config.GetSilkAttachment(), TextureTarget.Texture2D, r_handle, 0);
                 break;
             case TextureType.Cubemap:
                 r_handle = GL.Get().GenTexture();
-                GL.Get().BindTexture(TextureTarget.TextureCubeMap, r_handle);
+                Bind(Texture.Unit.Texture0);
 
                 for (int i = 0; i < 6; i++)
                 {
@@ -77,8 +76,15 @@ internal class FramebufferAttachment : IDisposable, ITextureBindable
 
                 GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter, (int)config.MinFilterMode);
                 GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, (int)config.MaxFilterMode);
-                GL.Get().BindTexture(TextureTarget.TextureCubeMap, 0);
 
+                if (config.GenerateMipMaps)
+                {
+                    GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureBaseLevel, 0);
+                    GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMaxLevel, config.MaxMipMapLevel);
+                    GL.Get().GenerateMipmap(TextureTarget.TextureCubeMap);
+                }
+
+                GL.Get().BindTexture(TextureTarget.TextureCubeMap, 0);
                 GL.Get().FramebufferTexture(FramebufferTarget.Framebuffer, config.GetSilkAttachment(), r_handle, 0);
                 break;
             case TextureType.Renderbuffer:
@@ -125,8 +131,17 @@ internal class FramebufferAttachment : IDisposable, ITextureBindable
             Logger.EngineError("Trying to bind a writeonly framebuffer attachment");
             return;
         }
+
         GL.Get().ActiveTexture((TextureUnit)textureUnit);
-        GL.Get().BindTexture(TextureTarget.Texture2D, r_handle);
+        switch (r_textureType)
+        {
+            case TextureType.Texture:
+                GL.Get().BindTexture(TextureTarget.Texture2D, r_handle);
+                break;
+            case TextureType.Cubemap:
+                GL.Get().BindTexture(TextureTarget.TextureCubeMap, r_handle);
+                break;
+        }
     }
 
     public uint GetHandle()

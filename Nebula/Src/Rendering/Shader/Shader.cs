@@ -333,6 +333,7 @@ public class Shader : ICacheable, IDisposable
         if (result != -1)
         {
             r_uniformLocationCache.Add(name, result);
+            return true;
         }
 
         Logger.EngineError("Uniform {0} not found", name);

@@ -1,12 +1,11 @@
 ﻿using Silk.NET.OpenGL;
-using Silk.NET.Vulkan;
 using StbImageSharp;
 
 namespace Nebula.Rendering;
 
 internal class Cubemap : ICacheable, IDisposable, ITextureBindable
 {
-    public enum CubemapType
+    public enum MappingType
     {
         Skybox,
         Irradiance,
@@ -20,23 +19,16 @@ internal class Cubemap : ICacheable, IDisposable, ITextureBindable
         r_handle = GL.Get().GenTexture();
         Bind(Texture.Unit.Texture0);
 
-        ImageResult imageResult;
         for (int i = 0; i < paths.Length; i++)
         {
-            imageResult = ImageResult.FromMemory(AssetLoader.LoadAsByteArray(paths[i], out int dataSize), config.GetColorComponents());
+            ImageResult imageResult = ImageResult.FromMemory(AssetLoader.LoadAsByteArray(paths[i], out int dataSize), config.GetColorComponents());
             fixed (void* d = imageResult.Data)
             {
                 GL.Get().TexImage2D(TextureTarget.TextureCubeMapPositiveX + i, 0, config.GetInternalFormat(), (uint)imageResult.Width, (uint)imageResult.Height, 0, config.GetPixelFormat(), config.GetPixelType(), d);
             }
         }
 
-        int wrapMode = (int)config.WrapMode;
-        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapS, wrapMode);
-        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapT, wrapMode);
-        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapR, wrapMode);
-
-        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter, (int)config.MinFilterMode);
-        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, (int)config.MaxFilterMode);
+        SetTextureParameters(config);
     }
 
     private unsafe Cubemap(ITextureBindable bindable, CubemapConfig config, Vector2i faceSize)
@@ -50,13 +42,7 @@ internal class Cubemap : ICacheable, IDisposable, ITextureBindable
             GL.Get().TexImage2D(TextureTarget.TextureCubeMapPositiveX + i, 0, config.GetInternalFormat(), (uint)faceSize.X, (uint)faceSize.Y, 0, config.GetPixelFormat(), config.GetPixelType(), null);
         }
 
-        int wrapMode = (int)config.WrapMode;
-        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapS, wrapMode);
-        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapT, wrapMode);
-        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapR, wrapMode);
-
-        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter, (int)config.MinFilterMode);
-        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, (int)config.MaxFilterMode);
+        SetTextureParameters(config);
 
         // Setup capturing
         Framebuffer framebuffer = new Framebuffer(faceSize, FramebufferAttachmentConfig.Defaults.DepthStencil());
@@ -65,26 +51,18 @@ internal class Cubemap : ICacheable, IDisposable, ITextureBindable
         // | Disposing this will make the cube model unable to render
         VertexArrayObject vao = Model.Load("Art/Models/Cube.obj", VertexFlags.Position).GetMeshes()[0].GetVao();
 
-        Matrix4x4[] viewMatrices =
-        [
-            Matrix4x4.CreateLookAt(Vector3.Zero, Vector3.Right, -Vector3.Up),
-            Matrix4x4.CreateLookAt(Vector3.Zero, -Vector3.Right, -Vector3.Up),
-            Matrix4x4.CreateLookAt(Vector3.Zero, Vector3.Up, Vector3.Forward),
-            Matrix4x4.CreateLookAt(Vector3.Zero, -Vector3.Up, -Vector3.Forward),
-            Matrix4x4.CreateLookAt(Vector3.Zero, Vector3.Forward, -Vector3.Up),
-            Matrix4x4.CreateLookAt(Vector3.Zero, -Vector3.Forward, -Vector3.Up),
-        ];
+        Matrix4x4[] viewMatrices = GetViewMatrices(Vector3.Zero);
 
         Shader mappingShader = null;
-        switch (config.CubemapType)
+        switch (config.MappingType)
         {
-            case CubemapType.Skybox:
+            case MappingType.Skybox:
                 mappingShader = Shader.Create("Shader/EquirectangularToCubemap.vert", "Shader/EquirectangularToCubemap.frag", false);
                 break;
-            case CubemapType.Irradiance:
+            case MappingType.Irradiance:
                 mappingShader = Shader.Create("Shader/EquirectangularToCubemap.vert", "Shader/IrradianceConvolution.frag", false);
                 break;
-            case CubemapType.Prefiltered:
+            case MappingType.Prefiltered:
                 mappingShader = Shader.Create("Shader/EquirectangularToCubemap.vert", "Shader/Prefilter.frag", false);
                 GL.Get().GenerateMipmap(TextureTarget.TextureCubeMap);
                 break;
@@ -97,7 +75,7 @@ internal class Cubemap : ICacheable, IDisposable, ITextureBindable
         GL.Get().Viewport(faceSize);
         bindable.Bind(Texture.Unit.Texture0);
 
-        if (config.CubemapType == CubemapType.Prefiltered)
+        if (config.MappingType == MappingType.Prefiltered)
         {
             int maxMipLevels = 5;
             for (int mipLevel = 0; mipLevel < maxMipLevels; mipLevel++)
@@ -175,6 +153,37 @@ internal class Cubemap : ICacheable, IDisposable, ITextureBindable
         return cubemap;
     }
 
+    private void SetTextureParameters(CubemapConfig config)
+    {
+        int wrapMode = (int)config.WrapMode;
+        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapS, wrapMode);
+        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapT, wrapMode);
+        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapR, wrapMode);
+
+        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter, (int)config.MinFilterMode);
+        GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, (int)config.MaxFilterMode);
+
+        if (config.GenerateMipMaps)
+        {
+            GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureBaseLevel, 0);
+            GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMaxLevel, config.MaxMipMapLevel);
+            GL.Get().GenerateMipmap(TextureTarget.TextureCubeMap);
+        }
+    }
+
+    public static Matrix4x4[] GetViewMatrices(Vector3 position)
+    {
+        return new Matrix4x4[]
+        {
+            Matrix4x4.CreateLookAt(position, position + Vector3.Right, -Vector3.Up),
+            Matrix4x4.CreateLookAt(position, position - Vector3.Right, -Vector3.Up),
+            Matrix4x4.CreateLookAt(position, position + Vector3.Up, Vector3.Forward),
+            Matrix4x4.CreateLookAt(position, position - Vector3.Up, -Vector3.Forward),
+            Matrix4x4.CreateLookAt(position, position + Vector3.Forward, -Vector3.Up),
+            Matrix4x4.CreateLookAt(position, position - Vector3.Forward, -Vector3.Up),
+        };
+    }
+
     public void Bind(Texture.Unit textureUnit)
     {
         GL.Get().ActiveTexture((TextureUnit)textureUnit);
@@ -185,7 +194,7 @@ internal class Cubemap : ICacheable, IDisposable, ITextureBindable
     {
         if (Cache.CubemapCache.TryGetKey(this, out int key))
         {
-            Logger.EngineDebug("Deleting cubemap with hash \"{}\"", key);
+            Logger.EngineDebug("Deleting cubemap with hash {0}", key);
             Cache.CubemapCache.RemoveData(key);
         }
 

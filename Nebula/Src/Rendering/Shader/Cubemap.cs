@@ -51,7 +51,7 @@ internal class Cubemap : ICacheable, IDisposable, ITextureBindable
         // | Disposing this will make the cube model unable to render
         VertexArrayObject vao = Model.Load("Art/Models/Cube.obj", VertexFlags.Position).GetMeshes()[0].GetVao();
 
-        Matrix4x4[] viewMatrices = GetViewMatrices(Vector3.Zero);
+        Matrix4x4[] viewMatrices = Utils.CubemapUtils.GetViewMatrices(Vector3.Zero);
 
         Shader mappingShader = null;
         switch (config.MappingType)
@@ -169,19 +169,6 @@ internal class Cubemap : ICacheable, IDisposable, ITextureBindable
             GL.Get().TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMaxLevel, config.MaxMipMapLevel);
             GL.Get().GenerateMipmap(TextureTarget.TextureCubeMap);
         }
-    }
-
-    public static Matrix4x4[] GetViewMatrices(Vector3 position)
-    {
-        return new Matrix4x4[]
-        {
-            Matrix4x4.CreateLookAt(position, position + Vector3.Right, -Vector3.Up),
-            Matrix4x4.CreateLookAt(position, position - Vector3.Right, -Vector3.Up),
-            Matrix4x4.CreateLookAt(position, position + Vector3.Up, Vector3.Forward),
-            Matrix4x4.CreateLookAt(position, position - Vector3.Up, -Vector3.Forward),
-            Matrix4x4.CreateLookAt(position, position + Vector3.Forward, -Vector3.Up),
-            Matrix4x4.CreateLookAt(position, position - Vector3.Forward, -Vector3.Up),
-        };
     }
 
     public void Bind(Texture.Unit textureUnit)

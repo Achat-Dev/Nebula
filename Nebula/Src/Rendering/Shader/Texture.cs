@@ -106,7 +106,7 @@ public class Texture : ICacheable, IDisposable, ITextureBindable
             }
         }
 
-        SetTextureParameters(config);
+        Utils.TextureUtils.SetBaseTextureParameters(TextureTarget.Texture2D, config);
 
         GargabeCollection.QueueCollection();
     }
@@ -118,7 +118,7 @@ public class Texture : ICacheable, IDisposable, ITextureBindable
 
         GL.Get().TexImage2D(TextureTarget.Texture2D, 0, config.GetInternalFormat(), (uint)size.X, (uint)size.Y, 0, config.GetPixelFormat(), config.GetPixelType(), null);
 
-        SetTextureParameters(config);
+        Utils.TextureUtils.SetBaseTextureParameters(TextureTarget.Texture2D, config);
 
         Framebuffer framebuffer = new Framebuffer(size, FramebufferAttachmentConfig.Defaults.DepthStencil());
         framebuffer.Bind();
@@ -166,22 +166,6 @@ public class Texture : ICacheable, IDisposable, ITextureBindable
     {
         // Don't cache captured textures because they are unique every time
         return new Texture(captureShader, config, size);
-    }
-
-    private void SetTextureParameters(TextureConfig config)
-    {
-        int wrapMode = (int)config.WrapMode;
-        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, wrapMode);
-        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, wrapMode);
-        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)config.MinFilterMode);
-        GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)config.MaxFilterMode);
-
-        if (config.GenerateMipMaps)
-        {
-            GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureBaseLevel, 0);
-            GL.Get().TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLevel, config.MaxMipMapLevel);
-            GL.Get().GenerateMipmap(TextureTarget.Texture2D);
-        }
     }
 
     public void Bind(Unit textureUnit)

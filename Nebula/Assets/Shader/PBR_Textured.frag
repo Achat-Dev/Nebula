@@ -132,8 +132,8 @@ float calculateOmnidirectionalShadowValue()
 {
     vec3 uv = io_vertexPosition - u_pointLights[0].position;
 
-    float mappedDepth = texture(u_omnidirectionalShadowMap, uv).r;
-    mappedDepth *= u_pointLightFarClippingPlane;
+    float mappedDepth = texture(u_omnidirectionalShadowMap, vec4(uv, 0.0)).r;
+    mappedDepth *= u_pointLights[0].range;
 
 	if (mappedDepth < length(uv))
 	{

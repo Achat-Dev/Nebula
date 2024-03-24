@@ -11,7 +11,7 @@ public static class Renderer
     private static VertexArrayObject s_screenVao;
     private static HashSet<ModelRendererComponent> s_modelRenderers = new HashSet<ModelRendererComponent>();
 
-    private static Vector2i s_shadowMapSize = new Vector2i(1024, 1024);
+    private static Vector2i s_shadowMapSize = new Vector2i(512, 512);
     private static Framebuffer s_directionalShadowMapFramebuffer;
     private static Shader s_directionalShadowMapShader;
     private static Framebuffer s_omnidirectionalShadowMapFramebuffer;
@@ -51,7 +51,8 @@ public static class Renderer
         s_directionalShadowMapShader = Shader.Create("Shader/DirectionalShadowMap.vert", "Shader/DirectionalShadowMap.frag", false);
 
         FramebufferAttachmentConfig omnidirectionalDepthConfig = FramebufferAttachmentConfig.Defaults.Depth();
-        omnidirectionalDepthConfig.TextureType = FramebufferAttachment.TextureType.Cubemap;
+        omnidirectionalDepthConfig.TextureType = FramebufferAttachment.TextureType.CubemapArray;
+        omnidirectionalDepthConfig.ArraySize = 4;
         s_omnidirectionalShadowMapFramebuffer = new Framebuffer(s_shadowMapSize, omnidirectionalDepthConfig);
         s_omnidirectionalShadowMapShader = Shader.Create("Shader/OmnidirectionalShadowMap.vert", "Shader/OmnidirectionalShadowMap.geom", "Shader/OmnidirectionalShadowMap.frag", false);
     }
@@ -73,7 +74,7 @@ public static class Renderer
         s_directionalShadowMapFramebuffer.Bind();
 
         GL.Get().Enable(EnableCap.DepthTest);
-        GL.Get().DepthFunc(GLEnum.Less);
+        GL.Get().DepthFunc(DepthFunction.Less);
 
         GL.Get().Enable(EnableCap.CullFace);
         GL.Get().CullFace(TriangleFace.Front);
@@ -97,31 +98,37 @@ public static class Renderer
         s_omnidirectionalShadowMapFramebuffer.Bind();
 
         GL.Get().Clear(ClearBufferMask.DepthBufferBit);
-        
-        PointLightComponent pointLight = PointLightComponent.GetPointLights().First();
-        s_omnidirectionalShadowMapShader.Use();
-        s_omnidirectionalShadowMapShader.SetFloat("u_farPlane", pointLight.GetRange());
-        s_omnidirectionalShadowMapShader.SetVec3("u_lightPosition", pointLight.GetEntity().GetTransform().GetWorldPosition());
-        Matrix4x4[] viewProjectionMatrices = pointLight.GetViewProjectionMatrices();
-        for (int i = 0; i < 6; i++)
-        {
-            s_omnidirectionalShadowMapShader.SetMat4($"u_viewProjections[{i}]", viewProjectionMatrices[i]);
-        }
 
-        foreach (var modelRenderer in s_modelRenderers)
+        HashSet<PointLightComponent> pointLights = PointLightComponent.GetPointLights();
+        s_omnidirectionalShadowMapShader.Use();
+
+        int index = 0;
+        foreach (var pointLight in pointLights)
         {
-            s_omnidirectionalShadowMapShader.SetMat4("u_modelMatrix", modelRenderer.GetEntity().GetTransform().GetWorldMatrix());
-            List<Mesh> meshes = modelRenderer.GetModel().GetMeshes();
-            foreach (var mesh in meshes)
+            s_omnidirectionalShadowMapShader.SetVec3("u_lightPosition", pointLight.GetEntity().GetTransform().GetWorldPosition());
+            s_omnidirectionalShadowMapShader.SetFloat("u_farPlane", pointLight.GetRange());
+            s_omnidirectionalShadowMapShader.SetInt("u_lightIndex", index);
+            Matrix4x4[] viewProjectionMatrices = pointLight.GetViewProjectionMatrices();
+            for (int i = 0; i < 6; i++)
             {
-                mesh.GetVao().Draw();
+                s_omnidirectionalShadowMapShader.SetMat4($"u_viewProjections[{i}]", viewProjectionMatrices[i]);
             }
+
+            foreach (var modelRenderer in s_modelRenderers)
+            {
+                s_omnidirectionalShadowMapShader.SetMat4("u_modelMatrix", modelRenderer.GetEntity().GetTransform().GetWorldMatrix());
+                List<Mesh> meshes = modelRenderer.GetModel().GetMeshes();
+                foreach (var mesh in meshes)
+                {
+                    mesh.GetVao().Draw();
+                }
+            }
+            index++;
         }
 
         Framebuffer framebuffer = camera.GetFramebuffer();
         framebuffer.Bind();
 
-        GL.Get().Enable(EnableCap.DepthTest);
         GL.Get().CullFace(TriangleFace.Back);
         GL.Get().Viewport(Game.GetWindowSize());
         GL.Get().Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
@@ -137,7 +144,7 @@ public static class Renderer
 
         // Render skybox
         GL.Get().Disable(EnableCap.CullFace);
-        GL.Get().DepthFunc(GLEnum.Lequal);
+        GL.Get().DepthFunc(DepthFunction.Lequal);
 
         Matrix4x4 viewProjectionMatrix = camera.GetViewProjectionMatrix();
         viewProjectionMatrix.M41 = 0;
@@ -146,7 +153,6 @@ public static class Renderer
         viewProjectionMatrix.M44 = 0;
 
         scene.GetSkyLight().SetupSkyboxRendering();
-        //s_omnidirectionalShadowMapFramebuffer.GetAttachment(FramebufferAttachment.AttachmentType.Depth).Bind(Texture.Unit.Texture0);
         s_skyboxShader.Use();
         s_skyboxShader.SetMat4("u_viewProjection", viewProjectionMatrix);
         s_skyboxVao.Draw();
@@ -169,8 +175,7 @@ public static class Renderer
 
         UniformBuffer lightBuffer = UniformBuffer.Defaults.Lights;
         lightBuffer.BufferData(0, Scene.GetActive().GetSkyLight().GetIntensity());
-        lightBuffer.BufferData(4, PointLightComponent.c_farClippingPlane);
-        lightBuffer.BufferData(8, PointLightComponent.GetPointLightCount());
+        lightBuffer.BufferData(4, PointLightComponent.GetPointLightCount());
 
         DirectionalLight directionalLight = Scene.GetActive().GetDirectionalLight();
         Vector4 directionalLightColour = ((Vector4)directionalLight.GetColour()) * directionalLight.GetIntensity();

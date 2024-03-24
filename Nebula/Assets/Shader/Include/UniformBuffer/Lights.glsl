@@ -35,7 +35,6 @@ struct TexturedLightParams
 layout (std140, binding = 2) uniform ub_lights
 {
 	uniform float u_skyLightIntensity;
-	uniform float u_pointLightFarClippingPlane;
 	uniform int u_pointLightCount;
 	uniform DirectionalLight u_directionalLight;
 	uniform PointLight u_pointLights[MAX_POINT_LIGHTS];
@@ -45,4 +44,6 @@ uniform samplerCube u_irradianceMap;
 uniform samplerCube u_prefilteredMap;
 uniform sampler2D u_brdfLut;
 uniform sampler2D u_directionalShadowMap;
-uniform samplerCube u_omnidirectionalShadowMap;
+uniform samplerCubeArray u_omnidirectionalShadowMap;
+
+const float c_shadowSamplingBias = 0.07;

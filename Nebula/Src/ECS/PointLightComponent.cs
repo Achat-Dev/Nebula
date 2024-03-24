@@ -9,10 +9,6 @@ public class PointLightComponent : StartableComponent
     private static uint s_pointLightCount = 0;
     private static readonly HashSet<PointLightComponent> s_pointLights = new HashSet<PointLightComponent>();
 
-    private static readonly Matrix4x4 s_projectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(90f, 1f, 0.001f, c_farClippingPlane);
-
-    internal const float c_farClippingPlane = 20f;
-
     public override void OnCreate()
     {
         if (s_pointLights.Add(this))
@@ -99,11 +95,12 @@ public class PointLightComponent : StartableComponent
 
     internal Matrix4x4[] GetViewProjectionMatrices()
     {
-        Matrix4x4[] viewMatrices = Rendering.Cubemap.GetViewMatrices(GetEntity().GetTransform().GetWorldPosition());
+        Matrix4x4[] viewMatrices = Utils.CubemapUtils.GetViewMatrices(GetEntity().GetTransform().GetWorldPosition());
+        Matrix4x4 projectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(90f, 1f, 0.001f, m_range);
 
         for (int i = 0; i < viewMatrices.Length; i++)
         {
-            viewMatrices[i] *= s_projectionMatrix;
+            viewMatrices[i] *= projectionMatrix;
         }
         return viewMatrices;
     }

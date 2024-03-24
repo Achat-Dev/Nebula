@@ -20,6 +20,23 @@ uniform float u_roughness;
 #include Math/PBR/FresnelSchlickRoughnessU.glsl
 #include Math/PBR/MaxReflectionLod.glsl
 
+float calculateDirectionalShadowValue()
+{
+	vec3 uv = io_vertexPositionLightSpace.xyz / io_vertexPositionLightSpace.w;
+	uv = uv * 0.5 + 0.5;
+
+	float mappedDepth = texture(u_directionalShadowMap, uv.xy).r;
+
+	if (mappedDepth < uv.z)
+	{
+		return 0.0;
+	}
+	else
+	{
+		return 1.0;
+	}
+}
+
 vec3 calculateDirectionalLight(FlatLightParams params)
 {
 	// Calculate Cook-Torrance BRDF
@@ -40,7 +57,32 @@ vec3 calculateDirectionalLight(FlatLightParams params)
 	float specularDenom = 4.0 * params.nDotV * nDotL + 0.0001; // plus at the end to prevent dividing by 0
 	specular /= specularDenom;
 
-	return (kd * u_albedo / PI + specular) * u_directionalLight.colour * nDotL;
+	return ((kd * u_albedo / PI + specular) * u_directionalLight.colour * nDotL) * calculateDirectionalShadowValue();
+}
+
+float calculateOmnidirectionalShadowValue(int index)
+{
+    vec3 uv = io_vertexPosition - u_pointLights[index].position;
+
+    float mappedDepth = texture(u_omnidirectionalShadowMap, vec4(uv, index)).r;
+	float uvLength = length(uv);
+	float currentDepth = (uvLength / u_pointLights[index].range) - c_shadowSamplingBias;
+
+	if (mappedDepth < currentDepth)
+	{
+		if (mappedDepth < 1.0)
+		{
+			return 0.0;
+		}
+		else
+		{
+			return currentDepth;
+		}
+	}
+	else
+	{
+		return 1.0;
+	}
 }
 
 vec3 calculatePointLights(FlatLightParams params)
@@ -72,7 +114,7 @@ vec3 calculatePointLights(FlatLightParams params)
 		float specularDenom = 4.0 * params.nDotV * nDotL + 0.0001; // plus at the end to prevent dividing by 0
 		specular /= specularDenom;
 
-		colour += (kd * u_albedo / PI + specular) * radiance * nDotL;
+		colour += ((kd * u_albedo / PI + specular) * radiance * nDotL) * calculateOmnidirectionalShadowValue(i);
 	}
 	return colour;
 }
@@ -93,40 +135,6 @@ vec3 calculateIBL(FlatLightParams params)
 	return (kd * diffuse + specular) * u_skyLightIntensity;
 }
 
-float calculateDirectionalShadowValue()
-{
-	vec3 uv = io_vertexPositionLightSpace.xyz / io_vertexPositionLightSpace.w;
-	uv = uv * 0.5 + 0.5;
-
-	float mappedDepth = texture(u_directionalShadowMap, uv.xy).r;
-
-	if (mappedDepth < uv.z)
-	{
-		return 1.0;
-	}
-	else
-	{
-		return 0.0;
-	}
-}
-
-float calculateOmnidirectionalShadowValue()
-{
-    vec3 uv = io_vertexPosition - u_pointLights[0].position;
-
-    float mappedDepth = texture(u_omnidirectionalShadowMap, uv).r;
-    mappedDepth *= u_pointLightFarClippingPlane;
-
-	if (mappedDepth < length(uv))
-	{
-		return 1.0;
-	}
-	else
-	{
-		return 0.0;
-	}
-}
-
 void main()
 {
 	FlatLightParams params;
@@ -135,11 +143,8 @@ void main()
 	params.f0 = mix(vec3(0.04), u_albedo, u_metallic);
 	params.nDotV = max(dot(params.normal, params.viewDirection), 0.0);
 
-	float directionalShadowValue = 1.0 - calculateDirectionalShadowValue();
-	float omnidirectionalShadowValue = 1.0 - calculateOmnidirectionalShadowValue();
-
-	vec3 colour = calculateDirectionalLight(params) * directionalShadowValue;
-	colour += calculatePointLights(params) * omnidirectionalShadowValue;
+	vec3 colour = calculateDirectionalLight(params);
+	colour += calculatePointLights(params);
 	colour += calculateIBL(params);
 
 	#include Math/PBR/HDRTonemapping.glsl

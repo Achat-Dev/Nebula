@@ -191,6 +191,19 @@ public class Shader : ICacheable, IDisposable
         GL.Get().UseProgram(r_handle);
     }
 
+    internal void SetBool(int location, bool value)
+    {
+        GL.Get().Uniform1(location, value ? 1 : 0);
+    }
+
+    internal void SetBool(string name, bool value)
+    {
+        if (TryGetCachedUniformLocation(name, out int location))
+        {
+            GL.Get().Uniform1(location, value ? 1 : 0);
+        }
+    }
+
     internal void SetFloat(int location, float value)
     {
         GL.Get().Uniform1(location, value);

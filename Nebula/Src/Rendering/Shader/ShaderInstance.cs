@@ -21,6 +21,30 @@ public class ShaderInstance
         r_shader = shader;
     }
 
+    public bool GetBool(string name)
+    {
+        if (r_shader.TryGetCachedUniformLocation(name, out int location))
+        {
+            return r_intBuffer[location] == 1;
+        }
+        return false;
+    }
+
+    public void SetBool(string name, bool value)
+    {
+        if (r_shader.TryGetCachedUniformLocation(name, out int location))
+        {
+            if (r_intBuffer.ContainsKey(location))
+            {
+                r_intBuffer[location] = value ? 1 : 0;
+            }
+            else
+            {
+                r_intBuffer.Add(location, value ? 1 : 0);
+            }
+        }
+    }
+
     public float GetFloat(string name)
     {
         if (r_shader.TryGetCachedUniformLocation(name, out int location))

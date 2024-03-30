@@ -68,7 +68,7 @@ public class PointLightComponent : StartableComponent
 
     internal static float[] GetPointLightData()
     {
-        float[] data = new float[s_pointLightCount * 12];
+        float[] data = new float[s_pointLightCount * 8];
 
         int i = 0;
         Vector3 position;
@@ -76,7 +76,7 @@ public class PointLightComponent : StartableComponent
 
         foreach (PointLightComponent pointLight in s_pointLights)
         {
-            data[i++] = pointLight.m_range;
+            /*data[i++] = pointLight.m_range;
             data[i++] = pointLight.m_intensity * pointLight.m_intensity;
             i += 2;
             position = pointLight.GetEntity().GetTransform().GetWorldPosition();
@@ -88,7 +88,18 @@ public class PointLightComponent : StartableComponent
             data[i++] = colour.X;
             data[i++] = colour.Y;
             data[i++] = colour.Z;
-            i++;
+            i++;*/
+
+            position = pointLight.GetEntity().GetTransform().GetWorldPosition();
+            data[i++] = position.X;
+            data[i++] = position.Y;
+            data[i++] = position.Z;
+            data[i++] = pointLight.m_range;
+            colour = ((Vector3)pointLight.m_colour);
+            data[i++] = colour.X;
+            data[i++] = colour.Y;
+            data[i++] = colour.Z;
+            data[i++] = pointLight.m_intensity * pointLight.m_intensity;
         }
 
         return data;

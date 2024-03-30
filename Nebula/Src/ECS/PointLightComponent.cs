@@ -2,7 +2,7 @@
 
 public class PointLightComponent : StartableComponent
 {
-    private float m_range = 1f;
+    private float m_range = 10f;
     private float m_intensity = 1f;
     private Colour m_colour = Colour.White;
 
@@ -33,7 +33,7 @@ public class PointLightComponent : StartableComponent
 
     public void SetRange(float range)
     {
-        m_range = range;
+        m_range = MathF.Max(range, 0.0011f);
     }
 
     public float GetIntensity()
@@ -43,7 +43,7 @@ public class PointLightComponent : StartableComponent
 
     public void SetIntensity(float intensity)
     {
-        m_intensity = intensity;
+        m_intensity = MathF.Max(intensity, 0.0011f);
     }
 
     public Colour GetColour()
@@ -76,14 +76,15 @@ public class PointLightComponent : StartableComponent
 
         foreach (PointLightComponent pointLight in s_pointLights)
         {
-            data[i++] = pointLight.GetRange();
-            i += 3;
+            data[i++] = pointLight.m_range;
+            data[i++] = pointLight.m_intensity * pointLight.m_intensity;
+            i += 2;
             position = pointLight.GetEntity().GetTransform().GetWorldPosition();
             data[i++] = position.X;
             data[i++] = position.Y;
             data[i++] = position.Z;
             i++;
-            colour = ((Vector3)pointLight.GetColour()) * pointLight.GetIntensity();
+            colour = ((Vector3)pointLight.m_colour);
             data[i++] = colour.X;
             data[i++] = colour.Y;
             data[i++] = colour.Z;

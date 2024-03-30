@@ -1,1 +1,1 @@
-﻿colour = pow(colour, vec3(1.0/2.2));
+﻿colour = pow(colour, vec3(1.0 / 2.2));

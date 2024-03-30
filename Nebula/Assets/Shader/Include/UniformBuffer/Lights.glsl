@@ -9,6 +9,7 @@ struct DirectionalLight
 struct PointLight
 {
 	float range;
+	float intensity;
 	vec3 position;
 	vec3 colour;
 };

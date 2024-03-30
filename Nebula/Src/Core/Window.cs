@@ -104,7 +104,7 @@ internal class Window : IDisposable
         shaderInstanceTextured.SetInt("u_prefilteredMap", 1);
         shaderInstanceTextured.SetInt("u_brdfLut", 2);
         shaderInstanceTextured.SetInt("u_directionalShadowMap", 3);
-        //shaderInstanceTextured.SetInt("u_omnidirectionalShadowMap", 4);
+        shaderInstanceTextured.SetInt("u_omnidirectionalShadowMap", 4);
         shaderInstanceTextured.SetTexture("u_albedoMap", albedoMap, Texture.Unit.Texture5);
         shaderInstanceTextured.SetTexture("u_normalMap", normalMap, Texture.Unit.Texture6);
         //shaderInstanceTextured.SetInt("u_metallicMap", 7);
@@ -115,7 +115,7 @@ internal class Window : IDisposable
         pbrTexturedEntity.GetTransform().SetWorldPosition(new Vector3(1f, 0f, 0f));
         modelRenderer = pbrTexturedEntity.AddComponent<ModelRendererComponent>();
         modelRenderer.SetModel(Model.Load("Art/Models/Sphere.obj"));
-        modelRenderer.SetShaderInstance(shaderInstanceFlat);
+        modelRenderer.SetShaderInstance(shaderInstanceTextured);
 
         // Objects
         ShaderInstance shaderInstanceGround = new ShaderInstance(Shader.Defaults.PBRFlat);

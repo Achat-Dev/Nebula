@@ -82,25 +82,15 @@ float calculateOmnidirectionalShadowValue(int index)
 {
     vec3 uv = io_vertexPosition - u_pointLights[index].position;
 
-    float mappedDepth = texture(u_omnidirectionalShadowMap, vec4(uv, index)).r;
-	float uvLength = length(uv);
-	float currentDepth = (uvLength / u_pointLights[index].range) - c_shadowSamplingBias;
+    float mappedDepth = texture(u_omnidirectionalShadowMap, vec4(uv, index)).r * u_pointLights[index].range;
+	float currentDepth = length(uv);
 
-	if (mappedDepth < currentDepth)
+	if (mappedDepth > currentDepth - c_shadowSamplingBias)
 	{
-		if (mappedDepth < 1.0)
-		{
-			return 0.0;
-		}
-		else
-		{
-			return currentDepth;
-		}
+		return 1.0 - smoothstep(0.0, u_pointLights[index].range, currentDepth);
 	}
-	else
-	{
-		return 1.0;
-	}
+
+	return 0.0;
 }
 
 vec3 calculatePointLights(TexturedLightParams params)
@@ -110,8 +100,8 @@ vec3 calculatePointLights(TexturedLightParams params)
 	{
 		// Calculate radiance
 		vec3 lightDirection = u_pointLights[i].position - io_vertexPosition;
-		float distance = length(lightDirection) / u_pointLights[i].range;
-		float attenuation = 1.0 / (distance * distance);
+		float distance = length(lightDirection);
+		float attenuation = (u_pointLights[i].range * u_pointLights[i].intensity) / (distance * distance);
 		vec3 radiance = u_pointLights[i].colour * attenuation;
 
 		// Calculate Cook-Torrance BRDF

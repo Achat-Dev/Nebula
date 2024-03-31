@@ -37,14 +37,6 @@ public static class Renderer
         s_skyboxVao = Model.Load("Art/Models/Cube.obj", VertexFlags.Position).GetMeshes()[0].GetVao();
         s_screenVao = Model.Load("Art/Models/Plane.obj", VertexFlags.Position | VertexFlags.UV).GetMeshes()[0].GetVao();
 
-        TextureConfig skyboxConfig = TextureConfig.Defaults.Hdr();
-        skyboxConfig.WrapMode = Texture.WrapMode.ClampToEdge;
-        skyboxConfig.GenerateMipMaps = false;
-        Texture skyboxTexture = Texture.Create("Art/Textures/Skybox_RuralRoad.hdr", skyboxConfig, true);
-        Skybox skybox = new Skybox(skyboxTexture, SkyboxConfig.Defaults.Small());
-        Scene.GetActive().GetSkyLight().SetSkybox(skybox);
-        skyboxTexture.Delete();
-
         FramebufferAttachmentConfig directionalDepthConfig = FramebufferAttachmentConfig.Defaults.Depth();
         directionalDepthConfig.TextureType = FramebufferAttachment.TextureType.Texture;
         s_directionalShadowMapFramebuffer = new Framebuffer(s_shadowMapSize, directionalDepthConfig);

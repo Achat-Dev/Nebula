@@ -6,6 +6,8 @@ public class Game
     private Window m_window;
 
     public static Action Closing;
+    // Temporary until scene files are implemented
+    public static Action Initialised;
 
     private static Game s_instance;
 
@@ -25,7 +27,6 @@ public class Game
         Logger.EngineInfo("Creating game");
 
         m_window = new Window(title, size, vSync);
-        Scene.Load();
     }
 
     public void Start()

@@ -55,8 +55,13 @@ public class Scene
             s_active.r_entities.Clear();
             s_active.r_entities.TrimExcess();
             s_active.r_entityRemovalStack.Clear();
+            s_active.r_entityRemovalStack.TrimExcess();
         }
+
+        // Actually load scenes once scene files are implemented
         Scene scene = new Scene();
+        scene.r_skyLight.SetSkybox(new Skybox("Art/Textures/Skybox_RuralRoad.hdr", SkyboxConfig.Defaults.Small(), true));
+
         s_active = scene;
         return scene;
     }

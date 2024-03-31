@@ -8,10 +8,13 @@ public class Program
     {
         Game game = new Game("Sandbox", new Vector2i(1280, 720), true);
 
-        Entity entity = new Entity();
-        entity.AddComponent<TestComponent>();
-        entity.AddComponent<TestStartableComponent>();
-        entity.AddComponent<TestUpdateableComponent>();
+        Game.Initialised += () =>
+        {
+            Entity entity = new Entity();
+            entity.AddComponent<TestComponent>();
+            entity.AddComponent<TestStartableComponent>();
+            entity.AddComponent<TestUpdateableComponent>();
+        };
 
         game.Start();
     }

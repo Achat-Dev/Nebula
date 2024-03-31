@@ -73,6 +73,10 @@ internal class Window : IDisposable
         Nebula.Rendering.Assimp.Init();
         Nebula.Rendering.Renderer.Init();
 
+        Scene.Load();
+
+        Game.Initialised?.Invoke();
+
         // Temporary
         // PBR Flat
         ShaderInstance shaderInstanceFlat = new ShaderInstance(Shader.Defaults.PBRFlat);

@@ -31,58 +31,32 @@ public class Shader : ICacheable, IDisposable
     private readonly bool r_isLit;
     private readonly Dictionary<string, int> r_uniformLocationCache = new Dictionary<string, int>();
 
-    private Shader(string vertexPath, string fragmentPath, bool isLit)
-    {
-        r_isLit = isLit;
-
-        // Create shaders
-        uint vertexShaderHandle = CreateGLShader(ShaderType.VertexShader, GetSourceWithIncludes(AssetLoader.LoadAsFileContent(vertexPath), new HashSet<string>()));
-        uint fragmentShaderHandle = CreateGLShader(ShaderType.FragmentShader, GetSourceWithIncludes(AssetLoader.LoadAsFileContent(fragmentPath), new HashSet<string>()));
-
-        // Link shaders
-        r_handle = GL.Get().CreateProgram();
-        GL.Get().AttachShader(r_handle, vertexShaderHandle);
-        GL.Get().AttachShader(r_handle, fragmentShaderHandle);
-        GL.Get().LinkProgram(r_handle);
-
-        GL.Get().GetProgram(r_handle, GLEnum.LinkStatus, out int status);
-        if (status == 0)
-        {
-            Logger.EngineError("Failed to link shaders\n{0}", GL.Get().GetProgramInfoLog(r_handle));
-        }
-
-        // Clean up
-        GL.Get().DetachShader(r_handle, vertexShaderHandle);
-        GL.Get().DetachShader(r_handle, fragmentShaderHandle);
-        GL.Get().DeleteShader(vertexShaderHandle);
-        GL.Get().DeleteShader(fragmentShaderHandle);
-
-        // Cache uniform locations
-        GL.Get().GetProgram(r_handle, GLEnum.ActiveUniforms, out int uniformCount);
-        for (uint i = 0; i < uniformCount; i++)
-        {
-            string name = GL.Get().GetActiveUniform(r_handle, i, out _, out _);
-            int location = GL.Get().GetUniformLocation(r_handle, name);
-            r_uniformLocationCache.Add(name, location);
-        }
-    }
-
     private Shader(string vertexPath, string geometryPath, string fragmentPath, bool isLit)
     {
         r_isLit = isLit;
 
+        bool usesGeometryShader = !string.IsNullOrEmpty(geometryPath);
+
         // Create shaders
         uint vertexShaderHandle = CreateGLShader(ShaderType.VertexShader, GetSourceWithIncludes(AssetLoader.LoadAsFileContent(vertexPath), new HashSet<string>()));
-        uint geometryShaderHandle = CreateGLShader(ShaderType.GeometryShader, GetSourceWithIncludes(AssetLoader.LoadAsFileContent(geometryPath), new HashSet<string>()));
         uint fragmentShaderHandle = CreateGLShader(ShaderType.FragmentShader, GetSourceWithIncludes(AssetLoader.LoadAsFileContent(fragmentPath), new HashSet<string>()));
+        uint geometryShaderHandle = 0;
+        if(usesGeometryShader)
+        {
+            geometryShaderHandle = CreateGLShader(ShaderType.GeometryShader, GetSourceWithIncludes(AssetLoader.LoadAsFileContent(geometryPath), new HashSet<string>()));
+        }
 
         // Link shaders
         r_handle = GL.Get().CreateProgram();
         GL.Get().AttachShader(r_handle, vertexShaderHandle);
-        GL.Get().AttachShader(r_handle, geometryShaderHandle);
         GL.Get().AttachShader(r_handle, fragmentShaderHandle);
+        if (usesGeometryShader)
+        {
+            GL.Get().AttachShader(r_handle, geometryShaderHandle);
+        }
         GL.Get().LinkProgram(r_handle);
 
+        // Check for errors
         GL.Get().GetProgram(r_handle, GLEnum.LinkStatus, out int status);
         if (status == 0)
         {
@@ -91,11 +65,14 @@ public class Shader : ICacheable, IDisposable
 
         // Clean up
         GL.Get().DetachShader(r_handle, vertexShaderHandle);
-        GL.Get().DetachShader(r_handle, geometryShaderHandle);
         GL.Get().DetachShader(r_handle, fragmentShaderHandle);
         GL.Get().DeleteShader(vertexShaderHandle);
-        GL.Get().DeleteShader(geometryShaderHandle);
         GL.Get().DeleteShader(fragmentShaderHandle);
+        if (usesGeometryShader)
+        {
+            GL.Get().DetachShader(r_handle, geometryShaderHandle);
+            GL.Get().DeleteShader(geometryShaderHandle);
+        }
 
         // Cache uniform locations
         GL.Get().GetProgram(r_handle, GLEnum.ActiveUniforms, out int uniformCount);
@@ -109,17 +86,7 @@ public class Shader : ICacheable, IDisposable
 
     public static Shader Create(string vertexPath, string fragmentPath, bool isLit)
     {
-        int hash = HashCode.Combine(vertexPath, fragmentPath);
-        if (Cache.ShaderCache.TryGetValue(hash, out Shader shader))
-        {
-            Logger.EngineVerbose("Shader from sources {0} and {1} already exists, returning cached instance", vertexPath, fragmentPath);
-            return shader;
-        }
-
-        Logger.EngineDebug("Creating shader from sources {0} and {1}", vertexPath, fragmentPath);
-        shader = new Shader(vertexPath, fragmentPath, isLit);
-        Cache.ShaderCache.CacheData(hash, shader);
-        return shader;
+        return Create(vertexPath, string.Empty, fragmentPath, isLit);
     }
 
     public static Shader Create(string vertexPath, string geometryPath, string fragmentPath, bool isLit)
@@ -345,6 +312,7 @@ public class Shader : ICacheable, IDisposable
 
         if (result != -1)
         {
+            Logger.EngineVerbose("Found uniform {0}, adding it to uniform cache", name);
             r_uniformLocationCache.Add(name, result);
             return true;
         }

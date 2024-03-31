@@ -76,20 +76,6 @@ public class PointLightComponent : StartableComponent
 
         foreach (PointLightComponent pointLight in s_pointLights)
         {
-            /*data[i++] = pointLight.m_range;
-            data[i++] = pointLight.m_intensity * pointLight.m_intensity;
-            i += 2;
-            position = pointLight.GetEntity().GetTransform().GetWorldPosition();
-            data[i++] = position.X;
-            data[i++] = position.Y;
-            data[i++] = position.Z;
-            i++;
-            colour = ((Vector3)pointLight.m_colour);
-            data[i++] = colour.X;
-            data[i++] = colour.Y;
-            data[i++] = colour.Z;
-            i++;*/
-
             position = pointLight.GetEntity().GetTransform().GetWorldPosition();
             data[i++] = position.X;
             data[i++] = position.Y;

@@ -48,13 +48,13 @@ public static class Renderer
         FramebufferAttachmentConfig directionalDepthConfig = FramebufferAttachmentConfig.Defaults.Depth();
         directionalDepthConfig.TextureType = FramebufferAttachment.TextureType.Texture;
         s_directionalShadowMapFramebuffer = new Framebuffer(s_shadowMapSize, directionalDepthConfig);
-        s_directionalShadowMapShader = Shader.Create("Shader/DirectionalShadowMap.vert", "Shader/DirectionalShadowMap.frag", false);
+        s_directionalShadowMapShader = Shader.Create("Shader/Shadows/DirectionalShadowMap.vert", "Shader/Shadows/DirectionalShadowMap.frag", false);
 
         FramebufferAttachmentConfig omnidirectionalDepthConfig = FramebufferAttachmentConfig.Defaults.Depth();
         omnidirectionalDepthConfig.TextureType = FramebufferAttachment.TextureType.CubemapArray;
         omnidirectionalDepthConfig.ArraySize = 4;
         s_omnidirectionalShadowMapFramebuffer = new Framebuffer(s_shadowMapSize, omnidirectionalDepthConfig);
-        s_omnidirectionalShadowMapShader = Shader.Create("Shader/OmnidirectionalShadowMap.vert", "Shader/OmnidirectionalShadowMap.geom", "Shader/OmnidirectionalShadowMap.frag", false);
+        s_omnidirectionalShadowMapShader = Shader.Create("Shader/Shadows/OmnidirectionalShadowMap.vert", "Shader/Shadows/OmnidirectionalShadowMap.geom", "Shader/Shadows/OmnidirectionalShadowMap.frag", false);
     }
 
     public static void SetClearColour(Colour colour)

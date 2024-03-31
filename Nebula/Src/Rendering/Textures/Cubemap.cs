@@ -57,13 +57,13 @@ internal class Cubemap : ICacheable, IDisposable, ITextureBindable
         switch (config.MappingType)
         {
             case MappingType.Skybox:
-                mappingShader = Shader.Create("Shader/EquirectangularToCubemap.vert", "Shader/EquirectangularToCubemap.frag", false);
+                mappingShader = Shader.Create("Shader/IBL/EquirectangularToCubemap.vert", "Shader/IBL/EquirectangularToCubemap.frag", false);
                 break;
             case MappingType.Irradiance:
-                mappingShader = Shader.Create("Shader/EquirectangularToCubemap.vert", "Shader/IrradianceConvolution.frag", false);
+                mappingShader = Shader.Create("Shader/IBL/EquirectangularToCubemap.vert", "Shader/IBL/IrradianceConvolution.frag", false);
                 break;
             case MappingType.Prefiltered:
-                mappingShader = Shader.Create("Shader/EquirectangularToCubemap.vert", "Shader/Prefilter.frag", false);
+                mappingShader = Shader.Create("Shader/IBL/EquirectangularToCubemap.vert", "Shader/IBL/Prefilter.frag", false);
                 GL.Get().GenerateMipmap(TextureTarget.TextureCubeMap);
                 break;
         }

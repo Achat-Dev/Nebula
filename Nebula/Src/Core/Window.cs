@@ -179,10 +179,6 @@ internal class Window : IDisposable
         Scene.GetActive().GetSkyLight().SetIntensity(1f);
     }
 
-    private float m_range = 10f;
-    private float m_intensity = 1f;
-    private float m_time = 0f;
-
     private void OnUpdate(double deltaTime)
     {
         float dt = (float)deltaTime;
@@ -213,27 +209,9 @@ internal class Window : IDisposable
         }
 
         float piThird = (MathF.PI * 2f) / 3f;
-        /*for (int i = 0; i < m_pointLightEntites.Length; i++)
-        {
-            m_pointLightEntites[i].GetTransform().SetWorldPosition(new Vector3(MathF.Sin((float)m_window.Time + piThird * i) * 4, 0, MathF.Cos((float)m_window.Time + piThird * i) * 4));
-        }*/
-
-        if (Input.IsKeyDown(Key.Q)) m_range -= 2 * dt;
-        if (Input.IsKeyDown(Key.E)) m_range += 2 * dt;
-
-        if (Input.IsKeyDown(Key.R)) m_intensity -= 2 * dt;
-        if (Input.IsKeyDown(Key.T)) m_intensity += 2 * dt;
-
-        if (Input.IsKeyDown(Key.Z)) m_time -= 2 * dt;
-        if (Input.IsKeyDown(Key.U)) m_time += 2 * dt;
-
-        Logger.EngineInfo("Range: {0}\tIntensity: {1}", m_range, m_intensity);
-
         for (int i = 0; i < m_pointLightEntites.Length; i++)
         {
-            m_pointLightEntites[i].GetComponent<PointLightComponent>().SetRange(m_range);
-            m_pointLightEntites[i].GetComponent<PointLightComponent>().SetIntensity(m_intensity);
-            m_pointLightEntites[i].GetTransform().SetWorldPosition(new Vector3(MathF.Sin(m_time + piThird * i) * 4, 0, MathF.Cos(m_time + piThird * i) * 4));
+            m_pointLightEntites[i].GetTransform().SetWorldPosition(new Vector3(MathF.Sin((float)m_window.Time + piThird * i) * 4, 0, MathF.Cos((float)m_window.Time + piThird * i) * 4));
         }
 
         Scene.GetActive().Update(dt);

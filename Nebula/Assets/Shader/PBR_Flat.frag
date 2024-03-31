@@ -19,23 +19,8 @@ uniform float u_roughness;
 #include Math/PBR/FresnelSchlick.glsl
 #include Math/PBR/FresnelSchlickRoughnessU.glsl
 #include Math/PBR/MaxReflectionLod.glsl
-
-float calculateDirectionalShadowValue()
-{
-	vec3 uv = io_vertexPositionLightSpace.xyz / io_vertexPositionLightSpace.w;
-	uv = uv * 0.5 + 0.5;
-
-	float mappedDepth = texture(u_directionalShadowMap, uv.xy).r;
-
-	if (mappedDepth < uv.z)
-	{
-		return 0.0;
-	}
-	else
-	{
-		return 1.0;
-	}
-}
+#include Math/Shadows/DirectionalShadowValue.glsl
+#include Math/Shadows/OmnidirectionalShadowValue.glsl
 
 vec3 calculateDirectionalLight(FlatLightParams params)
 {
@@ -58,21 +43,6 @@ vec3 calculateDirectionalLight(FlatLightParams params)
 	specular /= specularDenom;
 
 	return (kd * u_albedo / PI + specular) * u_directionalLight.colour * nDotL * calculateDirectionalShadowValue();
-}
-
-float calculateOmnidirectionalShadowValue(int index)
-{
-    vec3 uv = io_vertexPosition - u_pointLights[index].position;
-
-    float mappedDepth = texture(u_omnidirectionalShadowMap, vec4(uv, index)).r * u_pointLights[index].range;
-	float currentDepth = length(uv);
-
-	if (mappedDepth > currentDepth - c_shadowSamplingBias)
-	{
-		return 1.0 - smoothstep(0.0, u_pointLights[index].range, currentDepth);
-	}
-
-	return 0.0;
 }
 
 vec3 calculatePointLights(FlatLightParams params)

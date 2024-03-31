@@ -22,6 +22,8 @@ uniform sampler2D u_roughnessMap;
 #include Math/PBR/FresnelSchlick.glsl
 #include Math/PBR/FresnelSchlickRoughness.glsl
 #include Math/PBR/MaxReflectionLod.glsl
+#include Math/Shadows/DirectionalShadowValue.glsl
+#include Math/Shadows/OmnidirectionalShadowValue.glsl
 
 // Possible optimisation:
 // | Calculate tbn matrix in vertex shader
@@ -36,23 +38,6 @@ vec3 getNormalFromMap()
 	mat3 tbn = mat3(tangent, bitangent, normal);
 
 	return normalize(tbn * tangentNormal);
-}
-
-float calculateDirectionalShadowValue()
-{
-	vec3 uv = io_vertexPositionLightSpace.xyz / io_vertexPositionLightSpace.w;
-	uv = uv * 0.5 + 0.5;
-
-	float mappedDepth = texture(u_directionalShadowMap, uv.xy).r;
-
-	if (mappedDepth < uv.z)
-	{
-		return 0.0;
-	}
-	else
-	{
-		return 1.0;
-	}
 }
 
 vec3 calculateDirectionalLight(TexturedLightParams params)
@@ -76,21 +61,6 @@ vec3 calculateDirectionalLight(TexturedLightParams params)
 	specular /= specularDenom;
 
 	return (kd * params.albedo / PI + specular) * u_directionalLight.colour * nDotL * calculateDirectionalShadowValue();
-}
-
-float calculateOmnidirectionalShadowValue(int index)
-{
-    vec3 uv = io_vertexPosition - u_pointLights[index].position;
-
-    float mappedDepth = texture(u_omnidirectionalShadowMap, vec4(uv, index)).r * u_pointLights[index].range;
-	float currentDepth = length(uv);
-
-	if (mappedDepth > currentDepth - c_shadowSamplingBias)
-	{
-		return 1.0 - smoothstep(0.0, u_pointLights[index].range, currentDepth);
-	}
-
-	return 0.0;
 }
 
 vec3 calculatePointLights(TexturedLightParams params)

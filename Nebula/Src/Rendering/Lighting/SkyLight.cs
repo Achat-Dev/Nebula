@@ -7,7 +7,7 @@ public class SkyLight
 
     internal SkyLight() { }
 
-    internal void SetupModelRendering()
+    internal void BindPBRMaps()
     {
         if (m_skybox != null)
         {
@@ -17,7 +17,7 @@ public class SkyLight
         }
     }
 
-    internal void SetupSkyboxRendering()
+    internal void BindSkyboxMap()
     {
         if (m_skybox != null)
         {

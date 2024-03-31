@@ -72,6 +72,7 @@ internal class Window : IDisposable
         Nebula.Rendering.GL.Init(Silk.NET.OpenGL.GL.GetApi(m_window));
         Nebula.Rendering.Assimp.Init();
         Nebula.Rendering.Renderer.Init();
+        Nebula.Rendering.Lighting.Init();
 
         Scene.Load();
 
@@ -233,9 +234,10 @@ internal class Window : IDisposable
         Logger.EngineInfo("Closing window");
         m_isOpen = false;
         Game.Closing?.Invoke();
-        Renderer.Dispose();
-        GL.Dispose();
-        Assimp.Dispose();
-        Cache.Dispose();
+        Nebula.Rendering.Lighting.Dispose();
+        Nebula.Rendering.Renderer.Dispose();
+        Nebula.Rendering.GL.Dispose();
+        Nebula.Rendering.Assimp.Dispose();
+        Nebula.Cache.Dispose();
     }
 }

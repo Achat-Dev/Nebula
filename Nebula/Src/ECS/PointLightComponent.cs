@@ -19,6 +19,18 @@ public class PointLightComponent : StartableComponent
         Lighting.UnregisterPointLight(this);
     }
 
+    internal Matrix4x4[] GetViewProjectionMatrices()
+    {
+        Matrix4x4[] viewMatrices = Utils.CubemapUtils.GetViewMatrices(GetEntity().GetTransform().GetWorldPosition());
+        Matrix4x4 projectionMatrix = Matrix4x4.CreatePerspective(90f, 1f, 0.001f, m_range);
+
+        for (int i = 0; i < viewMatrices.Length; i++)
+        {
+            viewMatrices[i] *= projectionMatrix;
+        }
+        return viewMatrices;
+    }
+
     public float GetRange()
     {
         return m_range;
@@ -47,17 +59,5 @@ public class PointLightComponent : StartableComponent
     public void SetColour(Colour colour)
     {
         m_colour = colour;
-    }
-
-    internal Matrix4x4[] GetViewProjectionMatrices()
-    {
-        Matrix4x4[] viewMatrices = Utils.CubemapUtils.GetViewMatrices(GetEntity().GetTransform().GetWorldPosition());
-        Matrix4x4 projectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(90f, 1f, 0.001f, m_range);
-
-        for (int i = 0; i < viewMatrices.Length; i++)
-        {
-            viewMatrices[i] *= projectionMatrix;
-        }
-        return viewMatrices;
     }
 }

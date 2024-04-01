@@ -274,24 +274,40 @@ public struct Matrix4x4 : IEquatable<Matrix4x4>
         return System.Numerics.Matrix4x4.CreateLookAtLeftHanded(position, target, up);
     }
 
-    public static Matrix4x4 CreatePerspectiveFieldOfView(float fov, float aspectRatio, float nearClippingPlane, float farClippingPlane)
+    public static Matrix4x4 CreatePerspective(float fov, float aspectRatio, float nearClippingPlane, float farClippingPlane)
     {
         fov = MathHelper.DegreesToRadians(fov);
         return System.Numerics.Matrix4x4.CreatePerspectiveFieldOfView(fov, aspectRatio, nearClippingPlane, farClippingPlane);
     }
 
-    public static Matrix4x4 CreatePerspectiveFieldOfViewLeftHanded(float fov, float aspectRatio, float nearClippingPlane, float farClippingPlane)
+    public static Matrix4x4 CreatePerspectiveLeftHanded(float fov, float aspectRatio, float nearClippingPlane, float farClippingPlane)
     {
         fov = MathHelper.DegreesToRadians(fov);
         return System.Numerics.Matrix4x4.CreatePerspectiveFieldOfViewLeftHanded(fov, aspectRatio, nearClippingPlane, farClippingPlane);
     }
 
-    public static Matrix4x4 CreateOrthographicFieldOfView(float width, float height, float nearClippingPlane, float farClippingPlane)
+    public static Matrix4x4 CreateOrthographic(float width, float height, float nearClippingPlane, float farClippingPlane)
     {
         return System.Numerics.Matrix4x4.CreateOrthographic(width, height, nearClippingPlane, farClippingPlane);
     }
 
-    public static Matrix4x4 CreateOrthographicFieldOfViewLeftHanded(float width, float height, float nearClippingPlane, float farClippingPlane)
+    public static Matrix4x4 CreateOrthographic(float minX, float maxX, float minY, float maxY, float minZ, float maxZ)
+    {
+        float m11 = 2f / (maxX - minX);
+        float m22 = 2f / (maxY - minY);
+        float m33 = -2f / (maxZ - minZ);
+        float m41 = -((maxX + minX) / (maxX - minX));
+        float m42 = -((maxY + minY) / (maxY - minY));
+        float m43 = -((maxZ + minZ) / (maxZ - minZ));
+
+        return new Matrix4x4(
+            m11, 0f, 0f, 0f,
+            0f, m22, 0f, 0f,
+            0f, 0f, m33, 0f,
+            m41, m42, m43, 1f);
+    }
+
+    public static Matrix4x4 CreateOrthographicLeftHanded(float width, float height, float nearClippingPlane, float farClippingPlane)
     {
         return System.Numerics.Matrix4x4.CreateOrthographicLeftHanded(width, height, nearClippingPlane, farClippingPlane);
     }

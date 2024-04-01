@@ -69,7 +69,7 @@ internal class Cubemap : ICacheable, IDisposable, ITextureBindable
         }
         mappingShader.Use();
         mappingShader.SetInt("u_environmentMap", 0);
-        mappingShader.SetMat4("u_projection", Matrix4x4.CreatePerspectiveFieldOfView(90f, 1f, 0.1f, 100f));
+        mappingShader.SetMat4("u_projection", Matrix4x4.CreatePerspective(90f, 1f, 0.1f, 100f));
 
         // Capture faces
         GL.Get().Viewport(faceSize);

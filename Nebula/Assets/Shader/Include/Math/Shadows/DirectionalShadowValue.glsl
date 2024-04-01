@@ -7,6 +7,10 @@
 
 	if (mappedDepth < uv.z - c_directionalShadowSamplingBias)
 	{
+		if (max(uv.x, uv.y) > 1.0 || min(uv.x, uv.y) < 0.0)
+		{
+			return 1.0;
+		}
 		return 0.0;
 	}
 

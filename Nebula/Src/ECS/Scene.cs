@@ -4,6 +4,7 @@ namespace Nebula;
 
 public class Scene
 {
+    private readonly Camera r_camera = new Camera();
     private readonly DirectionalLight r_directionalLight = new DirectionalLight();
     private readonly SkyLight r_skyLight = new SkyLight();
 
@@ -38,6 +39,11 @@ public class Scene
         r_entityRemovalStack.Push(entity);
     }
 
+    public Camera GetCamera()
+    {
+        return r_camera;
+    }
+
     public DirectionalLight GetDirectionalLight()
     {
         return r_directionalLight;
@@ -52,6 +58,8 @@ public class Scene
     {
         if (s_active != null)
         {
+            IDisposable disposable = s_active.r_camera;
+            disposable.Dispose();
             s_active.r_entities.Clear();
             s_active.r_entities.TrimExcess();
             s_active.r_entityRemovalStack.Clear();

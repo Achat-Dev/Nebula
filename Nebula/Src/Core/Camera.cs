@@ -2,29 +2,23 @@
 
 namespace Nebula;
 
-public class CameraComponent : StartableComponent
+public class Camera : IDisposable
 {
+    private TransformComponent m_transform = new TransformComponent();
+
     private float m_aspectRatio = 16f / 9f;
     private float m_fov = 45f;
     private float m_nearClippingPlane = 0.001f;
-    private float m_farClippingPlane = 500f;
+    private float m_farClippingPlane = 100f;
     private Matrix4x4 m_projectionMatrix;
     private Framebuffer m_framebuffer;
 
-    public override void OnCreate()
+    internal Camera()
     {
         Window.Resizing += OnResize;
         Vector2i windowSize = Game.GetWindowSize();
         m_framebuffer = new Framebuffer(windowSize, FramebufferAttachmentConfig.Defaults.Colour(), FramebufferAttachmentConfig.Defaults.DepthStencil());
         OnResize(windowSize);
-    }
-
-    public override void OnDestroy()
-    {
-        base.OnDestroy();
-        IDisposable disposable = m_framebuffer;
-        disposable.Dispose();
-        Window.Resizing -= OnResize;
     }
 
     private void OnResize(Vector2i size)
@@ -36,20 +30,35 @@ public class CameraComponent : StartableComponent
 
     private void RecalculateProjectionMatrix()
     {
-        m_projectionMatrix = Matrix4x4.CreatePerspectiveFieldOfViewLeftHanded(m_fov, m_aspectRatio, m_nearClippingPlane, m_farClippingPlane);
+        m_projectionMatrix = Matrix4x4.CreatePerspectiveLeftHanded(m_fov, m_aspectRatio, m_nearClippingPlane, m_farClippingPlane);
+    }
+
+    internal Frustum GetFrustum()
+    {
+        return new Frustum(m_fov, m_aspectRatio, m_nearClippingPlane, m_farClippingPlane, m_transform);
+    }
+
+    internal Frustum GetFrustum(float maxDistance)
+    {
+        float farClippingPlane = maxDistance > m_farClippingPlane ? m_farClippingPlane : maxDistance + m_nearClippingPlane;
+        return new Frustum(m_fov, m_aspectRatio, m_nearClippingPlane, farClippingPlane, m_transform);
     }
 
     internal Matrix4x4 GetViewProjectionMatrix()
     {
-        TransformComponent transform = m_entity.GetTransform();
-        Vector3 position = transform.GetWorldPosition();
-        Matrix4x4 viewMatrix = Matrix4x4.CreateLookAtLeftHanded(position, position + transform.GetForward(), transform.GetUp());
+        Vector3 position = m_transform.GetWorldPosition();
+        Matrix4x4 viewMatrix = Matrix4x4.CreateLookAtLeftHanded(position, position + m_transform.GetForward(), m_transform.GetUp());
         return viewMatrix * m_projectionMatrix;
     }
 
     internal Framebuffer GetFramebuffer()
     {
         return m_framebuffer;
+    }
+
+    public TransformComponent GetTransform()
+    {
+        return m_transform;
     }
 
     public Vector2 GetClippingPlanes()
@@ -73,5 +82,12 @@ public class CameraComponent : StartableComponent
     {
         m_fov = fov;
         RecalculateProjectionMatrix();
+    }
+
+    void IDisposable.Dispose()
+    {
+        IDisposable disposable = m_framebuffer;
+        disposable.Dispose();
+        Window.Resizing -= OnResize;
     }
 }

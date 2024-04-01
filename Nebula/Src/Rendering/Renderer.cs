@@ -37,9 +37,10 @@ public static class Renderer
         GL.Get().ClearColor(colour);
     }
 
-    internal static void Render(CameraComponent camera)
+    internal static void Render()
     {
         Scene scene = Scene.GetActive();
+        Camera camera = scene.GetCamera();
         Matrix4x4 lightSpaceViewProjection = scene.GetDirectionalLight().GetViewProjectionMatrix();
 
         UpdateUniformBuffers(camera, ref lightSpaceViewProjection);
@@ -90,10 +91,10 @@ public static class Renderer
         s_screenVao.Draw();
     }
 
-    private static void UpdateUniformBuffers(CameraComponent camera, ref Matrix4x4 lightSpaceViewProjection)
+    private static void UpdateUniformBuffers(Camera camera, ref Matrix4x4 lightSpaceViewProjection)
     {
         UniformBuffer cameraBuffer = UniformBuffer.Defaults.Camera;
-        cameraBuffer.BufferData(0, camera.GetEntity().GetTransform().GetWorldPosition());
+        cameraBuffer.BufferData(0, camera.GetTransform().GetWorldPosition());
 
         UniformBuffer lightBuffer = UniformBuffer.Defaults.Lights;
         lightBuffer.BufferData(0, Scene.GetActive().GetSkyLight().GetIntensity());

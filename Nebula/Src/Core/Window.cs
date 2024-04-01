@@ -12,7 +12,6 @@ internal class Window : IDisposable
     public static event Action<Vector2i> Resizing;
 
     // Temporary
-    private CameraComponent m_camera;
     private Vector3 m_eulerAngles;
     private Entity[] m_pointLightEntites = new Entity[3];
 
@@ -152,9 +151,7 @@ internal class Window : IDisposable
         modelRenderer.SetShaderInstance(shaderInstanceGround);
 
         // Camera
-        Entity cameraEntity = new Entity("Camera");
-        m_camera = cameraEntity.AddComponent<CameraComponent>();
-        cameraEntity.GetTransform().Translate(new Vector3(0f, 0f, -5f));
+        Scene.GetActive().GetCamera().GetTransform().Translate(new Vector3(0f, 0f, -5f));
 
         // Lighting
         PointLightComponent[] pointLights = new PointLightComponent[3];
@@ -188,7 +185,7 @@ internal class Window : IDisposable
     {
         float dt = (float)deltaTime;
 
-        TransformComponent cameraTransform = m_camera.GetEntity().GetTransform();
+        TransformComponent cameraTransform = Scene.GetActive().GetCamera().GetTransform();
 
         if (Input.IsMouseButtonDown(MouseButton.Right))
         {
@@ -226,7 +223,7 @@ internal class Window : IDisposable
 
     private unsafe void OnRender(double deltaTime)
     {
-        Nebula.Rendering.Renderer.Render(m_camera);
+        Nebula.Rendering.Renderer.Render();
     }
 
     private void OnClose()

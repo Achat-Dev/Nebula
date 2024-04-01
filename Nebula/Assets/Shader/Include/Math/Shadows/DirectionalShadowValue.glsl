@@ -5,12 +5,10 @@
 
 	float mappedDepth = texture(u_directionalShadowMap, uv.xy).r;
 
-	if (mappedDepth < uv.z)
+	if (mappedDepth < uv.z - c_directionalShadowSamplingBias)
 	{
 		return 0.0;
 	}
-	else
-	{
-		return 1.0;
-	}
+
+	return 1.0;
 }

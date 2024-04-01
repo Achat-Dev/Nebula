@@ -5,7 +5,7 @@
     float mappedDepth = texture(u_omnidirectionalShadowMap, vec4(uv, index)).r * u_pointLights[index].range;
 	float currentDepth = length(uv);
 
-	if (mappedDepth > currentDepth - c_shadowSamplingBias)
+	if (mappedDepth > currentDepth - c_omnidirectionalShadowSamplingBias)
 	{
 		return 1.0 - smoothstep(0.0, u_pointLights[index].range, currentDepth);
 	}

@@ -10,6 +10,9 @@ public struct Vector4 : IEquatable<Vector4>
     public static readonly Vector4 Zero = new Vector4(0f, 0f, 0f, 0f);
     public static readonly Vector4 One = new Vector4(1f, 1f, 1f, 1f);
 
+    public static readonly Vector4 PositiveInfinity = new Vector4(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity);
+    public static readonly Vector4 NegativeInfinity = new Vector4(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity);
+
     public Vector4(float x, float y, float z, float w)
     {
         X = x;
@@ -170,6 +173,26 @@ public struct Vector4 : IEquatable<Vector4>
         value.Z /= scale.Z;
         value.W /= scale.W;
         return value;
+    }
+
+    public static bool operator >(Vector4 left, Vector4 right)
+    {
+        return left.X > right.X && left.Y > right.Y && left.Z > right.Z && left.W > right.W;
+    }
+
+    public static bool operator <(Vector4 left, Vector4 right)
+    {
+        return left.X < right.X && left.Y < right.Y && left.Z < right.Z && left.W < right.W;
+    }
+
+    public static bool operator >=(Vector4 left, Vector4 right)
+    {
+        return left.X >= right.X && left.Y >= right.Y && left.Z >= right.Z && left.W >= right.W;
+    }
+
+    public static bool operator <=(Vector4 left, Vector4 right)
+    {
+        return left.X <= right.X && left.Y <= right.Y && left.Z <= right.Z && left.W <= right.W;
     }
 
     public static bool operator ==(Vector4 left, Vector4 right)

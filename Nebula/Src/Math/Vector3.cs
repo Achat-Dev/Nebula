@@ -12,6 +12,9 @@ public struct Vector3 : IEquatable<Vector3>
     public static readonly Vector3 Up = new Vector3(0f, 1f, 0f);
     public static readonly Vector3 Forward = new Vector3(0f, 0f, 1f);
 
+    public static readonly Vector3 PositiveInfinity = new Vector3(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity);
+    public static readonly Vector3 NegativeInfinity = new Vector3(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity);
+
     public Vector3(float x, float y, float z)
     {
         X = x;
@@ -183,6 +186,26 @@ public struct Vector3 : IEquatable<Vector3>
         value.Y /= scale.Y;
         value.Z /= scale.Z;
         return value;
+    }
+
+    public static bool operator >(Vector3 left, Vector3 right)
+    {
+        return left.X > right.X && left.Y > right.Y && left.Z > right.Z;
+    }
+
+    public static bool operator <(Vector3 left, Vector3 right)
+    {
+        return left.X < right.X && left.Y < right.Y && left.Z < right.Z;
+    }
+
+    public static bool operator >=(Vector3 left, Vector3 right)
+    {
+        return left.X >= right.X && left.Y >= right.Y && left.Z >= right.Z;
+    }
+
+    public static bool operator <=(Vector3 left, Vector3 right)
+    {
+        return left.X <= right.X && left.Y <= right.Y && left.Z <= right.Z;
     }
 
     public static bool operator ==(Vector3 left, Vector3 right)

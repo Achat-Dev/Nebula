@@ -91,6 +91,26 @@ public struct Vector2i : IEquatable<Vector2i>
         return value;
     }
 
+    public static bool operator >(Vector2i left, Vector2i right)
+    {
+        return left.X > right.X && left.Y > right.Y;
+    }
+
+    public static bool operator <(Vector2i left, Vector2i right)
+    {
+        return left.X < right.X && left.Y < right.Y;
+    }
+
+    public static bool operator >=(Vector2i left, Vector2i right)
+    {
+        return left.X >= right.X && left.Y >= right.Y;
+    }
+
+    public static bool operator <=(Vector2i left, Vector2i right)
+    {
+        return left.X <= right.X && left.Y <= right.Y;
+    }
+
     public static bool operator ==(Vector2i left, Vector2i right)
     {
         return left.X == right.X && left.Y == right.Y;

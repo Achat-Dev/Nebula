@@ -10,6 +10,9 @@ public struct Vector2 : IEquatable<Vector2>
     public static readonly Vector2 Right = new Vector2(1f, 0f);
     public static readonly Vector2 Up = new Vector2(0f, 1f);
 
+    public static readonly Vector2 PositiveInfinity = new Vector2(float.PositiveInfinity, float.PositiveInfinity);
+    public static readonly Vector2 NegativeInfinity = new Vector2(float.NegativeInfinity, float.NegativeInfinity);
+
     public Vector2(float x, float y)
     {
         X = x;
@@ -146,6 +149,26 @@ public struct Vector2 : IEquatable<Vector2>
         value.X /= scale.X;
         value.Y /= scale.Y;
         return value;
+    }
+
+    public static bool operator >(Vector2 left, Vector2 right)
+    {
+        return left.X > right.X && left.Y > right.Y;
+    }
+
+    public static bool operator <(Vector2 left, Vector2 right)
+    {
+        return left.X < right.X && left.Y < right.Y;
+    }
+
+    public static bool operator >=(Vector2 left, Vector2 right)
+    {
+        return left.X >= right.X && left.Y >= right.Y;
+    }
+
+    public static bool operator <=(Vector2 left, Vector2 right)
+    {
+        return left.X <= right.X && left.Y <= right.Y;
     }
 
     public static bool operator ==(Vector2 left, Vector2 right)

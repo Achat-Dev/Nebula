@@ -104,6 +104,26 @@ public struct Vector3i : IEquatable<Vector3i>
         return value;
     }
 
+    public static bool operator >(Vector3i left, Vector3i right)
+    {
+        return left.X > right.X && left.Y > right.Y && left.Z > right.Z;
+    }
+
+    public static bool operator <(Vector3i left, Vector3i right)
+    {
+        return left.X < right.X && left.Y < right.Y && left.Z < right.Z;
+    }
+
+    public static bool operator >=(Vector3i left, Vector3i right)
+    {
+        return left.X >= right.X && left.Y >= right.Y && left.Z >= right.Z;
+    }
+
+    public static bool operator <=(Vector3i left, Vector3i right)
+    {
+        return left.X <= right.X && left.Y <= right.Y && left.Z <= right.Z;
+    }
+
     public static bool operator ==(Vector3i left, Vector3i right)
     {
         return left.X == right.X && left.Y == right.Y && left.Z == right.Z;

@@ -102,16 +102,6 @@ internal static class Lighting
         s_omnidirectionalShadowMapFramebuffer.GetAttachment(FramebufferAttachment.AttachmentType.Depth).Bind(Texture.Unit.Texture4);
     }
 
-    internal static uint GetPointLightCount()
-    {
-        return s_pointLightCount;
-    }
-
-    internal static HashSet<PointLightComponent> GetPointLights()
-    {
-        return s_pointLights;
-    }
-
     internal static float[] GetPointLightData()
     {
         float[] data = new float[s_pointLightCount * 8];
@@ -151,6 +141,45 @@ internal static class Lighting
         {
             s_pointLightCount = Math.Max(s_pointLightCount - 1, 0);
         }
+    }
+
+    internal static Vector2i GetDirectionalShadowMapSize()
+    {
+        return s_directionalShadowMapSize;
+    }
+
+    public static void SetDirectionalShadowMapSize(int size)
+    {
+        if (size <= 0)
+        {
+            Logger.EngineWarn("Trying to set directional shadow map size to {0}, value must be greater than 0", size);
+            return;
+        }
+
+        s_directionalShadowMapSize = new Vector2i(size, size);
+        s_directionalShadowMapFramebuffer.Resize(s_directionalShadowMapSize);
+    }
+
+    public static void SetPointShadowMapSize(int size)
+    {
+        if (size <= 0)
+        {
+            Logger.EngineWarn("Trying to set point shadow map size to {0}, value must be greater than 0", size);
+            return;
+        }
+
+        s_pointShadowMapSize = new Vector2i(size, size);
+        s_omnidirectionalShadowMapFramebuffer.Resize(s_pointShadowMapSize);
+    }
+
+    internal static uint GetPointLightCount()
+    {
+        return s_pointLightCount;
+    }
+
+    internal static HashSet<PointLightComponent> GetPointLights()
+    {
+        return s_pointLights;
     }
 
     internal static void Dispose()

@@ -7,7 +7,6 @@ public class DirectionalLight
     private float m_intensity = 1f;
     private float m_shadowDistance = 20f;
     private float m_shadowMapPadding = 2f;
-    private float m_projectionZScale = 5f;
 
     private Matrix4x4 m_viewProjection = Matrix4x4.Identity;
 
@@ -18,83 +17,25 @@ public class DirectionalLight
 
     internal Matrix4x4 GetViewProjectionMatrix()
     {
-        Frustum frustum = Scene.GetActive().GetCamera().GetFrustum(m_shadowDistance);
+        BoundingSphere frustumBoundingSphere = Scene.GetActive().GetCamera().GetFrustum(m_shadowDistance).GetBoundingSphere();
 
-        float shadowMapSize = (float)Lighting.GetDirectionalShadowMapSize();
-        float texelSize = 1f / shadowMapSize;
-        int csmSplit = 1;
-        float csmTexelSize = 2f * csmSplit / shadowMapSize;
-
-        Vector3 position = frustum.GetCenter();
+        // Replace this with the cascade level
+        int csmLevel = 1;
+        float csmTexelSize = 2f * csmLevel / (float)Lighting.GetDirectionalShadowMapSize();
 
         Quaternion rotation = Quaternion.FromEulerAngles(m_direction);
-        Vector3 forward = rotation * Vector3.Forward;
-        Matrix4x4 viewMatrix = Matrix4x4.CreateLookAt(position - forward, position, rotation * Vector3.Up);
+        Matrix4x4 viewMatrix = Matrix4x4.CreateLookAt(frustumBoundingSphere.Center - rotation * Vector3.Forward, frustumBoundingSphere.Center, rotation * Vector3.Up);
 
-        // Calculate min and max coordinates of the camera frustum
-        Vector4 point;
-        float left = float.PositiveInfinity;
-        float right = float.NegativeInfinity;
-        float bottom = float.PositiveInfinity;
-        float top = float.NegativeInfinity;
-        float near = float.PositiveInfinity;
-        float far = float.NegativeInfinity;
-        Vector3[] corners = frustum.GetCorners();
-        for (int i = 0; i < corners.Length; i++)
-        {
-            point = viewMatrix * new Vector4(corners[i].X, corners[i].Y, corners[i].Z, 1f);
-            left = MathF.Min(left, point.X);
-            right = MathF.Max(right, point.X);
-            bottom = MathF.Min(bottom, point.Y);
-            top = MathF.Max(top, point.Y);
-            near = MathF.Min(near, point.Z);
-            far = MathF.Max(far, point.Z);
-        }
+        // Make sure that the texture always has the same size and an aspect ratio of 1:1
+        // | This fixes shadow shimmering when the camera rotates
+        // | (as long as the fov and aspect ratio of the camera don't change)
+        float frustumSize = MathF.Floor(frustumBoundingSphere.Radius / csmTexelSize) * csmTexelSize;
+        frustumSize += m_shadowMapPadding;
 
-        // Make frustum an aspect ratio of 1:1
-        float distanceX = right - left;
-        float distanceY = top - bottom;
-        float distanceZ = far - near;
+        m_viewProjection = viewMatrix * Matrix4x4.CreateOrthographic(frustumSize, frustumSize, -frustumSize, frustumSize);
 
-        //float maxDistance = MathF.Max(MathF.Max(distanceX, distanceY), distanceZ);
-        float maxDistance = MathF.Max(distanceX, distanceY);
-
-        float halfX = (maxDistance - distanceX) / 2f;
-        //left -= halfX;
-        //right += halfX;
-
-        float halfY = (maxDistance - distanceY) / 2f;
-        //bottom -= halfY;
-        //top += halfY;
-
-        float halfZ = (maxDistance - distanceZ) / 2f;
-        //near -= halfZ + m_shadowMapPadding;
-        //far += halfZ + m_shadowMapPadding;
-
-        // Scale near and far clipping plane
-        if (near < 0)
-        {
-            near *= m_projectionZScale;
-        }
-        else
-        {
-            near /= m_projectionZScale;
-        }
-
-        if (far < 0)
-        {
-            far /= m_projectionZScale;
-        }
-        else
-        {
-            far *= m_projectionZScale;
-        }
-
-        float width = right - left;
-        float height = top - bottom;
-
-        m_viewProjection = viewMatrix * Matrix4x4.CreateOrthographic(width, height, near, far);
-
+        // Snap translation to texel grid
+        // | This fixes shadow shimmering when the camera moves
         m_viewProjection.M41 -= m_viewProjection.M41 % csmTexelSize;
         m_viewProjection.M42 -= m_viewProjection.M42 % csmTexelSize;
         m_viewProjection.M43 -= m_viewProjection.M43 % csmTexelSize;
@@ -150,15 +91,5 @@ public class DirectionalLight
     public void SetShadowMapPadding(float padding)
     {
         m_shadowMapPadding = padding;
-    }
-
-    public float GetProjectionZScale()
-    {
-        return m_projectionZScale;
-    }
-
-    public void SetProjectionZScale(float scale)
-    {
-        m_projectionZScale = scale;
     }
 }

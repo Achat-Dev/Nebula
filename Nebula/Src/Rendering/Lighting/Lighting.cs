@@ -4,7 +4,7 @@ namespace Nebula.Rendering;
 
 internal static class Lighting
 {
-    private static Vector2i s_directionalShadowMapSize = new Vector2i(128, 128);
+    private static Vector2i s_directionalShadowMapSize = new Vector2i(1024, 1024);
     private static Vector2i s_pointShadowMapSize = new Vector2i(128, 128);
 
     private static Shader s_directionalShadowMapShader;
@@ -92,11 +92,6 @@ internal static class Lighting
             }
             index++;
         }
-    }
-
-    internal static void DebugDirectionalShadowMap()
-    {
-        s_directionalShadowMapFramebuffer.GetAttachment(FramebufferAttachment.AttachmentType.Depth).Bind(Texture.Unit.Texture0);
     }
 
     public static void BindDirectionalShadowMap()

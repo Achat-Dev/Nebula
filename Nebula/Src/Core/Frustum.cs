@@ -99,6 +99,11 @@ internal class Frustum
         return new Frustum(center, rotation, distanceX, distanceY, distanceZ);
     }
 
+    public BoundingSphere GetBoundingSphere()
+    {
+        return new BoundingSphere(this);
+    }
+
     public Vector3 GetBottomLeftNear()
     {
         return m_corners[(int)CornerType.BottomLeftNear];

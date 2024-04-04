@@ -89,12 +89,6 @@ public static class Renderer
 
         framebuffer.GetAttachment(FramebufferAttachment.AttachmentType.Colour).Bind(Texture.Unit.Texture0);
         s_screenVao.Draw();
-
-        // Debug: Draw directional shadow map
-        int size = Lighting.GetDirectionalShadowMapSize() * 5;
-        GL.Get().Viewport(new Vector2i(size, size));
-        Lighting.DebugDirectionalShadowMap();
-        s_screenVao.Draw();
     }
 
     private static void UpdateUniformBuffers(Camera camera, ref Matrix4x4 lightSpaceViewProjection)

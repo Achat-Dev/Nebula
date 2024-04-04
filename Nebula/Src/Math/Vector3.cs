@@ -188,6 +188,11 @@ public struct Vector3 : IEquatable<Vector3>
         return value;
     }
 
+    public static Vector3 operator %(Vector3 left, Vector3 right)
+    {
+        return new Vector3(left.X % right.X, left.Y % right.Y, left.Z % right.Z);
+    }
+
     public static bool operator >(Vector3 left, Vector3 right)
     {
         return left.X > right.X && left.Y > right.Y && left.Z > right.Z;

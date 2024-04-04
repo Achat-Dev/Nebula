@@ -175,6 +175,11 @@ public struct Vector4 : IEquatable<Vector4>
         return value;
     }
 
+    public static Vector4 operator %(Vector4 left, Vector4 right)
+    {
+        return new Vector4(left.X % right.X, left.Y % right.Y, left.Z % right.Z, left.W % right.W);
+    }
+
     public static bool operator >(Vector4 left, Vector4 right)
     {
         return left.X > right.X && left.Y > right.Y && left.Z > right.Z && left.W > right.W;

@@ -18,7 +18,7 @@ internal class Frustum
     private Vector3 m_center;
     private Vector3[] m_corners = new Vector3[8];
 
-    public Frustum(float fov, float aspectRatio, float nearClippingPlane, float farClippingPlane, TransformComponent transform)
+    private Frustum(TransformComponent transform, float fov, float aspectRatio, float nearClippingPlane, float farClippingPlane)
     {
         fov = MathHelper.DegreesToRadians(fov);
 
@@ -60,14 +60,43 @@ internal class Frustum
         m_center /= m_corners.Length;
     }
 
-    public Vector3 GetCenter()
+    private Frustum(Vector3 center, Quaternion rotation, float distanceX, float distanceY, float distanceZ)
     {
-        return m_center;
+        m_center = center;
+
+        Vector3 forward = rotation * Vector3.Forward;
+        Vector3 up = rotation * Vector3.Up;
+        Vector3 right = rotation * Vector3.Right;
+
+        Vector3 distanceRight = right * (distanceX * 0.5f);
+        Vector3 distanceUp = up * (distanceY * 0.5f);
+        Vector3 distanceForward = forward * (distanceZ * 0.5f);
+
+        Vector3 centerNear = center - distanceForward;
+        Vector3 centerFar = center + distanceForward;
+
+        // Near face
+        m_corners[(int)CornerType.BottomLeftNear] = centerNear - distanceRight - distanceUp;
+        m_corners[(int)CornerType.TopLeftNear] = centerNear - distanceRight + distanceUp;
+        m_corners[(int)CornerType.TopRightNear] = centerNear + distanceRight + distanceUp;
+        m_corners[(int)CornerType.BottomRightNear] = centerNear + distanceRight - distanceUp;
+
+        // Far face
+        m_corners[(int)CornerType.BottomLeftFar] = centerFar - distanceRight - distanceUp;
+        m_corners[(int)CornerType.TopLeftFar] = centerFar - distanceRight + distanceUp;
+        m_corners[(int)CornerType.TopRightFar] = centerFar + distanceRight + distanceUp;
+        m_corners[(int)CornerType.BottomRightFar] = centerFar + distanceRight - distanceUp;
     }
 
-    public Vector3[] GetCorners()
+    public static Frustum FromPerspective(TransformComponent transform, float fov, float aspectRatio, float nearClippingPlane, float farClippingPlane)
     {
-        return m_corners;
+        return new Frustum(transform, fov, aspectRatio, nearClippingPlane, farClippingPlane);
+    }
+
+    // The position of the transform is treated as the center of the frustum
+    public static Frustum FromOrthographic(Vector3 center, Quaternion rotation, float distanceX, float distanceY, float distanceZ)
+    {
+        return new Frustum(center, rotation, distanceX, distanceY, distanceZ);
     }
 
     public Vector3 GetBottomLeftNear()
@@ -108,5 +137,15 @@ internal class Frustum
     public Vector3 GetBottomRightFar()
     {
         return m_corners[(int)CornerType.BottomLeftFar];
+    }
+
+    public Vector3 GetCenter()
+    {
+        return m_center;
+    }
+
+    public Vector3[] GetCorners()
+    {
+        return m_corners;
     }
 }

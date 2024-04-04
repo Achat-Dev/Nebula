@@ -33,15 +33,10 @@ public class Camera : IDisposable
         m_projectionMatrix = Matrix4x4.CreatePerspectiveLeftHanded(m_fov, m_aspectRatio, m_nearClippingPlane, m_farClippingPlane);
     }
 
-    internal Frustum GetFrustum()
-    {
-        return new Frustum(m_fov, m_aspectRatio, m_nearClippingPlane, m_farClippingPlane, m_transform);
-    }
-
     internal Frustum GetFrustum(float maxDistance)
     {
         float farClippingPlane = maxDistance > m_farClippingPlane ? m_farClippingPlane : maxDistance + m_nearClippingPlane;
-        return new Frustum(m_fov, m_aspectRatio, m_nearClippingPlane, farClippingPlane, m_transform);
+        return Frustum.FromPerspective(m_transform, m_fov, m_aspectRatio, m_nearClippingPlane, farClippingPlane);
     }
 
     internal Matrix4x4 GetViewProjectionMatrix()

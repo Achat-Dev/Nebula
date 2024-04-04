@@ -46,6 +46,3 @@ uniform samplerCube u_prefilteredMap;
 uniform sampler2D u_brdfLut;
 uniform sampler2D u_directionalShadowMap;
 uniform samplerCubeArray u_omnidirectionalShadowMap;
-
-const float c_omnidirectionalShadowSamplingBias = 0.07;
-const float c_directionalShadowSamplingBias = 0.0005;

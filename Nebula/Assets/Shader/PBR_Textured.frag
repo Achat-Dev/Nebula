@@ -60,7 +60,7 @@ vec3 calculateDirectionalLight(TexturedLightParams params)
 	float specularDenom = 4.0 * params.nDotV * nDotL + 0.0001; // plus at the end to prevent dividing by 0
 	specular /= specularDenom;
 
-	return (kd * params.albedo / PI + specular) * u_directionalLight.colour * nDotL * calculateDirectionalShadowValue();
+	return (kd * params.albedo / PI + specular) * u_directionalLight.colour * nDotL * calculateDirectionalShadowValue(nDotL);
 }
 
 vec3 calculatePointLights(TexturedLightParams params)
@@ -92,7 +92,7 @@ vec3 calculatePointLights(TexturedLightParams params)
 		float specularDenom = 4.0 * params.nDotV * nDotL + 0.0001; // plus at the end to prevent dividing by 0
 		specular /= specularDenom;
 
-		colour += (kd * params.albedo / PI + specular) * radiance * nDotL * calculateOmnidirectionalShadowValue(i);
+		colour += (kd * params.albedo / PI + specular) * radiance * nDotL * calculateOmnidirectionalShadowValue(i, nDotL);
 	}
 	return colour;
 }

@@ -1,4 +1,7 @@
-﻿float calculateDirectionalShadowValue()
+﻿const float c_directionalShadowMinBias = 0.0005;
+const float c_directionalShadowMaxBias = 0.005;
+
+float calculateDirectionalShadowValue(float nDotL)
 {
 	vec3 uv = io_vertexPositionLightSpace.xyz / io_vertexPositionLightSpace.w;
 	uv = uv * 0.5 + 0.5;
@@ -10,7 +13,8 @@
 		return 1.0;
 	}
 
-	if (mappedDepth < uv.z - c_directionalShadowSamplingBias)
+	float bias = max(c_directionalShadowMaxBias * (1.0 - nDotL), c_directionalShadowMinBias);
+	if (mappedDepth < uv.z - bias)
 	{
 		if (max(uv.x, uv.y) > 1.0 || min(uv.x, uv.y) < 0.0)
 		{

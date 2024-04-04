@@ -22,8 +22,6 @@ internal static class Lighting
 
         FramebufferAttachmentConfig directionalDepthConfig = FramebufferAttachmentConfig.Defaults.Depth();
         directionalDepthConfig.TextureType = FramebufferAttachment.TextureType.Texture;
-        directionalDepthConfig.MinFilterMode = Texture.FilterMode.Nearest;
-        directionalDepthConfig.MaxFilterMode = Texture.FilterMode.Nearest;
         s_directionalShadowMapFramebuffer = new Framebuffer(s_directionalShadowMapSize, directionalDepthConfig);
         s_directionalShadowMapShader = Shader.Create("Shader/Shadows/DirectionalShadowMap.vert", "Shader/Shadows/DirectionalShadowMap.frag", false);
 
@@ -34,7 +32,7 @@ internal static class Lighting
         s_omnidirectionalShadowMapShader = Shader.Create("Shader/Shadows/OmnidirectionalShadowMap.vert", "Shader/Shadows/OmnidirectionalShadowMap.geom", "Shader/Shadows/OmnidirectionalShadowMap.frag", false);
     }
 
-    public static void RenderDirectionalShadows(HashSet<ModelRendererComponent> modelRenderers, ref Matrix4x4 lightSpaceViewProjection)
+    public static void RenderDirectionalShadows(HashSet<ModelRendererComponent> modelRenderers)
     {
         s_directionalShadowMapFramebuffer.Bind();
 
@@ -47,7 +45,7 @@ internal static class Lighting
         GL.Get().Clear(ClearBufferMask.DepthBufferBit);
 
         s_directionalShadowMapShader.Use();
-        s_directionalShadowMapShader.SetMat4("u_viewProjection", lightSpaceViewProjection);
+        s_directionalShadowMapShader.SetMat4("u_viewProjection", Scene.GetActive().GetDirectionalLight().GetViewProjectionMatrix());
 
         foreach (var modelRenderer in modelRenderers)
         {

@@ -9,8 +9,6 @@ internal class Window : IDisposable
     private bool m_isOpen = true;
     private readonly IWindow m_window;
 
-    public static event Action<Vector2i> Resizing;
-
     // Temporary
     private Vector3 m_eulerAngles;
     private Entity[] m_pointLightEntites = new Entity[3];
@@ -60,7 +58,7 @@ internal class Window : IDisposable
     private void OnResize(Silk.NET.Maths.Vector2D<int> size)
     {
         GL.Get().Viewport(size);
-        Resizing?.Invoke(size);
+        Game.InvokeResizing(size);
     }
 
     private unsafe void OnLoad()
@@ -75,7 +73,7 @@ internal class Window : IDisposable
 
         Scene.Load();
 
-        Game.Initialised?.Invoke();
+        Game.InvokeInitialised();
 
         // Temporary
         // PBR Flat
@@ -230,7 +228,7 @@ internal class Window : IDisposable
     {
         Logger.EngineInfo("Closing window");
         m_isOpen = false;
-        Game.Closing?.Invoke();
+        Game.InvokeClosing();
         Nebula.Rendering.Lighting.Dispose();
         Nebula.Rendering.Renderer.Dispose();
         Nebula.Rendering.GL.Dispose();

@@ -1,6 +1,4 @@
-﻿using Nebula.Rendering;
-
-namespace Nebula;
+﻿namespace Nebula;
 
 public class Camera : IDisposable
 {
@@ -10,21 +8,26 @@ public class Camera : IDisposable
     private float m_fov = 45f;
     private float m_nearClippingPlane = 0.001f;
     private float m_farClippingPlane = 100f;
+
     private Matrix4x4 m_projectionMatrix;
-    private Framebuffer m_framebuffer;
+    private Matrix4x4 m_viewProjectionMatrix;
 
     internal Camera()
     {
-        Window.Resizing += OnResize;
-        Vector2i windowSize = Game.GetWindowSize();
-        m_framebuffer = new Framebuffer(windowSize, FramebufferAttachmentConfig.Defaults.Colour(), FramebufferAttachmentConfig.Defaults.DepthStencil());
-        OnResize(windowSize);
+        Game.Resizing += OnResize;
+        OnResize(Game.GetWindowSize());
+    }
+
+    internal void Update()
+    {
+        Vector3 position = m_transform.GetWorldPosition();
+        Matrix4x4 viewMatrix = Matrix4x4.CreateLookAtLeftHanded(position, position + m_transform.GetForward(), m_transform.GetUp());
+        m_viewProjectionMatrix = viewMatrix * m_projectionMatrix;
     }
 
     private void OnResize(Vector2i size)
     {
         m_aspectRatio = (float)size.X / (float)size.Y;
-        m_framebuffer.Resize(size);
         RecalculateProjectionMatrix();
     }
 
@@ -41,14 +44,7 @@ public class Camera : IDisposable
 
     internal Matrix4x4 GetViewProjectionMatrix()
     {
-        Vector3 position = m_transform.GetWorldPosition();
-        Matrix4x4 viewMatrix = Matrix4x4.CreateLookAtLeftHanded(position, position + m_transform.GetForward(), m_transform.GetUp());
-        return viewMatrix * m_projectionMatrix;
-    }
-
-    internal Framebuffer GetFramebuffer()
-    {
-        return m_framebuffer;
+        return m_viewProjectionMatrix;
     }
 
     public TransformComponent GetTransform()
@@ -81,8 +77,6 @@ public class Camera : IDisposable
 
     void IDisposable.Dispose()
     {
-        IDisposable disposable = m_framebuffer;
-        disposable.Dispose();
-        Window.Resizing -= OnResize;
+        Game.Resizing -= OnResize;
     }
 }

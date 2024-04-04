@@ -5,9 +5,10 @@ public class Game
     private string m_title;
     private Window m_window;
 
-    public static Action Closing;
+    public static event Action<Vector2i> Resizing;
+    public static event Action Closing;
     // Temporary until scene files are implemented
-    public static Action Initialised;
+    public static event Action Initialised;
 
     private static Game s_instance;
 
@@ -44,6 +45,21 @@ public class Game
         m_window.Close();
         m_window.Dispose();
         Logger.Flush();
+    }
+
+    internal static void InvokeInitialised()
+    {
+        Initialised?.Invoke();
+    }
+
+    internal static void InvokeResizing(Vector2i size)
+    {
+        Resizing?.Invoke(size);
+    }
+
+    internal static void InvokeClosing()
+    {
+        Closing?.Invoke();
     }
 
     internal static Vector2i GetWindowSize()

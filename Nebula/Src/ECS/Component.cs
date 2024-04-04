@@ -24,13 +24,3 @@ public abstract class Component
         m_entity = null;
     }
 }
-
-public abstract class StartableComponent : Component
-{
-    public abstract void OnCreate();
-}
-
-public abstract class UpdateableComponent : StartableComponent
-{
-    public abstract void OnUpdate(float deltaTime);
-}

@@ -15,7 +15,7 @@ public class DirectionalLight
         SetDirection(new Vector3(50f, -30f, 0f));
     }
 
-    internal Matrix4x4 GetViewProjectionMatrix()
+    internal void Update()
     {
         BoundingSphere frustumBoundingSphere = Scene.GetActive().GetCamera().GetFrustum(m_shadowDistance).GetBoundingSphere();
 
@@ -39,7 +39,10 @@ public class DirectionalLight
         m_viewProjection.M41 -= m_viewProjection.M41 % csmTexelSize;
         m_viewProjection.M42 -= m_viewProjection.M42 % csmTexelSize;
         m_viewProjection.M43 -= m_viewProjection.M43 % csmTexelSize;
+    }
 
+    internal Matrix4x4 GetViewProjectionMatrix()
+    {
         return m_viewProjection;
     }
 

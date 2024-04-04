@@ -2,17 +2,17 @@
 
 internal class Frustum
 {
-    private enum CornerType
+    private struct CornerType
     {
-        BottomLeftNear = 0,
-        TopLeftNear = 1,
-        TopRightNear = 2,
-        BottomRightNear = 3,
+        public const int NearBottomLeft = 0;
+        public const int NearTopLeft = 1;
+        public const int NearTopRight = 2;
+        public const int NearBottomRight = 3;
 
-        BottomLeftFar = 4,
-        TopLeftFar = 5,
-        TopRightFar = 6,
-        BottomRightFar = 7,
+        public const int FarBottomLeft = 4;
+        public const int FarTopLeft = 5;
+        public const int FarTopRight = 6;
+        public const int FarBottomRight = 7;
     }
 
     private Vector3 m_center;
@@ -22,7 +22,6 @@ internal class Frustum
     {
         fov = MathHelper.DegreesToRadians(fov);
 
-        // Setup
         Vector3 position = transform.GetWorldPosition();
         Vector3 forward = transform.GetForward();
         Vector3 up = transform.GetUp();
@@ -41,18 +40,18 @@ internal class Frustum
         Vector3 upFar = up * (heightFar * 0.5f);
 
         // Near face
-        m_corners[(int)CornerType.BottomLeftNear] = centerNear - rightNear - upNear;
-        m_corners[(int)CornerType.TopLeftNear] = centerNear - rightNear + upNear;
-        m_corners[(int)CornerType.TopRightNear] = centerNear + rightNear + upNear;
-        m_corners[(int)CornerType.BottomRightNear] = centerNear + rightNear - upNear;
+        m_corners[CornerType.NearBottomLeft] = centerNear - rightNear - upNear;
+        m_corners[CornerType.NearTopLeft] = centerNear - rightNear + upNear;
+        m_corners[CornerType.NearTopRight] = centerNear + rightNear + upNear;
+        m_corners[CornerType.NearBottomRight] = centerNear + rightNear - upNear;
 
         // Far face
-        m_corners[(int)CornerType.BottomLeftFar] = centerFar - rightFar - upFar;
-        m_corners[(int)CornerType.TopLeftFar] = centerFar - rightFar + upFar;
-        m_corners[(int)CornerType.TopRightFar] = centerFar + rightFar + upFar;
-        m_corners[(int)CornerType.BottomRightFar] = centerFar + rightFar - upFar;
+        m_corners[CornerType.FarBottomLeft] = centerFar - rightFar - upFar;
+        m_corners[CornerType.FarTopLeft] = centerFar - rightFar + upFar;
+        m_corners[CornerType.FarTopRight] = centerFar + rightFar + upFar;
+        m_corners[CornerType.FarBottomRight] = centerFar + rightFar - upFar;
 
-        // Calculate center
+        // Center
         for (int i = 0; i < m_corners.Length; i++)
         {
             m_center += m_corners[i];
@@ -76,16 +75,16 @@ internal class Frustum
         Vector3 centerFar = center + distanceForward;
 
         // Near face
-        m_corners[(int)CornerType.BottomLeftNear] = centerNear - distanceRight - distanceUp;
-        m_corners[(int)CornerType.TopLeftNear] = centerNear - distanceRight + distanceUp;
-        m_corners[(int)CornerType.TopRightNear] = centerNear + distanceRight + distanceUp;
-        m_corners[(int)CornerType.BottomRightNear] = centerNear + distanceRight - distanceUp;
+        m_corners[CornerType.NearBottomLeft] = centerNear - distanceRight - distanceUp;
+        m_corners[CornerType.NearTopLeft] = centerNear - distanceRight + distanceUp;
+        m_corners[CornerType.NearTopRight] = centerNear + distanceRight + distanceUp;
+        m_corners[CornerType.NearBottomRight] = centerNear + distanceRight - distanceUp;
 
         // Far face
-        m_corners[(int)CornerType.BottomLeftFar] = centerFar - distanceRight - distanceUp;
-        m_corners[(int)CornerType.TopLeftFar] = centerFar - distanceRight + distanceUp;
-        m_corners[(int)CornerType.TopRightFar] = centerFar + distanceRight + distanceUp;
-        m_corners[(int)CornerType.BottomRightFar] = centerFar + distanceRight - distanceUp;
+        m_corners[CornerType.FarBottomLeft] = centerFar - distanceRight - distanceUp;
+        m_corners[CornerType.FarTopLeft] = centerFar - distanceRight + distanceUp;
+        m_corners[CornerType.FarTopRight] = centerFar + distanceRight + distanceUp;
+        m_corners[CornerType.FarBottomRight] = centerFar + distanceRight - distanceUp;
     }
 
     public static Frustum FromPerspective(TransformComponent transform, float fov, float aspectRatio, float nearClippingPlane, float farClippingPlane)
@@ -106,42 +105,42 @@ internal class Frustum
 
     public Vector3 GetBottomLeftNear()
     {
-        return m_corners[(int)CornerType.BottomLeftNear];
+        return m_corners[CornerType.NearBottomLeft];
     }
 
     public Vector3 GetTopLeftNear()
     {
-        return m_corners[(int)CornerType.TopLeftNear];
+        return m_corners[CornerType.NearTopLeft];
     }
 
     public Vector3 GetTopRightNear()
     {
-        return m_corners[(int)CornerType.TopRightNear];
+        return m_corners[CornerType.NearTopRight];
     }
 
     public Vector3 GetBottomRightNear()
     {
-        return m_corners[(int)CornerType.BottomRightNear];
+        return m_corners[CornerType.NearBottomRight];
     }
 
     public Vector3 GetBottomLeftFar()
     {
-        return m_corners[(int)CornerType.BottomLeftFar];
+        return m_corners[CornerType.FarBottomLeft];
     }
 
     public Vector3 GetTopLeftFar()
     {
-        return m_corners[(int)CornerType.TopLeftFar];
+        return m_corners[CornerType.FarTopLeft];
     }
 
     public Vector3 GetTopRightFar()
     {
-        return m_corners[(int)CornerType.TopRightFar];
+        return m_corners[CornerType.FarTopRight];
     }
 
     public Vector3 GetBottomRightFar()
     {
-        return m_corners[(int)CornerType.BottomLeftFar];
+        return m_corners[CornerType.FarBottomLeft];
     }
 
     public Vector3 GetCenter()

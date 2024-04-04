@@ -1,10 +1,12 @@
 ﻿using Silk.NET.OpenGL;
+using Silk.NET.Vulkan;
 using StbImageSharp;
 
 namespace Nebula.Rendering;
 
 public static class Renderer
 {
+    private static Framebuffer s_framebuffer;
     private static Shader s_skyboxShader;
     private static Shader s_screenShader;
     private static VertexArrayObject s_skyboxVao;
@@ -15,13 +17,19 @@ public static class Renderer
     {
         Logger.EngineInfo("Initialising renderer");
 
+        // Configure stb image
         StbImage.stbi_ldr_to_hdr_gamma(1f);
         StbImage.stbi_hdr_to_ldr_gamma(1f);
 
+        // Configure OpenGL
         GL.Get().ClearColor(System.Drawing.Color.LightBlue);
         GL.Get().Enable(EnableCap.TextureCubeMapSeamless);
         GL.Get().CullFace(TriangleFace.Back);
         GL.Get().FrontFace(FrontFaceDirection.CW);
+
+        // Setup rendering stuff
+        s_framebuffer = new Framebuffer(Game.GetWindowSize(), FramebufferAttachmentConfig.Defaults.Colour(), FramebufferAttachmentConfig.Defaults.DepthStencil());
+        Game.Resizing += (size) => s_framebuffer.Resize(size);
 
         s_skyboxShader = Shader.Create("Shader/Skybox.vert", "Shader/Skybox.frag", false);
         s_screenShader = Shader.Create("Shader/Output.vert", "Shader/Output.frag", false);
@@ -43,15 +51,14 @@ public static class Renderer
         Camera camera = scene.GetCamera();
         Matrix4x4 lightSpaceViewProjection = scene.GetDirectionalLight().GetViewProjectionMatrix();
 
-        UpdateUniformBuffers(camera, ref lightSpaceViewProjection);
+        UpdateUniformBuffers();
 
         // Render shadows
-        Lighting.RenderDirectionalShadows(s_modelRenderers, ref lightSpaceViewProjection);
+        Lighting.RenderDirectionalShadows(s_modelRenderers);
         Lighting.RenderPointShadows(s_modelRenderers);
 
         // Render to framebuffer
-        Framebuffer framebuffer = camera.GetFramebuffer();
-        framebuffer.Bind();
+        s_framebuffer.Bind();
 
         GL.Get().CullFace(TriangleFace.Back);
         GL.Get().Viewport(Game.GetWindowSize());
@@ -81,18 +88,20 @@ public static class Renderer
         s_skyboxVao.Draw();
 
         // Render framebuffer to screen
-        framebuffer.Unbind();
+        s_framebuffer.Unbind();
         s_screenShader.Use();
 
         GL.Get().Disable(EnableCap.DepthTest);
         GL.Get().Clear(ClearBufferMask.ColorBufferBit);
 
-        framebuffer.GetAttachment(FramebufferAttachment.AttachmentType.Colour).Bind(Texture.Unit.Texture0);
+        s_framebuffer.GetAttachment(FramebufferAttachment.AttachmentType.Colour).Bind(Texture.Unit.Texture0);
         s_screenVao.Draw();
     }
 
-    private static void UpdateUniformBuffers(Camera camera, ref Matrix4x4 lightSpaceViewProjection)
+    private static void UpdateUniformBuffers()
     {
+        Camera camera = Scene.GetActive().GetCamera();
+
         UniformBuffer cameraBuffer = UniformBuffer.Defaults.Camera;
         cameraBuffer.BufferData(0, camera.GetTransform().GetWorldPosition());
 
@@ -108,7 +117,7 @@ public static class Renderer
 
         UniformBuffer matrixBuffer = UniformBuffer.Defaults.Matrices;
         matrixBuffer.BufferData(0, camera.GetViewProjectionMatrix());
-        matrixBuffer.BufferData(64, lightSpaceViewProjection);
+        matrixBuffer.BufferData(64, Scene.GetActive().GetDirectionalLight().GetViewProjectionMatrix());
     }
 
     internal static void DrawMesh(VertexArrayObject vao, Matrix4x4 modelMatrix, ShaderInstance shaderInstance)
@@ -148,5 +157,7 @@ public static class Renderer
     internal static void Dispose()
     {
         Logger.EngineInfo("Disposing renderer");
+        IDisposable disposable = s_framebuffer;
+        disposable.Dispose();
     }
 }

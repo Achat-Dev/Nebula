@@ -1,6 +1,4 @@
-﻿using Silk.NET.Assimp;
-
-namespace Nebula;
+﻿namespace Nebula;
 
 public struct Matrix4x4 : IEquatable<Matrix4x4>
 {
@@ -24,7 +22,8 @@ public struct Matrix4x4 : IEquatable<Matrix4x4>
     public float M43;
     public float M44;
 
-    public static readonly Matrix4x4 Identity = new Matrix4x4(1f, 0f, 0f, 0f,
+    public static readonly Matrix4x4 Identity = new Matrix4x4(
+        1f, 0f, 0f, 0f,
         0f, 1f, 0f, 0f,
         0f, 0f, 1f, 0f,
         0f, 0f, 0f, 1f);
@@ -291,14 +290,14 @@ public struct Matrix4x4 : IEquatable<Matrix4x4>
         return System.Numerics.Matrix4x4.CreateOrthographic(width, height, nearClippingPlane, farClippingPlane);
     }
 
-    public static Matrix4x4 CreateOrthographic(float minX, float maxX, float minY, float maxY, float minZ, float maxZ)
+    public static Matrix4x4 CreateOrthographic(float left, float right, float bottom, float top, float near, float far)
     {
-        float m11 = 2f / (maxX - minX);
-        float m22 = 2f / (maxY - minY);
-        float m33 = -2f / (maxZ - minZ);
-        float m41 = -((maxX + minX) / (maxX - minX));
-        float m42 = -((maxY + minY) / (maxY - minY));
-        float m43 = -((maxZ + minZ) / (maxZ - minZ));
+        float m11 = 2f / (right - left);
+        float m22 = 2f / (top - bottom);
+        float m33 = -2f / (far - near);
+        float m41 = -((right + left) / (right - left));
+        float m42 = -((top + bottom) / (top - bottom));
+        float m43 = -((far + near) / (far - near));
 
         return new Matrix4x4(
             m11, 0f, 0f, 0f,
@@ -310,6 +309,22 @@ public struct Matrix4x4 : IEquatable<Matrix4x4>
     public static Matrix4x4 CreateOrthographicLeftHanded(float width, float height, float nearClippingPlane, float farClippingPlane)
     {
         return System.Numerics.Matrix4x4.CreateOrthographicLeftHanded(width, height, nearClippingPlane, farClippingPlane);
+    }
+
+    public static Matrix4x4 CreateOrthographicLeftHanded(float left, float right, float bottom, float top, float near, float far)
+    {
+        float m11 = 2f / (right - left);
+        float m22 = 2f / (top - bottom);
+        float m33 = 2f / (far - near);
+        float m41 = -((right + left) / (right - left));
+        float m42 = -((top + bottom) / (top - bottom));
+        float m43 = -((far + near) / (far - near));
+
+        return new Matrix4x4(
+            m11, 0f, 0f, 0f,
+            0f, m22, 0f, 0f,
+            0f, 0f, m33, 0f,
+            m41, m42, m43, 1f);
     }
 
     /* -------------------- Operators -------------------- */

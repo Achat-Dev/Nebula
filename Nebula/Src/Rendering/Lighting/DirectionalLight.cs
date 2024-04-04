@@ -5,8 +5,11 @@ public class DirectionalLight
     private Vector3 m_direction;
     private Colour m_colour = Colour.White;
     private float m_intensity = 1f;
+    private float m_shadowDistance = 20f;
+    private float m_shadowMapPadding = 2f;
+    private float m_projectionZScale = 5f;
 
-    internal float m_shadowDistance = 20f;
+    private Matrix4x4 m_viewProjection = Matrix4x4.Identity;
 
     internal DirectionalLight()
     {
@@ -17,73 +20,86 @@ public class DirectionalLight
     {
         Frustum frustum = Scene.GetActive().GetCamera().GetFrustum(m_shadowDistance);
 
+        float shadowMapSize = (float)Lighting.GetDirectionalShadowMapSize();
+        float texelSize = 1f / shadowMapSize;
+        int csmSplit = 1;
+        float csmTexelSize = 2f * csmSplit / shadowMapSize;
+
+        Vector3 position = frustum.GetCenter();
+
         Quaternion rotation = Quaternion.FromEulerAngles(m_direction);
-        Matrix4x4 viewMatrix = Matrix4x4.CreateLookAt(frustum.GetCenter() - (rotation * Vector3.Forward), frustum.GetCenter(), rotation * Vector3.Up);
+        Vector3 forward = rotation * Vector3.Forward;
+        Matrix4x4 viewMatrix = Matrix4x4.CreateLookAt(position - forward, position, rotation * Vector3.Up);
 
         // Calculate min and max coordinates of the camera frustum
         Vector4 point;
-        float minX = float.PositiveInfinity;
-        float maxX = float.NegativeInfinity;
-        float minY = float.PositiveInfinity;
-        float maxY = float.NegativeInfinity;
-        float minZ = float.PositiveInfinity;
-        float maxZ = float.NegativeInfinity;
+        float left = float.PositiveInfinity;
+        float right = float.NegativeInfinity;
+        float bottom = float.PositiveInfinity;
+        float top = float.NegativeInfinity;
+        float near = float.PositiveInfinity;
+        float far = float.NegativeInfinity;
         Vector3[] corners = frustum.GetCorners();
         for (int i = 0; i < corners.Length; i++)
         {
             point = viewMatrix * new Vector4(corners[i].X, corners[i].Y, corners[i].Z, 1f);
-            minX = MathF.Min(minX, point.X);
-            maxX = MathF.Max(maxX, point.X);
-            minY = MathF.Min(minY, point.Y);
-            maxY = MathF.Max(maxY, point.Y);
-            minZ = MathF.Min(minZ, point.Z);
-            maxZ = MathF.Max(maxZ, point.Z);
+            left = MathF.Min(left, point.X);
+            right = MathF.Max(right, point.X);
+            bottom = MathF.Min(bottom, point.Y);
+            top = MathF.Max(top, point.Y);
+            near = MathF.Min(near, point.Z);
+            far = MathF.Max(far, point.Z);
         }
 
         // Make frustum an aspect ratio of 1:1
-        float distanceX = maxX - minX;
-        float distanceY = maxY - minY;
-        float distanceZ = maxZ - minZ;
+        float distanceX = right - left;
+        float distanceY = top - bottom;
+        float distanceZ = far - near;
 
-        float maxDistance = MathF.Max(MathF.Max(distanceX, distanceY), distanceZ);
-
-        float padding = 2f;
+        //float maxDistance = MathF.Max(MathF.Max(distanceX, distanceY), distanceZ);
+        float maxDistance = MathF.Max(distanceX, distanceY);
 
         float halfX = (maxDistance - distanceX) / 2f;
-        minX -= halfX + padding;
-        maxX += halfX + padding;
+        //left -= halfX;
+        //right += halfX;
 
         float halfY = (maxDistance - distanceY) / 2f;
-        minY -= halfY + padding;
-        maxY += halfY + padding;
+        //bottom -= halfY;
+        //top += halfY;
 
         float halfZ = (maxDistance - distanceZ) / 2f;
-        minZ -= halfZ + padding;
-        maxZ += halfZ + padding;
+        //near -= halfZ + m_shadowMapPadding;
+        //far += halfZ + m_shadowMapPadding;
 
         // Scale near and far clipping plane
-        float zScale = 5f;
-        if (minZ < 0)
+        if (near < 0)
         {
-            minZ *= zScale;
+            near *= m_projectionZScale;
         }
         else
         {
-            minZ /= zScale;
+            near /= m_projectionZScale;
         }
 
-        if (maxZ < 0)
+        if (far < 0)
         {
-            maxZ /= zScale;
+            far /= m_projectionZScale;
         }
         else
         {
-            maxZ *= zScale;
+            far *= m_projectionZScale;
         }
 
-        Matrix4x4 projectionMatrix = Matrix4x4.CreateOrthographic(minX, maxX, minY, maxY, minZ, maxZ);
+        float width = right - left;
+        float height = top - bottom;
 
-        return viewMatrix * projectionMatrix;
+        m_viewProjection = viewMatrix * Matrix4x4.CreateOrthographic(width, height, near, far);
+
+        m_viewProjection.M41 -= m_viewProjection.M41 % csmTexelSize;
+        m_viewProjection.M42 -= m_viewProjection.M42 % csmTexelSize;
+        m_viewProjection.M43 -= m_viewProjection.M43 % csmTexelSize;
+
+        return m_viewProjection;
     }
 
     public Vector3 GetDirection()
@@ -114,5 +130,35 @@ public class DirectionalLight
     public void SetIntensity(float intensity)
     {
         m_intensity = intensity;
+    }
+
+    public float GetShadowDistance()
+    {
+        return m_shadowDistance;
+    }
+
+    public void SetShadowDistance(float shadowDistance)
+    {
+        m_shadowDistance = shadowDistance;
+    }
+
+    public float GetShadowMapPadding()
+    {
+        return m_shadowMapPadding;
+    }
+
+    public void SetShadowMapPadding(float padding)
+    {
+        m_shadowMapPadding = padding;
+    }
+
+    public float GetProjectionZScale()
+    {
+        return m_projectionZScale;
+    }
+
+    public void SetProjectionZScale(float scale)
+    {
+        m_projectionZScale = scale;
     }
 }

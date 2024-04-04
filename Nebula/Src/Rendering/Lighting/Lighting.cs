@@ -4,7 +4,7 @@ namespace Nebula.Rendering;
 
 internal static class Lighting
 {
-    private static Vector2i s_directionalShadowMapSize = new Vector2i(1024, 1024);
+    private static Vector2i s_directionalShadowMapSize = new Vector2i(128, 128);
     private static Vector2i s_pointShadowMapSize = new Vector2i(128, 128);
 
     private static Shader s_directionalShadowMapShader;
@@ -22,6 +22,8 @@ internal static class Lighting
 
         FramebufferAttachmentConfig directionalDepthConfig = FramebufferAttachmentConfig.Defaults.Depth();
         directionalDepthConfig.TextureType = FramebufferAttachment.TextureType.Texture;
+        directionalDepthConfig.MinFilterMode = Texture.FilterMode.Nearest;
+        directionalDepthConfig.MaxFilterMode = Texture.FilterMode.Nearest;
         s_directionalShadowMapFramebuffer = new Framebuffer(s_directionalShadowMapSize, directionalDepthConfig);
         s_directionalShadowMapShader = Shader.Create("Shader/Shadows/DirectionalShadowMap.vert", "Shader/Shadows/DirectionalShadowMap.frag", false);
 
@@ -92,6 +94,11 @@ internal static class Lighting
         }
     }
 
+    internal static void DebugDirectionalShadowMap()
+    {
+        s_directionalShadowMapFramebuffer.GetAttachment(FramebufferAttachment.AttachmentType.Depth).Bind(Texture.Unit.Texture0);
+    }
+
     public static void BindDirectionalShadowMap()
     {
         s_directionalShadowMapFramebuffer.GetAttachment(FramebufferAttachment.AttachmentType.Depth).Bind(Texture.Unit.Texture3);
@@ -143,9 +150,9 @@ internal static class Lighting
         }
     }
 
-    internal static Vector2i GetDirectionalShadowMapSize()
+    internal static int GetDirectionalShadowMapSize()
     {
-        return s_directionalShadowMapSize;
+        return s_directionalShadowMapSize.X;
     }
 
     public static void SetDirectionalShadowMapSize(int size)

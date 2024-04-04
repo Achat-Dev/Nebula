@@ -22,6 +22,7 @@ internal static class Lighting
 
         FramebufferAttachmentConfig directionalDepthConfig = FramebufferAttachmentConfig.Defaults.Depth();
         directionalDepthConfig.TextureType = FramebufferAttachment.TextureType.Texture;
+        directionalDepthConfig.WrapMode = Texture.WrapMode.ClampToBorder;
         s_directionalShadowMapFramebuffer = new Framebuffer(s_directionalShadowMapSize, directionalDepthConfig);
         s_directionalShadowMapShader = Shader.Create("Shader/Shadows/DirectionalShadowMap.vert", "Shader/Shadows/DirectionalShadowMap.frag", false);
 

@@ -16,10 +16,6 @@ float calculateDirectionalShadowValue(float nDotL)
 	float bias = max(c_directionalShadowMaxBias * (1.0 - nDotL), c_directionalShadowMinBias);
 	if (mappedDepth < uv.z - bias)
 	{
-		if (max(uv.x, uv.y) > 1.0 || min(uv.x, uv.y) < 0.0)
-		{
-			return 1.0;
-		}
 		return 0.0;
 	}
 

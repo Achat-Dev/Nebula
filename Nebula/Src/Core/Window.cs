@@ -66,6 +66,7 @@ internal class Window : IDisposable
         Nebula.GargabeCollection.Init(10f);
         Nebula.AssetLoader.Init();
         Nebula.Input.Init(m_window.CreateInput());
+        Nebula.Rendering.ShaderParser.Init();
         Nebula.Rendering.GL.Init(Silk.NET.OpenGL.GL.GetApi(m_window));
         Nebula.Rendering.Assimp.Init();
         Nebula.Rendering.Renderer.Init();

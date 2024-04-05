@@ -1,5 +1,4 @@
 ﻿using Silk.NET.OpenGL;
-using System.Text;
 
 namespace Nebula.Rendering;
 
@@ -31,19 +30,19 @@ public class Shader : ICacheable, IDisposable
     private readonly bool r_isLit;
     private readonly Dictionary<string, int> r_uniformLocationCache = new Dictionary<string, int>();
 
-    private Shader(string vertexPath, string geometryPath, string fragmentPath, bool isLit)
+    private Shader(string vertexPath, string geometryPath, string fragmentPath, bool isLit, ShaderCompileReplacement[] compileReplacements)
     {
         r_isLit = isLit;
 
         bool usesGeometryShader = !string.IsNullOrEmpty(geometryPath);
 
         // Create shaders
-        uint vertexShaderHandle = CreateGLShader(ShaderType.VertexShader, GetSourceWithIncludes(AssetLoader.LoadAsFileContent(vertexPath), new HashSet<string>()));
-        uint fragmentShaderHandle = CreateGLShader(ShaderType.FragmentShader, GetSourceWithIncludes(AssetLoader.LoadAsFileContent(fragmentPath), new HashSet<string>()));
+        uint vertexShaderHandle = CreateGLShader(ShaderType.VertexShader, ShaderParser.Parse(AssetLoader.LoadAsFileContent(vertexPath), compileReplacements));
+        uint fragmentShaderHandle = CreateGLShader(ShaderType.FragmentShader, ShaderParser.Parse(AssetLoader.LoadAsFileContent(fragmentPath), compileReplacements));
         uint geometryShaderHandle = 0;
         if(usesGeometryShader)
         {
-            geometryShaderHandle = CreateGLShader(ShaderType.GeometryShader, GetSourceWithIncludes(AssetLoader.LoadAsFileContent(geometryPath), new HashSet<string>()));
+            geometryShaderHandle = CreateGLShader(ShaderType.GeometryShader, ShaderParser.Parse(AssetLoader.LoadAsFileContent(geometryPath), compileReplacements));
         }
 
         // Link shaders
@@ -84,12 +83,12 @@ public class Shader : ICacheable, IDisposable
         }
     }
 
-    public static Shader Create(string vertexPath, string fragmentPath, bool isLit)
+    public static Shader Create(string vertexPath, string fragmentPath, bool isLit, params ShaderCompileReplacement[] compileReplacements)
     {
-        return Create(vertexPath, string.Empty, fragmentPath, isLit);
+        return Create(vertexPath, string.Empty, fragmentPath, isLit, compileReplacements);
     }
 
-    public static Shader Create(string vertexPath, string geometryPath, string fragmentPath, bool isLit)
+    public static Shader Create(string vertexPath, string geometryPath, string fragmentPath, bool isLit, params ShaderCompileReplacement[] compileReplacements)
     {
         int hash = HashCode.Combine(vertexPath, geometryPath, fragmentPath);
         if (Cache.ShaderCache.TryGetValue(hash, out Shader shader))
@@ -99,7 +98,7 @@ public class Shader : ICacheable, IDisposable
         }
 
         Logger.EngineDebug("Creating shader from sources {0}, {1} and {2}", vertexPath, geometryPath, fragmentPath);
-        shader = new Shader(vertexPath, geometryPath, fragmentPath, isLit);
+        shader = new Shader(vertexPath, geometryPath, fragmentPath, isLit, compileReplacements);
         Cache.ShaderCache.CacheData(hash, shader);
         return shader;
     }
@@ -117,40 +116,6 @@ public class Shader : ICacheable, IDisposable
         }
 
         return handle;
-    }
-
-    private string GetSourceWithIncludes(string source, HashSet<string> includedShaders)
-    {
-        string include = "#include";
-
-        if (source.Contains(include))
-        {
-            StringBuilder stringBuilder = new StringBuilder();
-            string[] lines = source.Split(Environment.NewLine);
-
-            for (int i = 0; i < lines.Length; i++)
-            {
-                lines[i] = lines[i].TrimStart(' ', '\t');
-                if (lines[i].StartsWith(include))
-                {
-                    string path = lines[i].Substring(include.Length + 1).TrimEnd();
-                    if (!includedShaders.Contains(path))
-                    {
-                        includedShaders.Add(path);
-                        string includeSource = GetSourceWithIncludes(AssetLoader.LoadAsFileContent("Shader/Include/" + path), includedShaders);
-                        stringBuilder.AppendLine(includeSource);
-                    }
-                }
-                else
-                {
-                    stringBuilder.AppendLine(lines[i]);
-                }
-            }
-
-            return stringBuilder.ToString();
-        }
-
-        return source;
     }
 
     internal void Use()

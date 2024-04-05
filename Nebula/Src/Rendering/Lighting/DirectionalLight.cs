@@ -1,4 +1,6 @@
-﻿namespace Nebula.Rendering;
+﻿using Silk.NET.Assimp;
+
+namespace Nebula.Rendering;
 
 public class DirectionalLight
 {
@@ -8,42 +10,73 @@ public class DirectionalLight
     private float m_shadowDistance = 20f;
     private float m_shadowMapPadding = 2f;
 
-    private Matrix4x4 m_viewProjection = Matrix4x4.Identity;
-
     internal DirectionalLight()
     {
         SetDirection(new Vector3(50f, -30f, 0f));
     }
 
-    internal void Update()
+    internal float[] GetCascadeDistances()
     {
-        BoundingSphere frustumBoundingSphere = Scene.GetActive().GetCamera().GetFrustum(m_shadowDistance).GetBoundingSphere();
+        float[] cascadeDistances = Settings.Lighting.CascadeDistances;
+        float farClippingPlane = Scene.GetActive().GetCamera().GetFarClippingPlane();
 
-        // Replace this with the cascade level
-        int csmLevel = 1;
-        float csmTexelSize = 2f * csmLevel / (float)Lighting.GetDirectionalShadowMapSize();
+        float[] result = new float[Settings.Lighting.CascadeCount * 4];
 
-        Quaternion rotation = Quaternion.FromEulerAngles(m_direction);
-        Matrix4x4 viewMatrix = Matrix4x4.CreateLookAt(frustumBoundingSphere.Center - rotation * Vector3.Forward, frustumBoundingSphere.Center, rotation * Vector3.Up);
+        for (int i = 0; i < result.Length; i += 4)
+        {
+            result[i] = cascadeDistances[i / 4] * farClippingPlane;
+        }
 
-        // Make sure that the texture always has the same size and an aspect ratio of 1:1
-        // | This fixes shadow shimmering when the camera rotates
-        // | (as long as the fov and aspect ratio of the camera don't change)
-        float frustumSize = MathF.Floor(frustumBoundingSphere.Radius / csmTexelSize) * csmTexelSize;
-        frustumSize += m_shadowMapPadding;
-
-        m_viewProjection = viewMatrix * Matrix4x4.CreateOrthographic(frustumSize, frustumSize, -frustumSize, frustumSize);
-
-        // Snap translation to texel grid
-        // | This fixes shadow shimmering when the camera moves
-        m_viewProjection.M41 -= m_viewProjection.M41 % csmTexelSize;
-        m_viewProjection.M42 -= m_viewProjection.M42 % csmTexelSize;
-        m_viewProjection.M43 -= m_viewProjection.M43 % csmTexelSize;
+        return result;
     }
 
-    internal Matrix4x4 GetViewProjectionMatrix()
+    internal Matrix4x4[] GetViewProjectionMatrices()
     {
-        return m_viewProjection;
+        int cascadeCount = (int)Settings.Lighting.CascadeCount;
+        Matrix4x4[] result = new Matrix4x4[cascadeCount];
+
+        Camera camera = Scene.GetActive().GetCamera();
+        float nearClippingPlane = camera.GetNearClippingPlane();
+        float farClippingPlane = camera.GetFarClippingPlane();
+        float[] cascadeDistances = Settings.Lighting.CascadeDistances;
+
+        for (int i = 0; i < cascadeCount; i++)
+        {
+            float cascadeDistance = cascadeDistances[i] * farClippingPlane;
+
+            BoundingSphere frustumBoundingSphere;
+            if (i == 0)
+            {
+                frustumBoundingSphere = Scene.GetActive().GetCamera().GetFrustum(nearClippingPlane, cascadeDistance).GetBoundingSphere();
+            }
+            else
+            {
+                frustumBoundingSphere = Scene.GetActive().GetCamera().GetFrustum(cascadeDistances[i - 1] * farClippingPlane, cascadeDistance).GetBoundingSphere();
+            }
+
+            float csmTexelSize = 2f * (i + 1) / (float)Lighting.GetDirectionalShadowMapSize();
+
+            Quaternion rotation = Quaternion.FromEulerAngles(m_direction);
+            Matrix4x4 viewMatrix = Matrix4x4.CreateLookAt(frustumBoundingSphere.Center - rotation * Vector3.Forward, frustumBoundingSphere.Center, rotation * Vector3.Up);
+
+            // Make sure that the texture always has the same size and an aspect ratio of 1:1
+            // | This fixes shadow shimmering when the camera rotates
+            // | (as long as the fov and aspect ratio of the camera don't change)
+            float frustumSize = MathF.Floor(frustumBoundingSphere.Radius / csmTexelSize) * csmTexelSize;
+            frustumSize += m_shadowMapPadding;
+
+            Matrix4x4 viewProjection = viewMatrix * Matrix4x4.CreateOrthographic(frustumSize, frustumSize, -frustumSize, frustumSize);
+
+            // Snap translation to texel grid
+            // | This fixes shadow shimmering when the camera moves
+            viewProjection.M41 -= viewProjection.M41 % csmTexelSize;
+            viewProjection.M42 -= viewProjection.M42 % csmTexelSize;
+            viewProjection.M43 -= viewProjection.M43 % csmTexelSize;
+
+            result[i] = viewProjection;
+        }
+
+        return result;
     }
 
     public Vector3 GetDirection()

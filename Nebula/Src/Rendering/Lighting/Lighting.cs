@@ -21,16 +21,23 @@ internal static class Lighting
         Logger.EngineInfo("Initialising lighting");
 
         FramebufferAttachmentConfig directionalDepthConfig = FramebufferAttachmentConfig.Defaults.Depth();
-        directionalDepthConfig.TextureType = FramebufferAttachment.TextureType.Texture;
+        directionalDepthConfig.TextureType = FramebufferAttachment.TextureType.TextureArray;
         directionalDepthConfig.WrapMode = Texture.WrapMode.ClampToBorder;
+        directionalDepthConfig.ArraySize = Settings.Lighting.CascadeCount + 1;
         s_directionalShadowMapFramebuffer = new Framebuffer(s_directionalShadowMapSize, directionalDepthConfig);
-        s_directionalShadowMapShader = Shader.Create("Shader/Shadows/DirectionalShadowMap.vert", "Shader/Shadows/DirectionalShadowMap.frag", false);
+        s_directionalShadowMapShader = Shader.Create("Shader/Shadows/DirectionalShadowMap.vert",
+            "Shader/Shadows/DirectionalShadowMap.geom",
+            "Shader/Shadows/DirectionalShadowMap.frag",
+            false);
 
         FramebufferAttachmentConfig omnidirectionalDepthConfig = FramebufferAttachmentConfig.Defaults.Depth();
         omnidirectionalDepthConfig.TextureType = FramebufferAttachment.TextureType.CubemapArray;
         omnidirectionalDepthConfig.ArraySize = 4;
         s_omnidirectionalShadowMapFramebuffer = new Framebuffer(s_pointShadowMapSize, omnidirectionalDepthConfig);
-        s_omnidirectionalShadowMapShader = Shader.Create("Shader/Shadows/OmnidirectionalShadowMap.vert", "Shader/Shadows/OmnidirectionalShadowMap.geom", "Shader/Shadows/OmnidirectionalShadowMap.frag", false);
+        s_omnidirectionalShadowMapShader = Shader.Create("Shader/Shadows/OmnidirectionalShadowMap.vert",
+            "Shader/Shadows/OmnidirectionalShadowMap.geom",
+            "Shader/Shadows/OmnidirectionalShadowMap.frag",
+            false);
     }
 
     public static void RenderDirectionalShadows(HashSet<ModelRendererComponent> modelRenderers)
@@ -46,7 +53,6 @@ internal static class Lighting
         GL.Get().Clear(ClearBufferMask.DepthBufferBit);
 
         s_directionalShadowMapShader.Use();
-        s_directionalShadowMapShader.SetMat4("u_viewProjection", Scene.GetActive().GetDirectionalLight().GetViewProjectionMatrix());
 
         foreach (var modelRenderer in modelRenderers)
         {

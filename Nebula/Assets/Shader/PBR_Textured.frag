@@ -1,11 +1,7 @@
 ﻿#version 460 core
 
-#include UniformBuffer/Lights.glsl
-#include UniformBuffer/Camera.glsl
-
 out vec4 o_colour;
 
-in vec4 io_vertexPositionLightSpace;
 in vec3 io_vertexPosition;
 in vec3 io_normal;
 in vec3 io_tangent;
@@ -16,14 +12,15 @@ uniform sampler2D u_normalMap;
 uniform sampler2D u_metallicMap;
 uniform sampler2D u_roughnessMap;
 
+#include UniformBuffer/Lights.glsl
+#include UniformBuffer/Camera.glsl
+
 #include Math/Pi.glsl
 #include Math/PBR/DistributionGGX.glsl
 #include Math/PBR/GeometrySchlickGGX.glsl
 #include Math/PBR/FresnelSchlick.glsl
 #include Math/PBR/FresnelSchlickRoughness.glsl
 #include Math/PBR/MaxReflectionLod.glsl
-#include Math/Shadows/DirectionalShadowValue.glsl
-#include Math/Shadows/OmnidirectionalShadowValue.glsl
 
 // Possible optimisation:
 // | Calculate tbn matrix in vertex shader

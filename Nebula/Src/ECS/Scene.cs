@@ -16,7 +16,6 @@ public class Scene
     internal void Update(float deltaTime)
     {
         r_camera.Update();
-        r_directionalLight.Update();
 
         for (int i = r_entities.Count - 1; i >= 0; i--)
         {

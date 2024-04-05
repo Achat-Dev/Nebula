@@ -6,6 +6,12 @@ public class Program
 {
     public static void Main(string[] args)
     {
+        Settings.Lighting.CascadeCount = 5;
+        Settings.Lighting.CascadeDistances = new float[]
+        {
+            0.1f, 0.2f, 0.4f, 0.7f, 1f
+        };
+
         Game game = new Game("Sandbox", new Vector2i(1280, 720), true);
 
         Game.Initialised += () =>

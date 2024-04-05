@@ -1,5 +1,4 @@
 ﻿using Silk.NET.OpenGL;
-using Silk.NET.Vulkan;
 using StbImageSharp;
 
 namespace Nebula.Rendering;
@@ -49,7 +48,6 @@ public static class Renderer
     {
         Scene scene = Scene.GetActive();
         Camera camera = scene.GetCamera();
-        Matrix4x4 lightSpaceViewProjection = scene.GetDirectionalLight().GetViewProjectionMatrix();
 
         UpdateUniformBuffers();
 
@@ -116,8 +114,13 @@ public static class Renderer
         lightBuffer.BufferData(48, Lighting.GetPointLightData());
 
         UniformBuffer matrixBuffer = UniformBuffer.Defaults.Matrices;
-        matrixBuffer.BufferData(0, camera.GetViewProjectionMatrix());
-        matrixBuffer.BufferData(64, Scene.GetActive().GetDirectionalLight().GetViewProjectionMatrix());
+        matrixBuffer.BufferData(0, camera.GetViewMatrix());
+        matrixBuffer.BufferData(64, camera.GetViewProjectionMatrix());
+
+        UniformBuffer csmBuffer = UniformBuffer.Defaults.Csm;
+        csmBuffer.BufferData(0, directionalLight.GetCascadeDistances());
+        int offset = (int)Settings.Lighting.CascadeCount * 16;
+        csmBuffer.BufferData(offset, directionalLight.GetViewProjectionMatrices());
     }
 
     internal static void DrawMesh(VertexArrayObject vao, Matrix4x4 modelMatrix, ShaderInstance shaderInstance)

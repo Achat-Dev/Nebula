@@ -12,6 +12,9 @@ public class UniformBuffer : ICacheable, IDisposable
             new UniformBufferLayout(UniformBufferElement.Float, UniformBufferElement.Int),
             new UniformBufferLayout(UniformBufferElement.Vec3, UniformBufferElement.Vec3),
             new UniformBufferLayout(128, UniformBufferElement.Vec4, UniformBufferElement.Vec4));
+        public static readonly UniformBuffer Csm = Create(3,
+            new UniformBufferLayout(Settings.Lighting.CascadeCount, UniformBufferElement.Float),
+            new UniformBufferLayout(Settings.Lighting.CascadeCount, UniformBufferElement.Mat4));
     }
 
     private readonly uint r_handle;

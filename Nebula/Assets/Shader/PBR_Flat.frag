@@ -1,11 +1,7 @@
 ﻿#version 460 core
 
-#include UniformBuffer/Lights.glsl
-#include UniformBuffer/Camera.glsl
-
 out vec4 o_colour;
 
-in vec4 io_vertexPositionLightSpace;
 in vec3 io_vertexPosition;
 in vec3 io_normal;
 
@@ -13,14 +9,15 @@ uniform vec3 u_albedo;
 uniform float u_metallic;
 uniform float u_roughness;
 
+#include UniformBuffer/Lights.glsl
+#include UniformBuffer/Camera.glsl
+
 #include Math/Pi.glsl
 #include Math/PBR/DistributionGGXU.glsl
 #include Math/PBR/GeometrySchlickGGXU.glsl
 #include Math/PBR/FresnelSchlick.glsl
 #include Math/PBR/FresnelSchlickRoughnessU.glsl
 #include Math/PBR/MaxReflectionLod.glsl
-#include Math/Shadows/DirectionalShadowValue.glsl
-#include Math/Shadows/OmnidirectionalShadowValue.glsl
 
 vec3 calculateDirectionalLight(FlatLightParams params)
 {

@@ -275,13 +275,13 @@ public struct Matrix4x4 : IEquatable<Matrix4x4>
 
     public static Matrix4x4 CreatePerspective(float fov, float aspectRatio, float nearClippingPlane, float farClippingPlane)
     {
-        fov = MathHelper.DegreesToRadians(fov);
+        fov = Utils.MathUtils.DegreesToRadians(fov);
         return System.Numerics.Matrix4x4.CreatePerspectiveFieldOfView(fov, aspectRatio, nearClippingPlane, farClippingPlane);
     }
 
     public static Matrix4x4 CreatePerspectiveLeftHanded(float fov, float aspectRatio, float nearClippingPlane, float farClippingPlane)
     {
-        fov = MathHelper.DegreesToRadians(fov);
+        fov = Utils.MathUtils.DegreesToRadians(fov);
         return System.Numerics.Matrix4x4.CreatePerspectiveFieldOfViewLeftHanded(fov, aspectRatio, nearClippingPlane, farClippingPlane);
     }
 

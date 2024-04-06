@@ -1,6 +1,6 @@
-﻿namespace Nebula;
+﻿namespace Nebula.Utils;
 
-public static class MathHelper
+public static class MathUtils
 {
     public static float RadiansToDegrees(float radians)
     {

@@ -30,15 +30,15 @@ public struct Quaternion : IEquatable<Quaternion>
 
         float a = 2f * (W * X + Y * Z);
         float b = 1f - 2f * (X * X + Y * Y);
-        result.X = MathHelper.RadiansToDegrees(MathF.Atan2(a, b));
+        result.X = Utils.MathUtils.RadiansToDegrees(MathF.Atan2(a, b));
 
         a = MathF.Sqrt(1f + 2f * (W * Y - X * Z));
         b = MathF.Sqrt(1f - 2f * (W * Y - X * Z));
-        result.Y = MathHelper.RadiansToDegrees(2f * MathF.Atan2(a, b) - MathF.PI * 0.5f);
+        result.Y = Utils.MathUtils.RadiansToDegrees(2f * MathF.Atan2(a, b) - MathF.PI * 0.5f);
 
         a = 2f * (W * Z + X * Y);
         b = 1f - 2f * (Y * Y + Z * Z);
-        result.Z = MathHelper.RadiansToDegrees(MathF.Atan2(a, b));
+        result.Z = Utils.MathUtils.RadiansToDegrees(MathF.Atan2(a, b));
 
         return result;
     }
@@ -83,7 +83,7 @@ public struct Quaternion : IEquatable<Quaternion>
             return Identity;
         }
 
-        angle = MathHelper.DegreesToRadians(angle);
+        angle = Utils.MathUtils.DegreesToRadians(angle);
         angle *= 0.5f;
         axis.Normalise();
         Vector3 xyz = axis * MathF.Sin(angle);
@@ -93,9 +93,9 @@ public struct Quaternion : IEquatable<Quaternion>
 
     public static Quaternion FromEulerAngles(Vector3 eulerAngles)
     {
-        eulerAngles.X = MathHelper.DegreesToRadians(eulerAngles.X);
-        eulerAngles.Y = MathHelper.DegreesToRadians(eulerAngles.Y);
-        eulerAngles.Z = MathHelper.DegreesToRadians(eulerAngles.Z);
+        eulerAngles.X = Utils.MathUtils.DegreesToRadians(eulerAngles.X);
+        eulerAngles.Y = Utils.MathUtils.DegreesToRadians(eulerAngles.Y);
+        eulerAngles.Z = Utils.MathUtils.DegreesToRadians(eulerAngles.Z);
 
         float sinX = MathF.Sin(eulerAngles.X * 0.5f);
         float cosX = MathF.Cos(eulerAngles.X * 0.5f);

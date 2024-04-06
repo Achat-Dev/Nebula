@@ -20,7 +20,7 @@ internal class Frustum
 
     private Frustum(TransformComponent transform, float fov, float aspectRatio, float nearClippingPlane, float farClippingPlane)
     {
-        fov = MathHelper.DegreesToRadians(fov);
+        fov = Utils.MathUtils.DegreesToRadians(fov);
 
         Vector3 position = transform.GetWorldPosition();
         Vector3 forward = transform.GetForward();
@@ -92,7 +92,6 @@ internal class Frustum
         return new Frustum(transform, fov, aspectRatio, nearClippingPlane, farClippingPlane);
     }
 
-    // The position of the transform is treated as the center of the frustum
     public static Frustum FromOrthographic(Vector3 center, Quaternion rotation, float distanceX, float distanceY, float distanceZ)
     {
         return new Frustum(center, rotation, distanceX, distanceY, distanceZ);

@@ -32,7 +32,7 @@ internal static class Lighting
 
         FramebufferAttachmentConfig pointDepthConfig = FramebufferAttachmentConfig.Defaults.Depth();
         pointDepthConfig.TextureType = FramebufferAttachment.TextureType.CubemapArray;
-        pointDepthConfig.ArraySize = 4;
+        pointDepthConfig.ArraySize = Settings.Lighting.MaxDynamicShadowCasters + 1;
         s_pointShadowMapFramebuffer = new Framebuffer(s_pointShadowMapSize, pointDepthConfig);
         s_pointShadowMapShader = Shader.Create("Shader/Shadows/PointShadowMap.vert",
             "Shader/Shadows/PointShadowMap.geom",
@@ -111,24 +111,41 @@ internal static class Lighting
 
     internal static float[] GetPointLightData()
     {
-        float[] data = new float[s_pointLightCount * 8];
+        float[] data = new float[s_pointLightCount * 12];
 
         int i = 0;
-        Vector3 position;
-        Vector3 colour;
+        int shadowCasterCount = 0;
 
         foreach (PointLightComponent pointLight in s_pointLights)
         {
-            position = pointLight.GetEntity().GetTransform().GetWorldPosition();
+            Vector3 position = pointLight.GetEntity().GetTransform().GetWorldPosition();
             data[i++] = position.X;
             data[i++] = position.Y;
             data[i++] = position.Z;
             data[i++] = pointLight.GetRange();
-            colour = ((Vector3)pointLight.GetColour());
+            Vector3 colour = (Vector3)pointLight.GetColour();
             data[i++] = colour.X;
             data[i++] = colour.Y;
             data[i++] = colour.Z;
             data[i++] = pointLight.GetIntensity() * pointLight.GetIntensity();
+            bool isShadowCaster = pointLight.GetIsShadowCaster();
+            if (isShadowCaster && shadowCasterCount <= Settings.Lighting.MaxDynamicShadowCasters)
+            {
+                data[i++] = 1f;
+                shadowCasterCount++;
+            }
+            else
+            {
+                data[i++] = 0f;
+            }
+            data[i++] = 0f;
+            data[i++] = 0f;
+            data[i++] = 0f;
+        }
+
+        if (shadowCasterCount > Settings.Lighting.MaxDynamicShadowCasters)
+        {
+            Logger.EngineWarn("Exceeding max dynamic shadow caster count");
         }
 
         return data;
@@ -136,6 +153,12 @@ internal static class Lighting
 
     internal static void RegisterPointLight(PointLightComponent pointLight)
     {
+        if (s_pointLightCount >= Settings.Lighting.MaxPointLights)
+        {
+            Logger.EngineWarn("Exceeding max point light count");
+            return;
+        }
+
         if (s_pointLights.Add(pointLight))
         {
             s_pointLightCount++;

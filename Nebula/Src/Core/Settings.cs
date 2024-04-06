@@ -5,6 +5,9 @@ public static class Settings
 {
     public static class Lighting
     {
+        public static uint MaxPointLights = 128;
+        public static uint MaxDynamicShadowCasters = 16;
+
         public static uint CascadeCount = 1;
 
         // Cascade distances are relative to the cameras far clipping plane

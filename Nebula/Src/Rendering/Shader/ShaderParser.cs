@@ -11,6 +11,8 @@ internal static class ShaderParser
         Logger.EngineInfo("Initialising shader parser");
 
         s_globalCompileReplacementMap.Add("CASCADE_COUNT", Settings.Lighting.CascadeCount);
+        s_globalCompileReplacementMap.Add("MAX_POINT_LIGHTS", Settings.Lighting.MaxPointLights);
+        s_globalCompileReplacementMap.Add("MAX_DYNAMIC_SHADOW_CASTERS", Settings.Lighting.MaxDynamicShadowCasters);
     }
 
     public static string Parse(string source, ShaderCompileReplacement[] compileReplacements)

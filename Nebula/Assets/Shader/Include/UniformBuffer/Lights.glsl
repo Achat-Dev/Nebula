@@ -1,4 +1,4 @@
-﻿#define MAX_POINT_LIGHTS 128
+﻿#replace MAX_POINT_LIGHTS
 
 struct DirectionalLight
 {
@@ -12,6 +12,7 @@ struct PointLight
 	float range;
 	vec3 colour;
 	float intensity;
+	bool isShadowCaster;
 };
 
 struct FlatLightParams

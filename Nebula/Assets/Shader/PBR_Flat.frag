@@ -45,6 +45,7 @@ vec3 calculateDirectionalLight(FlatLightParams params)
 vec3 calculatePointLights(FlatLightParams params)
 {
 	vec3 colour = vec3(0.0);
+	int shadowCasterIndex = 0;
 	for (int i = 0; i < u_pointLightCount; i++)
 	{
 		// Calculate radiance
@@ -71,7 +72,10 @@ vec3 calculatePointLights(FlatLightParams params)
 		float specularDenom = 4.0 * params.nDotV * nDotL + 0.0001; // plus at the end to prevent dividing by 0
 		specular /= specularDenom;
 
-		colour += (kd * u_albedo / PI + specular) * radiance * nDotL * calculatePointShadowValue(i, nDotL);
+		float shadowValue = u_pointLights[i].isShadowCaster ? calculatePointShadowValue(shadowCasterIndex, nDotL) : 1.0;
+		shadowCasterIndex++;
+
+		colour += (kd * u_albedo / PI + specular) * radiance * nDotL * shadowValue;
 	}
 	return colour;
 }

@@ -6,6 +6,7 @@ public class PointLightComponent : StartableComponent
 {
     private float m_range = 10f;
     private float m_intensity = 1f;
+    private bool m_isShadowCaster = true;
     private Colour m_colour = Colour.White;
 
     public override void OnCreate()
@@ -49,6 +50,16 @@ public class PointLightComponent : StartableComponent
     public void SetIntensity(float intensity)
     {
         m_intensity = MathF.Max(intensity, 0.0011f);
+    }
+
+    public bool GetIsShadowCaster()
+    {
+        return m_isShadowCaster;
+    }
+
+    public void SetIsShadowCaster(bool isShadowCaster)
+    {
+        m_isShadowCaster = isShadowCaster;
     }
 
     public Colour GetColour()

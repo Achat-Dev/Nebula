@@ -10,8 +10,9 @@ internal class Window : IDisposable
     private readonly IWindow m_window;
 
     // Temporary
+    private int m_pointLightCount = 4;
     private Vector3 m_eulerAngles;
-    private Entity[] m_pointLightEntites = new Entity[3];
+    private Entity[] m_pointLightEntites;
 
     public Window(string title, Vector2i size, bool vSync)
     {
@@ -84,7 +85,7 @@ internal class Window : IDisposable
         shaderInstanceFlat.SetInt("u_prefilteredMap", 1);
         shaderInstanceFlat.SetInt("u_brdfLut", 2);
         shaderInstanceFlat.SetInt("u_directionalShadowMap", 3);
-        shaderInstanceFlat.SetInt("u_pointShadowMap", 4);
+        shaderInstanceFlat.SetInt("u_pointShadowMaps", 4);
         shaderInstanceFlat.SetVec3("u_albedo", (Vector3)Colour.White);
         shaderInstanceFlat.SetFloat("u_metallic", 0.1f);
         shaderInstanceFlat.SetFloat("u_roughness", 0.1f);
@@ -107,7 +108,7 @@ internal class Window : IDisposable
         shaderInstanceTextured.SetInt("u_prefilteredMap", 1);
         shaderInstanceTextured.SetInt("u_brdfLut", 2);
         shaderInstanceTextured.SetInt("u_directionalShadowMap", 3);
-        shaderInstanceTextured.SetInt("u_pointShadowMap", 4);
+        shaderInstanceTextured.SetInt("u_pointShadowMaps", 4);
         shaderInstanceTextured.SetTexture("u_albedoMap", albedoMap, Texture.Unit.Texture5);
         shaderInstanceTextured.SetTexture("u_normalMap", normalMap, Texture.Unit.Texture6);
         //shaderInstanceTextured.SetInt("u_metallicMap", 7);
@@ -153,31 +154,29 @@ internal class Window : IDisposable
         Scene.GetActive().GetCamera().GetTransform().Translate(new Vector3(0f, 0f, -5f));
 
         // Lighting
-        PointLightComponent[] pointLights = new PointLightComponent[3];
-        ShaderInstance[] flatShaderInstances = new ShaderInstance[3];
-        for (int i = 0; i < m_pointLightEntites.Length; i++)
+        m_pointLightEntites = new Entity[m_pointLightCount];
+        PointLightComponent[] pointLights = new PointLightComponent[m_pointLightCount];
+        ShaderInstance[] flatShaderInstances = new ShaderInstance[m_pointLightCount];
+        for (int i = 0; i < m_pointLightCount; i++)
         {
             m_pointLightEntites[i] = new Entity();
             pointLights[i] = m_pointLightEntites[i].AddComponent<PointLightComponent>();
             pointLights[i].GetEntity().GetTransform().SetLocalScale(Vector3.One * 0.2f);
             pointLights[i].SetIntensity(1f);
             pointLights[i].SetRange(10f);
+            float lightValue = Utils.MathUtils.Lerp(0.1f, 1f, (float)i / (float)m_pointLightCount);
+            Colour lightColour = new Colour(lightValue, lightValue, lightValue, 1f);
+            pointLights[i].SetColour(lightColour);
 
             modelRenderer = m_pointLightEntites[i].AddComponent<ModelRendererComponent>();
             modelRenderer.SetModel(Model.Load("Art/Models/Cube.obj"));
             flatShaderInstances[i] = new ShaderInstance(Shader.Defaults.UnlitFlat);
+            flatShaderInstances[i].SetVec3("u_colour", (Vector3)lightColour);
             modelRenderer.SetShaderInstance(flatShaderInstances[i]);
         }
 
-        pointLights[0].SetColour(Colour.Red);
-        pointLights[1].SetColour(Colour.Green);
-        pointLights[2].SetColour(Colour.Blue);
-        flatShaderInstances[0].SetVec3("u_colour", (Vector3)Colour.Red);
-        flatShaderInstances[1].SetVec3("u_colour", (Vector3)Colour.Green);
-        flatShaderInstances[2].SetVec3("u_colour", (Vector3)Colour.Blue);
-
-        Scene.GetActive().GetDirectionalLight().SetIntensity(1f);
-        Scene.GetActive().GetSkyLight().SetIntensity(1f);
+        Scene.GetActive().GetDirectionalLight().SetIntensity(0f);
+        Scene.GetActive().GetSkyLight().SetIntensity(0f);
     }
 
     private void OnUpdate(double deltaTime)
@@ -209,7 +208,7 @@ internal class Window : IDisposable
             cameraTransform.SetLocalRotation(Quaternion.Identity);
         }
 
-        float piThird = (MathF.PI * 2f) / 3f;
+        float piThird = (MathF.PI * 2f) / (float)m_pointLightCount;
         for (int i = 0; i < m_pointLightEntites.Length; i++)
         {
             m_pointLightEntites[i].GetTransform().SetWorldPosition(new Vector3(MathF.Sin((float)m_window.Time + piThird * i) * 4, 0, MathF.Cos((float)m_window.Time + piThird * i) * 4));

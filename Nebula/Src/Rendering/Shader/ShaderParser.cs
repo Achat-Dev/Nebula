@@ -4,6 +4,7 @@ namespace Nebula.Rendering;
 
 internal static class ShaderParser
 {
+    private static readonly Stack<string> s_currentShaderPath = new Stack<string>();
     private static readonly Dictionary<string, object> s_globalCompileReplacementMap = new Dictionary<string, object>();
 
     internal static void Init()
@@ -15,15 +16,22 @@ internal static class ShaderParser
         s_globalCompileReplacementMap.Add("MAX_DYNAMIC_SHADOW_CASTERS", Settings.Lighting.MaxDynamicShadowCasters);
     }
 
-    public static string Parse(string source, ShaderCompileReplacement[] compileReplacements)
+    public static string Parse(string path, ShaderCompileReplacement[] compileReplacements)
     {
+        string source = AssetLoader.LoadAsFileContent(path);
+
         Dictionary<string, object> compileReplacementMap = new Dictionary<string, object>(s_globalCompileReplacementMap);
         for (int i = 0; i < compileReplacements.Length; i++)
         {
             compileReplacementMap.Add(compileReplacements[i].Name, compileReplacements[i].Value);
         }
 
-        return ParseRecursive(source, new HashSet<string>(), compileReplacementMap);
+        s_currentShaderPath.Push(path);
+        string result = ParseRecursive(source, new HashSet<string>(), compileReplacementMap);
+        s_currentShaderPath.Clear();
+        s_currentShaderPath.TrimExcess();
+
+        return result;
     }
 
     private static string ParseRecursive(string source, HashSet<string> includedShaders, Dictionary<string, object> compileReplacementMap)
@@ -46,7 +54,9 @@ internal static class ShaderParser
                     if (!includedShaders.Contains(path))
                     {
                         includedShaders.Add(path);
+                        s_currentShaderPath.Push(path);
                         string includeSource = ParseRecursive(AssetLoader.LoadAsFileContent("Shader/Include/" + path), includedShaders, compileReplacementMap);
+                        s_currentShaderPath.Pop();
                         stringBuilder.AppendLine(includeSource);
                     }
                 }
@@ -60,7 +70,7 @@ internal static class ShaderParser
                     }
                     else
                     {
-                        Logger.EngineWarn("Unknown shader compile replacement {0}", name);
+                        Logger.EngineWarn("Unknown shader compile replacement {0} in {1}", name, s_currentShaderPath.Peek());
                     }
                 }
                 else

@@ -37,12 +37,12 @@ public class Shader : ICacheable, IDisposable
         bool usesGeometryShader = !string.IsNullOrEmpty(geometryPath);
 
         // Create shaders
-        uint vertexShaderHandle = CreateGLShader(ShaderType.VertexShader, ShaderParser.Parse(AssetLoader.LoadAsFileContent(vertexPath), compileReplacements));
-        uint fragmentShaderHandle = CreateGLShader(ShaderType.FragmentShader, ShaderParser.Parse(AssetLoader.LoadAsFileContent(fragmentPath), compileReplacements));
+        uint vertexShaderHandle = CreateGLShader(ShaderType.VertexShader, vertexPath, compileReplacements);
+        uint fragmentShaderHandle = CreateGLShader(ShaderType.FragmentShader, fragmentPath, compileReplacements);
         uint geometryShaderHandle = 0;
-        if(usesGeometryShader)
+        if (usesGeometryShader)
         {
-            geometryShaderHandle = CreateGLShader(ShaderType.GeometryShader, ShaderParser.Parse(AssetLoader.LoadAsFileContent(geometryPath), compileReplacements));
+            geometryShaderHandle = CreateGLShader(ShaderType.GeometryShader, geometryPath, compileReplacements);
         }
 
         // Link shaders
@@ -85,7 +85,17 @@ public class Shader : ICacheable, IDisposable
 
     public static Shader Create(string vertexPath, string fragmentPath, bool isLit, params ShaderCompileReplacement[] compileReplacements)
     {
-        return Create(vertexPath, string.Empty, fragmentPath, isLit, compileReplacements);
+        int hash = HashCode.Combine(vertexPath, fragmentPath);
+        if (Cache.ShaderCache.TryGetValue(hash, out Shader shader))
+        {
+            Logger.EngineVerbose("Shader from sources {0} and {1} already exists, returning cached instance", vertexPath, fragmentPath);
+            return shader;
+        }
+
+        Logger.EngineDebug("Creating shader from sources {0} and {1}", vertexPath, fragmentPath);
+        shader = new Shader(vertexPath, string.Empty, fragmentPath, isLit, compileReplacements);
+        Cache.ShaderCache.CacheData(hash, shader);
+        return shader;
     }
 
     public static Shader Create(string vertexPath, string geometryPath, string fragmentPath, bool isLit, params ShaderCompileReplacement[] compileReplacements)
@@ -103,8 +113,10 @@ public class Shader : ICacheable, IDisposable
         return shader;
     }
 
-    private uint CreateGLShader(ShaderType type, string source)
+    private uint CreateGLShader(ShaderType type, string path, ShaderCompileReplacement[] compileReplacements)
     {
+        string source = ShaderParser.Parse(path, compileReplacements);
+
         uint handle = GL.Get().CreateShader(type);
         GL.Get().ShaderSource(handle, source);
         GL.Get().CompileShader(handle);
@@ -112,7 +124,7 @@ public class Shader : ICacheable, IDisposable
         string infoLog = GL.Get().GetShaderInfoLog(handle);
         if (!string.IsNullOrWhiteSpace(infoLog))
         {
-            Logger.EngineError("Failed to compile shader of type {0}\n" + infoLog, type);
+            Logger.EngineError("Failed to compile shader {0} of type {1}\n" + infoLog, path, type);
         }
 
         return handle;
@@ -255,7 +267,7 @@ public class Shader : ICacheable, IDisposable
 
     internal unsafe void SetMat4(int location, Matrix4x4 value)
     {
-        GL.Get().UniformMatrix4(location, 1, false, (float*) &value);
+        GL.Get().UniformMatrix4(location, 1, false, (float*)&value);
     }
 
     internal unsafe void SetMat4(string name, Matrix4x4 value)

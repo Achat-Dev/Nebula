@@ -46,8 +46,6 @@ layout (std140, binding = 2) uniform ub_lights
 uniform samplerCube u_irradianceMap;
 uniform samplerCube u_prefilteredMap;
 uniform sampler2D u_brdfLut;
-uniform sampler2DArray u_directionalShadowMap;
-uniform samplerCubeArray u_omnidirectionalShadowMap;
 
 #include Math/Shadows/DirectionalShadowValue.glsl
-#include Math/Shadows/OmnidirectionalShadowValue.glsl
+#include Math/Shadows/PointShadowValue.glsl

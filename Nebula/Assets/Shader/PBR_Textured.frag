@@ -89,7 +89,7 @@ vec3 calculatePointLights(TexturedLightParams params)
 		float specularDenom = 4.0 * params.nDotV * nDotL + 0.0001; // plus at the end to prevent dividing by 0
 		specular /= specularDenom;
 
-		colour += (kd * params.albedo / PI + specular) * radiance * nDotL * calculateOmnidirectionalShadowValue(i, nDotL);
+		colour += (kd * params.albedo / PI + specular) * radiance * nDotL * calculatePointShadowValue(i, nDotL);
 	}
 	return colour;
 }

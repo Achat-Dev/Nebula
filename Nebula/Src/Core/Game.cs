@@ -1,5 +1,14 @@
 ﻿namespace Nebula;
 
+/*
+ * Cleanup
+ * | Light count via settings
+ * | Shadow caster count via settings
+ * | Settings via file
+ * | Log message levels
+ * | Shader instance
+ */
+
 public class Game
 {
     private string m_title;

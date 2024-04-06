@@ -1,14 +1,11 @@
-﻿using Silk.NET.Assimp;
-
-namespace Nebula.Rendering;
+﻿namespace Nebula.Rendering;
 
 public class DirectionalLight
 {
     private Vector3 m_direction;
     private Colour m_colour = Colour.White;
     private float m_intensity = 1f;
-    private float m_shadowDistance = 20f;
-    private float m_shadowMapPadding = 2f;
+    private float m_shadowMapPadding = 1f;
 
     internal DirectionalLight()
     {
@@ -107,16 +104,6 @@ public class DirectionalLight
     public void SetIntensity(float intensity)
     {
         m_intensity = intensity;
-    }
-
-    public float GetShadowDistance()
-    {
-        return m_shadowDistance;
-    }
-
-    public void SetShadowDistance(float shadowDistance)
-    {
-        m_shadowDistance = shadowDistance;
     }
 
     public float GetShadowMapPadding()

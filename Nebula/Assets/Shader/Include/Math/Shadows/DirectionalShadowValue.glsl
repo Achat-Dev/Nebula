@@ -1,4 +1,6 @@
-﻿const float c_directionalShadowMinBias = 0.0005;
+﻿uniform sampler2DArray u_directionalShadowMap;
+
+const float c_directionalShadowMinBias = 0.0005;
 const float c_directionalShadowMaxBias = 0.005;
 
 #include UniformBuffer/Matrices.glsl

@@ -84,7 +84,7 @@ internal class Window : IDisposable
         shaderInstanceFlat.SetInt("u_prefilteredMap", 1);
         shaderInstanceFlat.SetInt("u_brdfLut", 2);
         shaderInstanceFlat.SetInt("u_directionalShadowMap", 3);
-        shaderInstanceFlat.SetInt("u_omnidirectionalShadowMap", 4);
+        shaderInstanceFlat.SetInt("u_pointShadowMap", 4);
         shaderInstanceFlat.SetVec3("u_albedo", (Vector3)Colour.White);
         shaderInstanceFlat.SetFloat("u_metallic", 0.1f);
         shaderInstanceFlat.SetFloat("u_roughness", 0.1f);
@@ -107,7 +107,7 @@ internal class Window : IDisposable
         shaderInstanceTextured.SetInt("u_prefilteredMap", 1);
         shaderInstanceTextured.SetInt("u_brdfLut", 2);
         shaderInstanceTextured.SetInt("u_directionalShadowMap", 3);
-        shaderInstanceTextured.SetInt("u_omnidirectionalShadowMap", 4);
+        shaderInstanceTextured.SetInt("u_pointShadowMap", 4);
         shaderInstanceTextured.SetTexture("u_albedoMap", albedoMap, Texture.Unit.Texture5);
         shaderInstanceTextured.SetTexture("u_normalMap", normalMap, Texture.Unit.Texture6);
         //shaderInstanceTextured.SetInt("u_metallicMap", 7);

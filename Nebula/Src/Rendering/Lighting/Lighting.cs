@@ -8,10 +8,10 @@ internal static class Lighting
     private static Vector2i s_pointShadowMapSize = new Vector2i(128, 128);
 
     private static Shader s_directionalShadowMapShader;
-    private static Shader s_omnidirectionalShadowMapShader;
+    private static Shader s_pointShadowMapShader;
 
     private static Framebuffer s_directionalShadowMapFramebuffer;
-    private static Framebuffer s_omnidirectionalShadowMapFramebuffer;
+    private static Framebuffer s_pointShadowMapFramebuffer;
 
     private static uint s_pointLightCount = 0;
     private static readonly HashSet<PointLightComponent> s_pointLights = new HashSet<PointLightComponent>();
@@ -30,13 +30,13 @@ internal static class Lighting
             "Shader/Shadows/DirectionalShadowMap.frag",
             false);
 
-        FramebufferAttachmentConfig omnidirectionalDepthConfig = FramebufferAttachmentConfig.Defaults.Depth();
-        omnidirectionalDepthConfig.TextureType = FramebufferAttachment.TextureType.CubemapArray;
-        omnidirectionalDepthConfig.ArraySize = 4;
-        s_omnidirectionalShadowMapFramebuffer = new Framebuffer(s_pointShadowMapSize, omnidirectionalDepthConfig);
-        s_omnidirectionalShadowMapShader = Shader.Create("Shader/Shadows/OmnidirectionalShadowMap.vert",
-            "Shader/Shadows/OmnidirectionalShadowMap.geom",
-            "Shader/Shadows/OmnidirectionalShadowMap.frag",
+        FramebufferAttachmentConfig pointDepthConfig = FramebufferAttachmentConfig.Defaults.Depth();
+        pointDepthConfig.TextureType = FramebufferAttachment.TextureType.CubemapArray;
+        pointDepthConfig.ArraySize = 4;
+        s_pointShadowMapFramebuffer = new Framebuffer(s_pointShadowMapSize, pointDepthConfig);
+        s_pointShadowMapShader = Shader.Create("Shader/Shadows/PointShadowMap.vert",
+            "Shader/Shadows/PointShadowMap.geom",
+            "Shader/Shadows/PointShadowMap.frag",
             false);
     }
 
@@ -67,28 +67,28 @@ internal static class Lighting
 
     public static void RenderPointShadows(HashSet<ModelRendererComponent> modelRenderers)
     {
-        s_omnidirectionalShadowMapFramebuffer.Bind();
+        s_pointShadowMapFramebuffer.Bind();
 
         GL.Get().Viewport(s_pointShadowMapSize);
         GL.Get().Clear(ClearBufferMask.DepthBufferBit);
 
-        s_omnidirectionalShadowMapShader.Use();
+        s_pointShadowMapShader.Use();
 
         int index = 0;
         foreach (var pointLight in s_pointLights)
         {
-            s_omnidirectionalShadowMapShader.SetVec3("u_lightPosition", pointLight.GetEntity().GetTransform().GetWorldPosition());
-            s_omnidirectionalShadowMapShader.SetFloat("u_farPlane", pointLight.GetRange());
-            s_omnidirectionalShadowMapShader.SetInt("u_lightIndex", index);
+            s_pointShadowMapShader.SetVec3("u_lightPosition", pointLight.GetEntity().GetTransform().GetWorldPosition());
+            s_pointShadowMapShader.SetFloat("u_farPlane", pointLight.GetRange());
+            s_pointShadowMapShader.SetInt("u_lightIndex", index);
             Matrix4x4[] viewProjectionMatrices = pointLight.GetViewProjectionMatrices();
             for (int i = 0; i < 6; i++)
             {
-                s_omnidirectionalShadowMapShader.SetMat4($"u_viewProjections[{i}]", viewProjectionMatrices[i]);
+                s_pointShadowMapShader.SetMat4($"u_viewProjections[{i}]", viewProjectionMatrices[i]);
             }
 
             foreach (var modelRenderer in modelRenderers)
             {
-                s_omnidirectionalShadowMapShader.SetMat4("u_modelMatrix", modelRenderer.GetEntity().GetTransform().GetWorldMatrix());
+                s_pointShadowMapShader.SetMat4("u_modelMatrix", modelRenderer.GetEntity().GetTransform().GetWorldMatrix());
                 List<Mesh> meshes = modelRenderer.GetModel().GetMeshes();
                 foreach (var mesh in meshes)
                 {
@@ -106,7 +106,7 @@ internal static class Lighting
 
     public static void BindPointShadowMap()
     {
-        s_omnidirectionalShadowMapFramebuffer.GetAttachment(FramebufferAttachment.AttachmentType.Depth).Bind(Texture.Unit.Texture4);
+        s_pointShadowMapFramebuffer.GetAttachment(FramebufferAttachment.AttachmentType.Depth).Bind(Texture.Unit.Texture4);
     }
 
     internal static float[] GetPointLightData()
@@ -176,7 +176,7 @@ internal static class Lighting
         }
 
         s_pointShadowMapSize = new Vector2i(size, size);
-        s_omnidirectionalShadowMapFramebuffer.Resize(s_pointShadowMapSize);
+        s_pointShadowMapFramebuffer.Resize(s_pointShadowMapSize);
     }
 
     internal static uint GetPointLightCount()
@@ -194,7 +194,7 @@ internal static class Lighting
         Logger.EngineInfo("Disposing lighting");
         IDisposable disposable = s_directionalShadowMapFramebuffer;
         disposable.Dispose();
-        disposable = s_omnidirectionalShadowMapFramebuffer;
+        disposable = s_pointShadowMapFramebuffer;
         disposable.Dispose();
     }
 }

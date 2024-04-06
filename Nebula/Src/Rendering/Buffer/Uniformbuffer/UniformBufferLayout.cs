@@ -20,13 +20,11 @@ public struct UniformBufferLayout
     private uint CalculateTotalByteSize(UniformBufferElement[] elements)
     {
         uint byteSize = 0;
-        uint elementSize = 0;
-        uint elementOffset = 0;
 
         for (int i = 0; i < elements.Length; i++)
         {
-            elementSize = elements[i].GetByteSize();
-            elementOffset = elements[i].GetBaseOffset();
+            uint elementSize = elements[i].GetByteSize();
+            uint elementOffset = elements[i].GetBaseOffset();
             byteSize += CalculatePadding(byteSize, elementOffset) + elementSize;
         }
 

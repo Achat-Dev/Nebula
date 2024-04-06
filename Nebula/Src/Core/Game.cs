@@ -2,12 +2,9 @@
 
 /*
  * Cleanup
- * | Light count via settings
- * | Shadow caster count via settings
  * | Settings via file
  * | Log message levels
  * | Better log messages
- * | Shader log messages
  * | Shader instance
  */
 

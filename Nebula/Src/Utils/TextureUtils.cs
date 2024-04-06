@@ -16,7 +16,7 @@ public static class TextureUtils
         GL.Get().TexParameter(textureTarget, TextureParameterName.TextureMinFilter, (int)config.MinFilterMode);
         GL.Get().TexParameter(textureTarget, TextureParameterName.TextureMagFilter, (int)config.MaxFilterMode);
 
-        GL.Get().TexParameter(textureTarget, TextureParameterName.TextureBorderColor, [ 1f, 1f, 1f, 1f ]);
+        GL.Get().TexParameter(textureTarget, TextureParameterName.TextureBorderColor, [1f, 1f, 1f, 1f]);
 
         if (config.GenerateMipMaps)
         {

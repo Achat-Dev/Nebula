@@ -1,13 +1,5 @@
 ﻿namespace Nebula;
 
-/*
- * Cleanup
- * | Settings via file
- * | Log message levels
- * | Better log messages
- * | Shader instance
- */
-
 public class Game
 {
     private string m_title;

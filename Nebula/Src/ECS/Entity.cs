@@ -16,7 +16,7 @@ public class Entity
         Scene scene = Scene.GetActive();
         if (scene == null)
         {
-            Logger.EngineError("Trying to create an entity without an active scene. Created entity will not be updated");
+            Logger.EngineWarn("Trying to create an entity without an active scene. Created entity will not be updated");
         }
         else
         {

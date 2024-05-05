@@ -1,7 +1,6 @@
 # Nebula
 
-Nebula is a game engine written in C# using OpenGL via Silk.NET.
-At the moment it is more of a render engine though, because there is very little game logic code implemented.
+Nebula is a game engine written in C# using OpenGL via Silk.NET (at the moment it is more of a render engine though, because there is very little game logic code implemented).
 
 ## Features
 

@@ -13,8 +13,10 @@ The core architecture of the project was developed by following the tutorial of 
 
 The 3D rendering of the project was developed by following the [LearnOpenGL tutorial by Joey de Vries](https://learnopengl.com).
 
-> Copyright (c) Joey de Vries\
-> > https://twitter.com/JoeyDeVriez \
+> Copyright (c) Joey de Vries
+>
+> > https://twitter.com/JoeyDeVriez
+>
 > The code snippets used in the LearnOpenGL tutorial are licensed under the CC BY-NC 4.0 license\
 > Changes to the provided shaders were made in form of renaming variables and functions and organising code in a different manner\
 > See the [license](https://creativecommons.org/licenses/by-nc/4.0/legalcode) for more details

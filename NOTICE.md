@@ -2,24 +2,39 @@
 
 ## Architecture
 
-The core architecture of the project was developed by following the tutorial of the [Hazel Game Engine by TheCherno](https://github.com/TheCherno/Hazel).
+The rendering workflow of the project and the ECS was developed by following the tutorial of the [Hazel Game Engine by TheCherno](https://github.com/TheCherno/Hazel).
 
 > Copyright (c) TheCherno and contributors\
 > The source code of Hazel is licensed under the Apache-2.0 license\
-> Changes to the code were made in form of adapting the code to a C# programming style\
 > See the [license](./Licenses/Hazel.txt) for more details
+>
+> Changes to the code were made in form of:
+>
+> - Changed class, function and variable names
+> - Used Generics and C#'s `IDisposable`
+> - Sometimes organised the code in a different manner to better fit the architecture of the project
 
 ## Rendering
 
-The 3D rendering of the project was developed by following the [LearnOpenGL tutorial by Joey de Vries](https://learnopengl.com).
+The 3D rendering of the project was developed by following [LearnOpenGL by Joey de Vries](https://learnopengl.com).
 
 > Copyright (c) Joey de Vries
 >
 > > https://twitter.com/JoeyDeVriez
 >
-> The code snippets used in the LearnOpenGL tutorial are licensed under the CC BY-NC 4.0 license\
-> Changes to the provided shaders were made in form of renaming variables and functions and organising code in a different manner\
+> The code snippets provided in LearnOpenGL are licensed under the CC BY-NC 4.0 license\
 > See the [license](https://creativecommons.org/licenses/by-nc/4.0/legalcode) for more details
+>
+> Changes to the provided shaders were made in form of:
+>
+> - Changed function and variable / uniform names
+> - Moved functions that are used in multiple files into separate files to include them via the ShaderParser
+>
+> Changes to the rendering architecture were made in form of:
+>
+> - Changed class, function and variable names
+> - Used C#'s `IDisposable`
+> - Sometimes organised the code in a different manner to better fit the architecture of the project
 
 ## Nuget dependencies
 
